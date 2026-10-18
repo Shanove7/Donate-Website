@@ -6,6 +6,7 @@
     <title>KAXEL SUPPORT</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -354,6 +355,15 @@
             display: grid;
             gap: 8px;
         }
+    
+        .icon-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+        .icon-btn svg,.lucide{width:18px;height:18px;stroke-width:2.2;vertical-align:middle}
+        .action-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+        .notice-panel,.comment-panel{margin-top:14px;padding:14px;border:2px solid #111;background:#fff;border-radius:12px}
+        .notice-item,.comment-item{padding:10px 0;border-bottom:1px solid #ddd;text-align:left}
+        .notice-item:last-child,.comment-item:last-child{border-bottom:0}
+        .comment-panel textarea{width:100%;padding:10px;border:2px solid #111;font:inherit;margin:8px 0}
+        @media(max-width:520px){.action-row{grid-template-columns:1fr}}
     </style>
 </head>
 <body>
@@ -365,7 +375,7 @@
     <div class="container">
         <div class="goal-box">
             <div class="goal-header">
-                <span id="goalTitle">🎯 TARGET DONASI</span>
+                <span id="goalTitle"> TARGET DONASI</span>
                 <span id="goalNumbers">Rp0 / Rp1.000.000</span>
             </div>
             <div class="progress-track">
@@ -377,7 +387,7 @@
         <div class="neo-card">
             <div class="card-header-flex">
                 <div class="badge-title">KAXEL SUPPORT</div>
-                <div class="tier-badge" id="tierBadge">☕ TRAKTIR KOPI</div>
+                <div class="tier-badge" id="tierBadge">TRAKTIR KOPI</div>
             </div>
 
             <div class="tabs">
@@ -430,21 +440,21 @@
                     <label class="label"><span>Nominal Donasi (Rp)</span></label>
                     <input type="number" id="amount" placeholder="10000" required min="100" class="neo-input" oninput="updateTierBadge(this.value)">
                     <div class="preset-grid">
-                        <button type="button" class="preset-btn" onclick="setNominal(5000)">☕ 5K</button>
-                        <button type="button" class="preset-btn" onclick="setNominal(10000)">⚡ 10K</button>
-                        <button type="button" class="preset-btn" onclick="setNominal(25000)">🔥 25K</button>
-                        <button type="button" class="preset-btn" onclick="setNominal(50000)">🚀 50K</button>
-                        <button type="button" class="preset-btn" onclick="setNominal(100000)">💎 100K</button>
-                        <button type="button" class="preset-btn" onclick="setNominal(250000)">👑 250K</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(5000)">5K</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(10000)">10K</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(25000)">25K</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(50000)">50K</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(100000)">100K</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(250000)">250K</button>
                     </div>
 
                     <label class="label"><span>Pilih Stiker Reaksi</span></label>
                     <div class="emoji-grid">
-                        <div class="emoji-btn selected" onclick="selectEmoji('🔥', this)">🔥</div>
-                        <div class="emoji-btn" onclick="selectEmoji('❤️', this)">❤️</div>
-                        <div class="emoji-btn" onclick="selectEmoji('🚀', this)">🚀</div>
-                        <div class="emoji-btn" onclick="selectEmoji('☕', this)">☕</div>
-                        <div class="emoji-btn" onclick="selectEmoji('👑', this)">👑</div>
+                        <button type="button" class="emoji-btn selected" data-reaction="support" onclick="selectReaction('support', this)" aria-label="Dukungan"><i data-lucide="heart-handshake"></i></button>
+                        <button type="button" class="emoji-btn" data-reaction="heart" onclick="selectReaction('heart', this)" aria-label="Apresiasi"><i data-lucide="heart"></i></button>
+                        <button type="button" class="emoji-btn" data-reaction="rocket" onclick="selectReaction('rocket', this)" aria-label="Semangat"><i data-lucide="rocket"></i></button>
+                        <button type="button" class="emoji-btn" data-reaction="coffee" onclick="selectReaction('coffee', this)" aria-label="Traktir kopi"><i data-lucide="coffee"></i></button>
+                        <button type="button" class="emoji-btn" data-reaction="crown" onclick="selectReaction('crown', this)" aria-label="VIP"><i data-lucide="crown"></i></button>
                     </div>
 
                     <label class="label"><span>Pesan / Dukungan</span></label>
@@ -455,7 +465,7 @@
 
                 <div id="qrSection" class="hidden">
                     <div class="session-banner">
-                        📌 Sesi Otomatis Tersimpan! Aman keluar web untuk buka aplikasi Bank/E-Wallet.
+                        Sesi otomatis tersimpan. Anda dapat membuka aplikasi bank atau dompet digital.
                     </div>
 
                     <div class="qr-frame">
@@ -478,15 +488,13 @@
                         </p>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <button type="button" onclick="toggleDownloadMenu()" class="neo-btn blue" style="font-size:13px;">📥 PILIHAN UNDUH QR</button>
-                        <button type="button" id="cancelBtn" class="neo-btn red" style="font-size:13px;">❌ BATALKAN</button>
+                    <div class="action-row">
+                        <button type="button" onclick="downloadQrOnly()" class="neo-btn blue icon-btn"><i data-lucide="download"></i> UNDUH QR CODE</button>
+                        <button type="button" onclick="downloadInvoice()" class="neo-btn icon-btn"><i data-lucide="file-text"></i> UNDUH INVOICE</button>
+                        <button type="button" id="cancelBtn" class="neo-btn red icon-btn"><i data-lucide="x-circle"></i> BATALKAN</button>
                     </div>
-
-                    <div id="downloadMenu" class="dl-menu hidden">
-                        <button type="button" onclick="downloadQrOnly()" class="neo-btn orange" style="padding:10px; font-size:12px;">🖼️ 1. UNDUH GAMBAR QR SAJA (PNG)</button>
-                        <button type="button" onclick="downloadQrCard()" class="neo-btn" style="padding:10px; font-size:12px;">💳 2. UNDUH KARTU INVOICE LENGKAP (PNG)</button>
-                    </div>
+                    <div class="notice-panel"><div class="icon-btn"><i data-lucide="bell-ring"></i><strong>NOTIFIKASI</strong></div><button type="button" class="neo-btn" onclick="enableNotifications()">IZINKAN NOTIFIKASI</button><div id="notificationList">Belum ada notifikasi.</div></div>
+                    <div class="comment-panel"><div class="icon-btn"><i data-lucide="messages-square"></i><strong>PESAN UNTUK ADMIN</strong></div><div id="commentList">Memuat percakapan...</div><textarea id="donorMessage" rows="2" maxlength="1000" placeholder="Tulis pesan atau komentar untuk admin"></textarea><button type="button" class="neo-btn" onclick="sendDonorMessage()">KIRIM PESAN</button></div>
                 </div>
 
                 <div id="resultSection" class="hidden" style="text-align: center; padding: 16px 0;">
@@ -512,7 +520,7 @@
         let pollTimer = null
         let countdownTimer = null
         let currentTrx = null
-        let selectedEmoji = '🔥'
+        let selectedEmoji = 'support'
 
         const formatRp = (num) => 'Rp' + Number(num).toLocaleString('id-ID')
 
@@ -539,13 +547,13 @@
             const num = parseInt(val) || 0
             const badge = document.getElementById('tierBadge')
             if (num >= 100000) {
-                badge.textContent = '👑 VIP SULTAN'
+                badge.textContent = 'VIP SUPPORTER'
                 badge.style.background = '#ff914d'
             } else if (num >= 25000) {
-                badge.textContent = '🔥 PRO SUPPORTER'
+                badge.textContent = 'PRO SUPPORTER'
                 badge.style.background = '#5ce1e6'
             } else {
-                badge.textContent = '☕ TRAKTIR KOPI'
+                badge.textContent = 'TRAKTIR KOPI'
                 badge.style.background = '#c1ff72'
             }
         }
@@ -562,8 +570,8 @@
             updateTierBadge(val)
         }
 
-        const selectEmoji = (emoji, el) => {
-            selectedEmoji = emoji
+        const selectReaction = (reaction, el) => {
+            selectedEmoji = reaction
             document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'))
             el.classList.add('selected')
         }
@@ -578,6 +586,7 @@
             document.getElementById(`tab-${tab}`).classList.remove('hidden')
 
             if (tab !== 'donate') loadPublicStats()
+            if (window.lucide) lucide.createIcons()
         }
 
         const loadPublicStats = async () => {
@@ -587,15 +596,15 @@
 
                 if (json.goal) {
                     const pct = Math.min(100, Math.round((json.goal.current / json.goal.target) * 100))
-                    document.getElementById('goalTitle').textContent = '🎯 ' + json.goal.title
+                    document.getElementById('goalTitle').textContent = ' ' + json.goal.title
                     document.getElementById('goalNumbers').textContent = `${formatRp(json.goal.current)} / ${formatRp(json.goal.target)}`
                     document.getElementById('goalFill').style.width = pct + '%'
                     document.getElementById('goalPercent').textContent = `${pct}% TERCAPAI`
                 }
 
                 if (json.recent && json.recent.length > 0) {
-                    const tickerItems = json.recent.slice(0, 5).map(r => `${r.emoji || '🔥'} ${r.name} baru saja mendonasikan ${formatRp(r.amount)} ("${r.notes}")`).join('  ✦  ')
-                    document.getElementById('marqueeText').textContent = `⚡ LIVE FEED: ${tickerItems}  ✦  TERIMA KASIH ATAS DUKUNGANMU! ⚡`
+                    const tickerItems = json.recent.slice(0, 5).map(r => `${r.name} baru saja mendonasikan ${formatRp(r.amount)} ("${r.notes}")`).join(' | ')
+                    document.getElementById('marqueeText').textContent = `LIVE FEED: ${tickerItems} | TERIMA KASIH ATAS DUKUNGANMU!`
                 }
 
                 const lbEl = document.getElementById('leaderboardList')
@@ -604,7 +613,7 @@
                 } else {
                     lbEl.innerHTML = json.leaderboard.map((u, idx) => `
                         <div class="feed-item" style="display:flex; justify-content:space-between; align-items:center;">
-                            <div style="font-weight:900; font-size:16px;">${idx === 0 ? '👑' : '#' + (idx + 1)} ${u.name} <span style="font-size:12px; font-weight:700;">(${u.count}x)</span></div>
+                            <div style="font-weight:900; font-size:16px;">${idx === 0 ? '<i data-lucide="crown"></i>' : '#' + (idx + 1)} ${u.name} <span style="font-size:12px; font-weight:700;">(${u.count}x)</span></div>
                             <div class="feed-amount" style="font-weight:900;">${formatRp(u.total)}</div>
                         </div>
                     `).join('')
@@ -617,7 +626,7 @@
                     feedEl.innerHTML = json.recent.map(r => `
                         <div class="feed-item">
                             <div class="feed-header">
-                                <span>${r.emoji || '🔥'} ${r.name}</span>
+                                <span><i data-lucide="heart-handshake"></i> ${r.name}</span>
                                 <span class="feed-amount">${formatRp(r.amount)}</span>
                             </div>
                             <div class="feed-notes">"${r.notes}"</div>
@@ -670,13 +679,7 @@
             if (rawPhone.startsWith('0')) rawPhone = rawPhone.slice(1)
             const fullWhatsapp = rawPhone ? `${code}${rawPhone}` : ''
 
-            const payload = {
-                name: document.getElementById('name').value,
-                whatsapp: fullWhatsapp,
-                amount: document.getElementById('amount').value,
-                notes: document.getElementById('notes').value,
-                emoji: selectedEmoji
-            }
+            const payload = { name: document.getElementById('name').value, whatsapp: fullWhatsapp, amount: document.getElementById('amount').value, notes: document.getElementById('notes').value, emoji: selectedEmoji }
 
             try {
                 const res = await fetch('/api/donate', {
@@ -708,13 +711,14 @@
             document.getElementById('donateForm').classList.add('hidden')
             document.getElementById('resultSection').classList.add('hidden')
             document.getElementById('qrSection').classList.remove('hidden')
-            document.getElementById('downloadMenu').classList.add('hidden')
+            
 
             document.getElementById('qrImage').src = trx.qrImage
             document.getElementById('trxId').textContent = trx.transactionId
             document.getElementById('trxAmount').textContent = formatRp(trx.amount)
             document.getElementById('trxFee').textContent = formatRp(trx.fee)
             document.getElementById('trxTotal').textContent = formatRp(trx.totalAmount)
+            refreshConversation()
 
             if (countdownTimer) clearInterval(countdownTimer)
             const expTime = new Date(trx.expiredAt).getTime()
@@ -722,7 +726,7 @@
                 const diff = Math.max(0, Math.floor((expTime - Date.now()) / 1000))
                 const m = String(Math.floor(diff / 60)).padStart(2, '0')
                 const s = String(diff % 60).padStart(2, '0')
-                document.getElementById('countdown').textContent = `⏳ SISA WAKTU: ${m}:${s}`
+                document.getElementById('countdown').textContent = `SISA WAKTU: ${m}:${s}`
                 if (diff <= 0) clearInterval(countdownTimer)
             }
             updateClock()
@@ -735,9 +739,6 @@
             showAlert('ID Transaksi berhasil disalin!')
         }
 
-        const toggleDownloadMenu = () => {
-            document.getElementById('downloadMenu').classList.toggle('hidden')
-        }
 
         const downloadQrOnly = () => {
             if (!currentTrx) return
@@ -745,6 +746,62 @@
             a.href = currentTrx.qrImage
             a.download = `QRIS-Kaxel-${currentTrx.transactionId}.png`
             a.click()
+        }
+
+        const enableNotifications = async () => {
+            if (!('Notification' in window)) return showAlert('Browser ini tidak mendukung notifikasi perangkat.')
+            const permission = await Notification.requestPermission()
+            showAlert(permission === 'granted' ? 'Notifikasi perangkat diaktifkan.' : 'Izin notifikasi tidak diberikan. Notifikasi website tetap tersedia.')
+        }
+
+        const refreshConversation = async () => {
+            if (!currentTrx) return
+            try {
+                const [commentsRes, notificationsRes] = await Promise.all([
+                    fetch(`/api/comments/${currentTrx.transactionId}?key=${encodeURIComponent(currentTrx.accessKey)}`),
+                    fetch(`/api/notifications/${currentTrx.transactionId}?key=${encodeURIComponent(currentTrx.accessKey)}`)
+                ])
+                const commentsJson = await commentsRes.json()
+                const notificationsJson = await notificationsRes.json()
+                const comments = commentsJson.comments || []
+                document.getElementById('commentList').innerHTML = comments.length ? comments.map(c => `<div class="comment-item"><strong>${escapeHtml(c.senderName || 'Donatur')}</strong><p>${escapeHtml(c.message)}</p><small>${new Date(c.createdAt).toLocaleString('id-ID')}</small>${(c.replies || []).map(r => `<div class="comment-item"><strong>${escapeHtml(r.senderName || 'Admin Kaxel')}</strong><p>${escapeHtml(r.message)}</p><small>${new Date(r.createdAt).toLocaleString('id-ID')}</small></div>`).join('')}</div>`).join('') : 'Belum ada pesan.'
+                const notices = notificationsJson.notifications || []
+                document.getElementById('notificationList').innerHTML = notices.length ? notices.slice(0, 8).map(n => `<div class="notice-item"><strong>${escapeHtml(n.title)}</strong><p>${escapeHtml(n.message)}</p><small>${new Date(n.createdAt).toLocaleString('id-ID')}</small></div>`).join('') : 'Belum ada notifikasi.'
+                for (const n of notices.filter(n => !n.read)) {
+                    const shownKey = `kaxel_notice_${n.id}`
+                    if (Notification.permission === 'granted' && !sessionStorage.getItem(shownKey)) { new Notification(n.title, { body: n.message }); sessionStorage.setItem(shownKey, '1') }
+                }
+            } catch (e) {}
+        }
+
+        const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))
+
+        const sendDonorMessage = async () => {
+            if (!currentTrx) return
+            const field = document.getElementById('donorMessage')
+            const message = field.value.trim()
+            if (!message) return showAlert('Tulis pesan terlebih dahulu.')
+            const res = await fetch('/api/comments', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ transactionId: currentTrx.transactionId, key: currentTrx.accessKey, message }) })
+            const json = await res.json()
+            if (!json.success) return showAlert(json.message || 'Pesan gagal dikirim.')
+            field.value = ''
+            refreshConversation()
+            showAlert('Pesan berhasil dikirim ke admin.')
+        }
+
+        const downloadInvoice = async () => {
+            if (!currentTrx) return
+            try {
+                const res = await fetch(`/api/invoice/${currentTrx.transactionId}?key=${encodeURIComponent(currentTrx.accessKey)}`)
+                if (!res.ok) throw new Error('Invoice tidak dapat dibuat.')
+                const blob = await res.blob()
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `Invoice-${currentTrx.transactionId}.html`
+                a.click()
+                URL.revokeObjectURL(url)
+            } catch (e) { showAlert('Gagal mengunduh invoice.') }
         }
 
         const downloadQrCard = () => {
@@ -802,6 +859,7 @@
 
             const poll = async () => {
                 if (!currentTrx) return
+                refreshConversation()
 
                 try {
                     const res = await fetch(`/api/status/${currentTrx.transactionId}?key=${currentTrx.accessKey}`)
@@ -817,13 +875,13 @@
                                 confetti({ particleCount: 140, spread: 90, origin: { y: 0.6 } })
                             }
                             loadPublicStats()
-                            return showResult('🎉', 'DONASI DITERIMA!', `Terima kasih banyak ${currentTrx.name || ''} atas dukungan sebesar ${formatRp(currentTrx.amount)}!`)
+                            return showResult('check-circle', 'DONASI DITERIMA!', `Terima kasih banyak ${currentTrx.name || ''} atas dukungan sebesar ${formatRp(currentTrx.amount)}!`)
                         }
                         if (status === 'expired' || isExpired) {
-                            return showResult('⌛', 'WAKTU HABIS', 'QRIS sudah kadaluarsa, silakan buat transaksi baru.')
+                            return showResult('clock', 'WAKTU HABIS', 'QRIS sudah kadaluarsa, silakan buat transaksi baru.')
                         }
                         if (status === 'cancel' || status === 'cancelled') {
-                            return showResult('❌', 'DIBATALKAN', 'Transaksi donasi telah dibatalkan.')
+                            return showResult('x-circle', 'DIBATALKAN', 'Transaksi donasi telah dibatalkan.')
                         }
                     }
                 } catch (e) {}
@@ -842,11 +900,11 @@
 
             try {
                 await fetch(`/api/cancel/${currentTrx.transactionId}`, { method: 'POST' })
-                showResult('❌', 'DIBATALKAN', 'Transaksi berhasil dibatalkan.')
+                showResult('x-circle', 'DIBATALKAN', 'Transaksi berhasil dibatalkan.')
             } catch (e) {
                 showAlert('Gagal membatalkan transaksi.')
                 btn.disabled = false
-                btn.textContent = '❌ BATALKAN'
+                btn.textContent = 'BATALKAN'
             }
         })
 
@@ -873,10 +931,11 @@
             btn.textContent = 'BUAT QRIS SEKARANG'
             const cBtn = document.getElementById('cancelBtn')
             cBtn.disabled = false
-            cBtn.textContent = '❌ BATALKAN'
+            cBtn.textContent = 'BATALKAN'
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons()
             loadPublicStats()
             checkSavedSession()
         })
