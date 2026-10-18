@@ -7,6 +7,7 @@ dotenv.config()
 const app = express()
 const BTZ_BASE_URL = new URL('https://web.btzpay.my.id').origin
 const API_KEY = process.env.BTZ_API_KEY
+const SHOPEEPAY_API_KEY = process.env.BTZ_SHOPEEPAY_API_KEY || process.env.SHOPEEPAY_API_KEY || ''
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123'
 const FEE_PERCENT = parseFloat(process.env.FEE_PERCENT || '0.7')
 const JSONBIN_ID = process.env.JSONBIN_ID || ''
@@ -60,11 +61,11 @@ const getFee = (amount) => Math.round(Number(amount) * FEE_PERCENT / 100)
 
 app.post('/api/donate', async (req, res) => {
     try {
-        if (!API_KEY) {
-            return res.status(500).json({ success: false, message: 'API Key belum dipasang di Environment Variables.' })
-        }
-
-        const { name, amount, notes, emoji, whatsapp } = req.body
+        const { name, amount, notes, emoji, whatsapp, paymentMethod = 'qris' } = req.body
+        const selectedMethod = String(paymentMethod).toLowerCase()
+        if (!['qris', 'shopeepay'].includes(selectedMethod)) return res.status(400).json({ success: false, message: 'Metode pembayaran tidak tersedia.' })
+        const selectedApiKey = selectedMethod === 'shopeepay' ? SHOPEEPAY_API_KEY : API_KEY
+        if (!selectedApiKey) return res.status(500).json({ success: false, message: selectedMethod === 'shopeepay' ? 'API key ShopeePay belum dipasang. Tambahkan BTZ_SHOPEEPAY_API_KEY di Environment Variables.' : 'API Key QRIS belum dipasang di Environment Variables.' })
         const parsedAmount = parseInt(amount)
 
         if (!parsedAmount || isNaN(parsedAmount) || parsedAmount < 100) {
@@ -80,7 +81,7 @@ app.post('/api/donate', async (req, res) => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                apikey: API_KEY,
+                apikey: selectedApiKey,
                 amount: parsedAmount,
                 fee: getFee(parsedAmount),
                 notes: trxNotes,
@@ -99,35 +100,26 @@ app.post('/api/donate', async (req, res) => {
 
         const createJson = await createRes.json()
 
-        if (!createJson.success || !createJson.data?.qrisString) {
-            return res.status(400).json({
-                success: false,
-                message: createJson.message || 'Gagal membuat transaksi QRIS.'
-            })
+        if (!createJson.success || !createJson.data?.transactionId) {
+            return res.status(400).json({ success: false, message: createJson.message || `Gagal membuat transaksi ${selectedMethod === 'qris' ? 'QRIS' : 'ShopeePay'}.` })
         }
 
         const trx = createJson.data
+        let qrBase64 = ''
 
-        const qrRes = await fetch(`${BTZ_BASE_URL}/api/qris/create-qr-code`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                data: trx.qrisString,
-                size: '500x500',
-                style: '4',
-                color: '0f1056',
-                format: 'png',
-                pngMode: 'styled',
-                viewer: '0'
+        if (selectedMethod === 'qris') {
+            if (!trx.qrisString) return res.status(400).json({ success: false, message: 'Gateway tidak mengembalikan data QRIS untuk transaksi ini.' })
+            const qrRes = await fetch(`${BTZ_BASE_URL}/api/qris/create-qr-code`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data: trx.qrisString, size: '500x500', style: '4', color: '0f1056', format: 'png', pngMode: 'styled', viewer: '0' })
             })
-        })
-
-        if (!qrRes.ok) {
-            return res.status(500).json({ success: false, message: 'Gagal membuat gambar QR.' })
+            if (!qrRes.ok) return res.status(500).json({ success: false, message: 'Gagal membuat gambar QR.' })
+            const qrBuffer = await qrRes.arrayBuffer()
+            qrBase64 = `data:image/png;base64,${Buffer.from(qrBuffer).toString('base64')}`
+        } else if (!trx.paymentUrl) {
+            return res.status(502).json({ success: false, message: 'Gateway tidak mengembalikan paymentUrl ShopeePay. Periksa konfigurasi payment method di Betabotz Paygate.' })
         }
-
-        const qrBuffer = await qrRes.arrayBuffer()
-        const qrBase64 = `data:image/png;base64,${Buffer.from(qrBuffer).toString('base64')}`
 
         const db = await loadDb()
         db.history.unshift({
@@ -138,6 +130,9 @@ app.post('/api/donate', async (req, res) => {
             amount: trx.amount,
             fee: trx.fee,
             totalAmount: trx.totalAmount,
+            paymentMethod: selectedMethod === 'qris' ? 'qris' : 'shopeepay',
+            paymentUrl: trx.paymentUrl || '',
+            accountDetails: trx.accountDetails || {},
             notes: trxNotes,
             emoji: chosenEmoji,
             status: 'pending',
@@ -157,6 +152,9 @@ app.post('/api/donate', async (req, res) => {
                 amount: trx.amount,
                 fee: trx.fee,
                 totalAmount: trx.totalAmount,
+                paymentMethod: selectedMethod === 'qris' ? 'qris' : 'shopeepay',
+                paymentUrl: trx.paymentUrl || '',
+                accountDetails: trx.accountDetails || {},
                 expiredAt: trx.expiredAt || new Date(Date.now() + 1200000).toISOString(),
                 notes: trxNotes,
                 qrImage: qrBase64
@@ -197,24 +195,25 @@ app.get('/api/status/:id', async (req, res) => {
 app.post('/api/cancel/:id', async (req, res) => {
     try {
         const { id } = req.params
+        const db = await loadDb()
+        const existingTrx = db.history.find(item => item.transactionId === id)
+        if (!existingTrx) return res.status(404).json({ success: false, message: 'Transaksi tidak ditemukan.' })
+        const cancelApiKey = existingTrx.paymentMethod === 'shopeepay' ? SHOPEEPAY_API_KEY : API_KEY
+        if (!cancelApiKey) return res.status(500).json({ success: false, message: 'API key untuk metode pembayaran ini belum dipasang.' })
         const cancelRes = await fetch(`${BTZ_BASE_URL}/api/qris/cancel/${id}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                apikey: API_KEY,
-                reason: 'cancelled_by_user'
-            })
+            body: JSON.stringify({ apikey: cancelApiKey, reason: 'cancelled_by_user' })
         })
         const cancelJson = await cancelRes.json()
 
-        const db = await loadDb()
         const idx = db.history.findIndex(item => item.transactionId === id)
-        if (idx !== -1) {
-            db.history[idx].status = 'cancelled'
+        if (idx !== -1 && cancelJson.success) {
+            db.history[idx].status = cancelJson.data?.status || 'cancel'
             await saveDb(db)
         }
 
-        res.json(cancelJson)
+        res.status(cancelRes.status).json(cancelJson)
     } catch (error) {
         res.status(500).json({ success: false, message: 'Gagal membatalkan transaksi.' })
     }
