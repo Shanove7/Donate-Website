@@ -8,6 +8,8 @@ const app = express()
 const BTZ_BASE_URL = new URL('https://web.btzpay.my.id').origin
 const API_KEY = process.env.BTZ_API_KEY
 const SHOPEEPAY_API_KEY = process.env.BTZ_SHOPEEPAY_API_KEY || process.env.SHOPEEPAY_API_KEY || ''
+const SHOPEEPAY_ACCOUNT_NUMBER = process.env.BTZ_SHOPEEPAY_ACCOUNT_NUMBER || ''
+const SHOPEEPAY_ACCOUNT_NAME = process.env.BTZ_SHOPEEPAY_ACCOUNT_NAME || ''
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123'
 const FEE_PERCENT = parseFloat(process.env.FEE_PERCENT || '0.7')
 const JSONBIN_ID = process.env.JSONBIN_ID || ''
@@ -66,6 +68,7 @@ app.post('/api/donate', async (req, res) => {
         if (!['qris', 'shopeepay'].includes(selectedMethod)) return res.status(400).json({ success: false, message: 'Metode pembayaran tidak tersedia.' })
         const selectedApiKey = selectedMethod === 'shopeepay' ? SHOPEEPAY_API_KEY : API_KEY
         if (!selectedApiKey) return res.status(500).json({ success: false, message: selectedMethod === 'shopeepay' ? 'API key ShopeePay belum dipasang. Tambahkan BTZ_SHOPEEPAY_API_KEY di Environment Variables.' : 'API Key QRIS belum dipasang di Environment Variables.' })
+        if (selectedMethod === 'shopeepay' && (!SHOPEEPAY_ACCOUNT_NUMBER || !SHOPEEPAY_ACCOUNT_NAME)) return res.status(500).json({ success: false, message: 'Tujuan ShopeePay belum dikonfigurasi. Tambahkan BTZ_SHOPEEPAY_ACCOUNT_NUMBER dan BTZ_SHOPEEPAY_ACCOUNT_NAME di Environment Variables.' })
         const parsedAmount = parseInt(amount)
 
         if (!parsedAmount || isNaN(parsedAmount) || parsedAmount < 100) {
@@ -94,7 +97,11 @@ app.post('/api/donate', async (req, res) => {
                     name: senderName,
                     email: '',
                     phone: cleanWa
-                }
+                },
+                ...(selectedMethod === 'shopeepay' ? {
+                    accountNumber: SHOPEEPAY_ACCOUNT_NUMBER,
+                    accountName: SHOPEEPAY_ACCOUNT_NAME
+                } : {})
             })
         })
 
