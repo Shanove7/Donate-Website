@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KAXEL ADMIN PANEL</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -90,13 +91,14 @@
         .bg-pending { background: #ffde59; }
         .bg-cancel { background: #ff5757; color: #fff; }
         .hidden { display: none !important; }
+    .icon-btn{display:inline-flex;align-items:center;gap:8px}.icon-btn svg,.lucide{width:18px;height:18px;vertical-align:middle}.reply-box{min-width:230px}.reply-box textarea{width:100%;padding:8px;border:2px solid #111;font:inherit;margin:6px 0}.reply-list{font-size:12px;margin-top:6px;white-space:normal}.notice{padding:10px;background:#dbeafe;border:2px solid #111;margin:12px 0}
     </style>
 </head>
 <body>
 
     <div class="container">
         <div id="loginBox" class="neo-box" style="max-width: 420px; margin: 60px auto;">
-            <div class="title">🔒 ADMIN LOGIN</div>
+            <div class="title icon-btn"><i data-lucide="shield-check"></i> ADMIN LOGIN</div>
             <form id="loginForm">
                 <input type="password" id="adminPass" placeholder="Masukkan Password Admin" required class="neo-input">
                 <button type="submit" class="neo-btn" style="width: 100%;">MASUK DASHBOARD</button>
@@ -105,10 +107,10 @@
 
         <div id="dashboardBox" class="hidden">
             <div class="neo-box" style="background: #5ce1e6; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-                <h1 style="font-weight: 900; font-size: 24px;">📊 KAXEL ADMIN DASHBOARD</h1>
+                <h1 class="icon-btn" style="font-weight: 900; font-size: 24px;"><i data-lucide="layout-dashboard"></i> KAXEL ADMIN DASHBOARD</h1>
                 <div style="display: flex; gap: 8px;">
-                    <button onclick="fetchAdminData()" class="neo-btn" style="background: #ffde59;">🔄 REFRESH</button>
-                    <a href="/" class="neo-btn" style="background: #fff; text-decoration: none; color: #000;">🏠 KE WEB</a>
+                    <button onclick="fetchAdminData()" class="neo-btn icon-btn" style="background: #ffde59;"><i data-lucide="refresh-cw"></i> REFRESH</button>
+                    <a href="/" class="neo-btn icon-btn" style="background: #fff; text-decoration: none; color: #000;"><i data-lucide="house"></i> KE WEB</a>
                 </div>
             </div>
 
@@ -128,7 +130,7 @@
             </div>
 
             <div class="neo-box" style="background: #fff9db;">
-                <h3 style="font-weight: 900; margin-bottom: 12px; text-transform: uppercase;">🎯 Atur Target Donasi (Goal Bar)</h3>
+                <h3 style="font-weight: 900; margin-bottom: 12px; text-transform: uppercase;">Atur Target Donasi (Goal Bar)</h3>
                 <form id="goalForm" style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 10px; align-items: start;">
                     <input type="text" id="goalTitleInput" placeholder="Judul Target (Misal: Upgrade VPS)" required class="neo-input" style="margin-bottom:0;">
                     <input type="number" id="goalTargetInput" placeholder="1000000" required class="neo-input" style="margin-bottom:0;">
@@ -137,7 +139,7 @@
             </div>
 
             <div class="neo-box">
-                <h3 style="font-weight: 900; margin-bottom: 16px; text-transform: uppercase;">📋 Riwayat Semua Donasi & Nomor WA</h3>
+                <h3 style="font-weight: 900; margin-bottom: 16px; text-transform: uppercase;">Riwayat Semua Donasi & Nomor WA</h3>
                 <div class="table-wrap">
                     <table>
                         <thead>
@@ -149,6 +151,7 @@
                                 <th>Nominal</th>
                                 <th>Pesan</th>
                                 <th>Status</th>
+                                <th>Pesan & Balasan</th>
                             </tr>
                         </thead>
                         <tbody id="historyTable"></tbody>
@@ -161,6 +164,7 @@
     <script>
         let savedPassword = ''
         const formatRp = (num) => 'Rp' + Number(num).toLocaleString('id-ID')
+        const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault()
@@ -213,7 +217,7 @@
 
                 const tbody = document.getElementById('historyTable')
                 if (json.history.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Belum ada transaksi.</td></tr>'
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Belum ada transaksi.</td></tr>'
                     return
                 }
 
@@ -223,26 +227,52 @@
                         : item.status === 'pending' ? 'bg-pending' : 'bg-cancel'
 
                     const waClean = item.whatsapp ? item.whatsapp.replace(/[^0-9]/g, '') : ''
-                    const waLink = waClean
-                        ? `<a href="https://wa.me/${waClean}" target="_blank" style="color:#000; background:#c1ff72; padding:2px 6px; border:2px solid #000; text-decoration:none;">📱 ${item.whatsapp}</a>`
-                        : '-'
+                    const waLink = waClean ? `<a href="https://wa.me/${waClean}" target="_blank" style="color:#000; background:#c1ff72; padding:2px 6px; border:2px solid #000; text-decoration:none;">${esc(item.whatsapp)}</a>` : '-'
 
                     return `
                         <tr>
                             <td>${new Date(item.createdAt).toLocaleString('id-ID')}</td>
                             <td style="font-family: monospace;">${item.transactionId}</td>
-                            <td>${item.emoji || ''} ${item.name}</td>
+                            <td>${esc(item.name)}</td>
                             <td>${waLink}</td>
                             <td>${formatRp(item.amount)}</td>
-                            <td>${item.notes}</td>
-                            <td><span class="badge ${statusClass}">${item.status}</span></td>
+                            <td>${esc(item.notes)}</td>
+                            <td><span class="badge ${statusClass}">${esc(item.status)}</span></td>
+                            <td class="reply-box"><div id="replies-${item.transactionId}" class="reply-list">Memuat pesan...</div></td>
                         </tr>
                     `
                 }).join('')
+                if (window.lucide) lucide.createIcons()
+                await loadAdminComments()
             } catch (e) {
                 alert('Gagal mengambil data dari server.')
             }
         }
+
+        const loadAdminComments = async () => {
+            try {
+                const res = await fetch(`/api/admin/comments?password=${encodeURIComponent(savedPassword)}`)
+                const json = await res.json()
+                if (!json.success) return
+                document.querySelectorAll('[id^="replies-"]').forEach(el => {
+                    const trxId = el.id.slice(7)
+                    const related = (json.comments || []).filter(c => c.transactionId === trxId)
+                    el.innerHTML = related.map(c => `<div style="padding:6px 0;border-bottom:1px solid #ddd"><b>${esc(c.senderName || 'Donatur')}:</b> ${esc(c.message)}${(c.replies || []).map(r => `<p><b>${esc(r.senderName || 'Admin')}:</b> ${esc(r.message)}</p>`).join('')}<textarea id="reply-${c.id}" rows="2" placeholder="Balas komentar"></textarea><button class="neo-btn" onclick="sendReply('${c.id}')">BALAS</button></div>`).join('') || 'Belum ada komentar.'
+                })
+            } catch (e) {}
+        }
+
+        const sendReply = async commentId => {
+            const field = document.getElementById(`reply-${commentId}`)
+            const message = field.value.trim()
+            if (!message) return alert('Isi balasan terlebih dahulu.')
+            const res = await fetch('/api/admin/reply', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ password: savedPassword, commentId, message }) })
+            const json = await res.json()
+            if (!json.success) return alert(json.message || 'Balasan gagal dikirim.')
+            await fetchAdminData()
+        }
+
+        window.addEventListener('DOMContentLoaded', () => { if (window.lucide) lucide.createIcons() })
     </script>
 </body>
 </html>
