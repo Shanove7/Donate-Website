@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KAXEL SUPPORT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #f4f0ea;
+            background-image: radial-gradient(#000 1.25px, transparent 1.25px);
+            background-size: 20px 20px;
+            color: #000;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+        .marquee {
+            background: #000;
+            color: #ffde59;
+            font-weight: 900;
+            padding: 8px 0;
+            border-bottom: 4px solid #000;
+            overflow: hidden;
+            white-space: nowrap;
+            font-size: 13px;
+            letter-spacing: 1px;
+        }
+        .marquee span {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 16s linear infinite;
+        }
+        @keyframes marquee {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+        .container {
+            max-width: 480px;
+            margin: 28px auto 0;
+            padding: 0 16px;
+        }
+        .goal-box {
+            background: #fff;
+            border: 4px solid #000;
+            box-shadow: 6px 6px 0px #000;
+            padding: 14px;
+            margin-bottom: 28px;
+        }
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 900;
+            font-size: 13px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .progress-track {
+            width: 100%;
+            height: 22px;
+            background: #f4f0ea;
+            border: 3px solid #000;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #7ed957;
+            border-right: 3px solid #000;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        .progress-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 900;
+        }
+        .neo-card {
+            background: #ffde59;
+            border: 4px solid #000;
+            box-shadow: 8px 8px 0px #000;
+            padding: 24px;
+            position: relative;
+            margin-bottom: 24px;
+        }
+        .card-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: -42px;
+            margin-bottom: 16px;
+        }
+        .badge-title {
+            background: #ff5757;
+            color: #fff;
+            border: 4px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            padding: 6px 14px;
+            font-size: 20px;
+            font-weight: 900;
+            text-transform: uppercase;
+            transform: rotate(-2deg);
+        }
+        .tier-badge {
+            background: #c1ff72;
+            border: 3px solid #000;
+            box-shadow: 3px 3px 0px #000;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            transform: rotate(2deg);
+        }
+        .tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            background: #fff;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            padding: 8px;
+            font-weight: 900;
+            font-family: inherit;
+            font-size: 13px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .tab-btn.active {
+            background: #5ce1e6;
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000;
+        }
+        .label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 900;
+            font-size: 13px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .neo-input {
+            width: 100%;
+            padding: 12px;
+            background: #fff;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 16px;
+            transition: 0.1s;
+        }
+        .neo-input:focus {
+            outline: none;
+            background: #fff9db;
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000;
+        }
+        .wa-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .wa-select {
+            width: 125px;
+            padding: 12px 6px;
+            background: #5ce1e6;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            font-family: inherit;
+            font-weight: 900;
+            font-size: 13px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .wa-input {
+            margin-bottom: 0 !important;
+            flex: 1;
+        }
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: -8px;
+            margin-bottom: 16px;
+        }
+        .preset-btn {
+            background: #c1ff72;
+            border: 3px solid #000;
+            box-shadow: 3px 3px 0px #000;
+            padding: 8px 4px;
+            font-weight: 900;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .preset-btn:active {
+            transform: translate(3px, 3px);
+            box-shadow: 0px 0px 0px #000;
+        }
+        .emoji-grid {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .emoji-btn {
+            flex: 1;
+            background: #fff;
+            border: 3px solid #000;
+            box-shadow: 3px 3px 0px #000;
+            padding: 8px;
+            font-size: 20px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .emoji-btn.selected {
+            background: #ff914d;
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #000;
+        }
+        .neo-btn {
+            width: 100%;
+            background: #7ed957;
+            border: 4px solid #000;
+            box-shadow: 5px 5px 0px #000;
+            padding: 14px;
+            font-weight: 900;
+            font-family: inherit;
+            font-size: 15px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .neo-btn:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 3px 3px 0px #000;
+        }
+        .neo-btn:active {
+            transform: translate(5px, 5px);
+            box-shadow: 0px 0px 0px #000;
+        }
+        .neo-btn.red { background: #ff5757; color: #fff; }
+        .neo-btn.blue { background: #5ce1e6; color: #000; }
+        .neo-btn.orange { background: #ff914d; color: #000; }
+        .hidden { display: none !important; }
+        .alert-box {
+            background: #ff5757;
+            color: #fff;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            padding: 12px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        .session-banner {
+            background: #5ce1e6;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            padding: 10px;
+            font-weight: 900;
+            font-size: 12px;
+            margin-bottom: 14px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        .qr-frame {
+            background: #fff;
+            border: 4px solid #000;
+            box-shadow: 5px 5px 0px #000;
+            padding: 16px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .qr-frame img {
+            width: 240px;
+            height: 240px;
+            border: 3px solid #000;
+            display: block;
+            margin: 0 auto 12px;
+        }
+        .info-list {
+            background: #fff;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            padding: 14px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .info-list p {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 2px dashed #000;
+        }
+        .info-list p:last-child { border-bottom: none; }
+        .feed-item {
+            background: #fff;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .feed-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 900;
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+        .feed-amount {
+            background: #c1ff72;
+            border: 2px solid #000;
+            padding: 2px 8px;
+            font-size: 13px;
+        }
+        .feed-notes {
+            font-size: 14px;
+            font-weight: 700;
+            color: #222;
+            background: #f4f0ea;
+            padding: 8px;
+            border: 2px solid #000;
+        }
+        .timer-badge {
+            background: #000;
+            color: #ffde59;
+            padding: 4px 10px;
+            font-weight: 900;
+            display: inline-block;
+            font-size: 13px;
+        }
+        .dl-menu {
+            background: #fff;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            padding: 10px;
+            margin-top: 10px;
+            display: grid;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="marquee">
+        <span id="marqueeText">⚡ SUPPORT KAXEL DENGAN QRIS OTOMATIS — TRANSAKSI TERSIMPAN OTOMATIS WALAU KELUAR DARI WEB! ⚡</span>
+    </div>
+
+    <div class="container">
+        <div class="goal-box">
+            <div class="goal-header">
+                <span id="goalTitle">🎯 TARGET DONASI</span>
+                <span id="goalNumbers">Rp0 / Rp1.000.000</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="goalFill"></div>
+                <div class="progress-text" id="goalPercent">0% TERCAPAI</div>
+            </div>
+        </div>
+
+        <div class="neo-card">
+            <div class="card-header-flex">
+                <div class="badge-title">KAXEL SUPPORT</div>
+                <div class="tier-badge" id="tierBadge">☕ TRAKTIR KOPI</div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('donate', this)">⚡ DONATE</button>
+                <button class="tab-btn" onclick="switchTab('leaderboard', this)">🏆 SULTAN</button>
+                <button class="tab-btn" onclick="switchTab('feed', this)">💬 RIWAYAT</button>
+            </div>
+
+            <div id="alertBox" class="alert-box hidden"></div>
+
+            <div id="tab-donate">
+                <form id="donateForm">
+                    <label class="label"><span>Nama / Alias</span></label>
+                    <input type="text" id="name" placeholder="Anonim / Nama Kamu" class="neo-input">
+
+                    <label class="label">
+                        <span>Nomor WhatsApp</span>
+                        <span style="font-size:11px; background:#fff; padding:0 6px; border:2px solid #000;">OPSIONAL (PRIVASI AMAN)</span>
+                    </label>
+                    <div class="wa-group">
+                        <select id="countryCode" class="wa-select">
+                            <option value="+62">🇮🇩 +62 (ID)</option>
+                            <option value="+60">🇲🇾 +60 (MY)</option>
+                            <option value="+65">🇸🇬 +65 (SG)</option>
+                            <option value="+673">🇧🇳 +673 (BN)</option>
+                            <option value="+63">🇵🇭 +63 (PH)</option>
+                            <option value="+66">🇹🇭 +66 (TH)</option>
+                            <option value="+84">🇻🇳 +84 (VN)</option>
+                            <option value="+81">🇯🇵 +81 (JP)</option>
+                            <option value="+82">🇰🇷 +82 (KR)</option>
+                            <option value="+86">🇨🇳 +86 (CN)</option>
+                            <option value="+852">🇭🇰 +852 (HK)</option>
+                            <option value="+886">🇹🇼 +886 (TW)</option>
+                            <option value="+91">🇮🇳 +91 (IN)</option>
+                            <option value="+966">🇸🇦 +966 (SA)</option>
+                            <option value="+971">🇦🇪 +971 (AE)</option>
+                            <option value="+90">🇹🇷 +90 (TR)</option>
+                            <option value="+61">🇦🇺 +61 (AU)</option>
+                            <option value="+1">🇺🇸 +1 (US)</option>
+                            <option value="+44">🇬🇧 +44 (UK)</option>
+                            <option value="+49">🇩🇪 +49 (DE)</option>
+                            <option value="+33">🇫🇷 +33 (FR)</option>
+                            <option value="+31">🇳🇱 +31 (NL)</option>
+                            <option value="+7">🇷🇺 +7 (RU)</option>
+                            <option value="+55">🇧🇷 +55 (BR)</option>
+                        </select>
+                        <input type="tel" id="waNumber" placeholder="8123456789" class="neo-input wa-input">
+                    </div>
+
+                    <label class="label"><span>Nominal Donasi (Rp)</span></label>
+                    <input type="number" id="amount" placeholder="10000" required min="100" class="neo-input" oninput="updateTierBadge(this.value)">
+                    <div class="preset-grid">
+                        <button type="button" class="preset-btn" onclick="setNominal(5000)">☕ 5K</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(10000)">⚡ 10K</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(25000)">🔥 25K</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(50000)">🚀 50K</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(100000)">💎 100K</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(250000)">👑 250K</button>
+                    </div>
+
+                    <label class="label"><span>Pilih Stiker Reaksi</span></label>
+                    <div class="emoji-grid">
+                        <div class="emoji-btn selected" onclick="selectEmoji('🔥', this)">🔥</div>
+                        <div class="emoji-btn" onclick="selectEmoji('❤️', this)">❤️</div>
+                        <div class="emoji-btn" onclick="selectEmoji('🚀', this)">🚀</div>
+                        <div class="emoji-btn" onclick="selectEmoji('☕', this)">☕</div>
+                        <div class="emoji-btn" onclick="selectEmoji('👑', this)">👑</div>
+                    </div>
+
+                    <label class="label"><span>Pesan / Dukungan</span></label>
+                    <textarea id="notes" rows="2" placeholder="Semangat terus Kaxel!" class="neo-input"></textarea>
+
+                    <button type="submit" id="submitBtn" class="neo-btn">BUAT QRIS SEKARANG</button>
+                </form>
+
+                <div id="qrSection" class="hidden">
+                    <div class="session-banner">
+                        📌 Sesi Otomatis Tersimpan! Aman keluar web untuk buka aplikasi Bank/E-Wallet.
+                    </div>
+
+                    <div class="qr-frame">
+                        <img id="qrImage" src="" alt="QRIS">
+                        <div class="timer-badge" id="countdown">⏳ 15:00</div>
+                    </div>
+
+                    <div class="info-list">
+                        <p>
+                            <span>ID TRX</span>
+                            <span>
+                                <span id="trxId"></span>
+                                <button type="button" onclick="copyTrxId()" style="background:#ffde59; border:2px solid #000; padding:1px 6px; font-weight:900; font-size:11px; cursor:pointer;">SALIN</button>
+                            </span>
+                        </p>
+                        <p><span>NOMINAL</span> <span id="trxAmount"></span></p>
+                        <p><span>BIAYA ADMIN</span> <span id="trxFee"></span></p>
+                        <p style="font-size: 16px; background: #c1ff72; padding: 6px; border: 2px solid #000; margin-top: 4px;">
+                            <span>TOTAL BAYAR</span> <span id="trxTotal"></span>
+                        </p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <button type="button" onclick="toggleDownloadMenu()" class="neo-btn blue" style="font-size:13px;">📥 PILIHAN UNDUH QR</button>
+                        <button type="button" id="cancelBtn" class="neo-btn red" style="font-size:13px;">❌ BATALKAN</button>
+                    </div>
+
+                    <div id="downloadMenu" class="dl-menu hidden">
+                        <button type="button" onclick="downloadQrOnly()" class="neo-btn orange" style="padding:10px; font-size:12px;">🖼️ 1. UNDUH GAMBAR QR SAJA (PNG)</button>
+                        <button type="button" onclick="downloadQrCard()" class="neo-btn" style="padding:10px; font-size:12px;">💳 2. UNDUH KARTU INVOICE LENGKAP (PNG)</button>
+                    </div>
+                </div>
+
+                <div id="resultSection" class="hidden" style="text-align: center; padding: 16px 0;">
+                    <div id="resultIcon" style="font-size: 64px; margin-bottom: 8px;">🎉</div>
+                    <h2 id="resultTitle" style="font-size: 24px; font-weight: 900; text-transform: uppercase; margin-bottom: 12px;"></h2>
+                    <p id="resultDesc" class="feed-item" style="font-weight: 700; margin-bottom: 20px;"></p>
+                    <button onclick="resetUI()" class="neo-btn blue">BUAT DONASI BARU</button>
+                </div>
+            </div>
+
+            <div id="tab-leaderboard" class="hidden">
+                <div id="leaderboardList">Memuat data...</div>
+            </div>
+
+            <div id="tab-feed" class="hidden">
+                <div id="feedList">Memuat riwayat...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'kaxel_active_donation_v2'
+        let pollTimer = null
+        let countdownTimer = null
+        let currentTrx = null
+        let selectedEmoji = '🔥'
+
+        const formatRp = (num) => 'Rp' + Number(num).toLocaleString('id-ID')
+
+        const playSuccessSound = () => {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)()
+                const notes = [523.25, 659.25, 783.99, 1046.50]
+                notes.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator()
+                    const gain = ctx.createGain()
+                    osc.type = 'triangle'
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.12)
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime + idx * 0.12)
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.12 + 0.35)
+                    osc.connect(gain)
+                    gain.connect(ctx.destination)
+                    osc.start(ctx.currentTime + idx * 0.12)
+                    osc.stop(ctx.currentTime + idx * 0.12 + 0.35)
+                })
+            } catch (e) {}
+        }
+
+        const updateTierBadge = (val) => {
+            const num = parseInt(val) || 0
+            const badge = document.getElementById('tierBadge')
+            if (num >= 100000) {
+                badge.textContent = '👑 VIP SULTAN'
+                badge.style.background = '#ff914d'
+            } else if (num >= 25000) {
+                badge.textContent = '🔥 PRO SUPPORTER'
+                badge.style.background = '#5ce1e6'
+            } else {
+                badge.textContent = '☕ TRAKTIR KOPI'
+                badge.style.background = '#c1ff72'
+            }
+        }
+
+        const showAlert = (msg) => {
+            const box = document.getElementById('alertBox')
+            box.textContent = msg
+            box.classList.remove('hidden')
+            setTimeout(() => box.classList.add('hidden'), 4000)
+        }
+
+        const setNominal = (val) => {
+            document.getElementById('amount').value = val
+            updateTierBadge(val)
+        }
+
+        const selectEmoji = (emoji, el) => {
+            selectedEmoji = emoji
+            document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'))
+            el.classList.add('selected')
+        }
+
+        const switchTab = (tab, btn) => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'))
+            btn.classList.add('active')
+
+            document.getElementById('tab-donate').classList.add('hidden')
+            document.getElementById('tab-leaderboard').classList.add('hidden')
+            document.getElementById('tab-feed').classList.add('hidden')
+            document.getElementById(`tab-${tab}`).classList.remove('hidden')
+
+            if (tab !== 'donate') loadPublicStats()
+        }
+
+        const loadPublicStats = async () => {
+            try {
+                const res = await fetch('/api/public-stats')
+                const json = await res.json()
+
+                if (json.goal) {
+                    const pct = Math.min(100, Math.round((json.goal.current / json.goal.target) * 100))
+                    document.getElementById('goalTitle').textContent = '🎯 ' + json.goal.title
+                    document.getElementById('goalNumbers').textContent = `${formatRp(json.goal.current)} / ${formatRp(json.goal.target)}`
+                    document.getElementById('goalFill').style.width = pct + '%'
+                    document.getElementById('goalPercent').textContent = `${pct}% TERCAPAI`
+                }
+
+                if (json.recent && json.recent.length > 0) {
+                    const tickerItems = json.recent.slice(0, 5).map(r => `${r.emoji || '🔥'} ${r.name} baru saja mendonasikan ${formatRp(r.amount)} ("${r.notes}")`).join('  ✦  ')
+                    document.getElementById('marqueeText').textContent = `⚡ LIVE FEED: ${tickerItems}  ✦  TERIMA KASIH ATAS DUKUNGANMU! ⚡`
+                }
+
+                const lbEl = document.getElementById('leaderboardList')
+                if (!json.leaderboard || json.leaderboard.length === 0) {
+                    lbEl.innerHTML = '<div class="feed-item" style="text-align:center;font-weight:700;">Belum ada data supporter. Jadilah Sultan pertama!</div>'
+                } else {
+                    lbEl.innerHTML = json.leaderboard.map((u, idx) => `
+                        <div class="feed-item" style="display:flex; justify-content:space-between; align-items:center;">
+                            <div style="font-weight:900; font-size:16px;">${idx === 0 ? '👑' : '#' + (idx + 1)} ${u.name} <span style="font-size:12px; font-weight:700;">(${u.count}x)</span></div>
+                            <div class="feed-amount" style="font-weight:900;">${formatRp(u.total)}</div>
+                        </div>
+                    `).join('')
+                }
+
+                const feedEl = document.getElementById('feedList')
+                if (!json.recent || json.recent.length === 0) {
+                    feedEl.innerHTML = '<div class="feed-item" style="text-align:center;font-weight:700;">Belum ada riwayat donasi.</div>'
+                } else {
+                    feedEl.innerHTML = json.recent.map(r => `
+                        <div class="feed-item">
+                            <div class="feed-header">
+                                <span>${r.emoji || '🔥'} ${r.name}</span>
+                                <span class="feed-amount">${formatRp(r.amount)}</span>
+                            </div>
+                            <div class="feed-notes">"${r.notes}"</div>
+                        </div>
+                    `).join('')
+                }
+            } catch (e) {}
+        }
+
+        const saveSession = (trx) => {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(trx))
+            } catch (e) {}
+        }
+
+        const clearSession = () => {
+            try {
+                localStorage.removeItem(STORAGE_KEY)
+            } catch (e) {}
+        }
+
+        const checkSavedSession = () => {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY)
+                if (!raw) return
+                const saved = JSON.parse(raw)
+                if (!saved || !saved.transactionId) return
+
+                if (Date.now() > new Date(saved.expiredAt).getTime()) {
+                    clearSession()
+                    return
+                }
+
+                currentTrx = saved
+                showQrScreen(currentTrx)
+                startPolling()
+            } catch (e) {
+                clearSession()
+            }
+        }
+
+        document.getElementById('donateForm').addEventListener('submit', async (e) => {
+            e.preventDefault()
+            const btn = document.getElementById('submitBtn')
+            btn.disabled = true
+            btn.textContent = 'MEMPROSES QRIS...'
+
+            const code = document.getElementById('countryCode').value
+            let rawPhone = document.getElementById('waNumber').value.trim().replace(/[^0-9]/g, '')
+            if (rawPhone.startsWith('0')) rawPhone = rawPhone.slice(1)
+            const fullWhatsapp = rawPhone ? `${code}${rawPhone}` : ''
+
+            const payload = {
+                name: document.getElementById('name').value,
+                whatsapp: fullWhatsapp,
+                amount: document.getElementById('amount').value,
+                notes: document.getElementById('notes').value,
+                emoji: selectedEmoji
+            }
+
+            try {
+                const res = await fetch('/api/donate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                const json = await res.json()
+
+                if (!json.success) {
+                    showAlert(json.message)
+                    btn.disabled = false
+                    btn.textContent = 'BUAT QRIS SEKARANG'
+                    return
+                }
+
+                currentTrx = json.data
+                saveSession(currentTrx)
+                showQrScreen(currentTrx)
+                startPolling()
+            } catch (err) {
+                showAlert('Gagal menghubungi server.')
+                btn.disabled = false
+                btn.textContent = 'BUAT QRIS SEKARANG'
+            }
+        })
+
+        const showQrScreen = (trx) => {
+            document.getElementById('donateForm').classList.add('hidden')
+            document.getElementById('resultSection').classList.add('hidden')
+            document.getElementById('qrSection').classList.remove('hidden')
+            document.getElementById('downloadMenu').classList.add('hidden')
+
+            document.getElementById('qrImage').src = trx.qrImage
+            document.getElementById('trxId').textContent = trx.transactionId
+            document.getElementById('trxAmount').textContent = formatRp(trx.amount)
+            document.getElementById('trxFee').textContent = formatRp(trx.fee)
+            document.getElementById('trxTotal').textContent = formatRp(trx.totalAmount)
+
+            if (countdownTimer) clearInterval(countdownTimer)
+            const expTime = new Date(trx.expiredAt).getTime()
+            const updateClock = () => {
+                const diff = Math.max(0, Math.floor((expTime - Date.now()) / 1000))
+                const m = String(Math.floor(diff / 60)).padStart(2, '0')
+                const s = String(diff % 60).padStart(2, '0')
+                document.getElementById('countdown').textContent = `⏳ SISA WAKTU: ${m}:${s}`
+                if (diff <= 0) clearInterval(countdownTimer)
+            }
+            updateClock()
+            countdownTimer = setInterval(updateClock, 1000)
+        }
+
+        const copyTrxId = () => {
+            if (!currentTrx) return
+            navigator.clipboard.writeText(currentTrx.transactionId)
+            showAlert('ID Transaksi berhasil disalin!')
+        }
+
+        const toggleDownloadMenu = () => {
+            document.getElementById('downloadMenu').classList.toggle('hidden')
+        }
+
+        const downloadQrOnly = () => {
+            if (!currentTrx) return
+            const a = document.createElement('a')
+            a.href = currentTrx.qrImage
+            a.download = `QRIS-Kaxel-${currentTrx.transactionId}.png`
+            a.click()
+        }
+
+        const downloadQrCard = () => {
+            if (!currentTrx) return
+            const canvas = document.createElement('canvas')
+            canvas.width = 600
+            canvas.height = 780
+            const ctx = canvas.getContext('2d')
+
+            ctx.fillStyle = '#ffde59'
+            ctx.fillRect(0, 0, 600, 780)
+            ctx.lineWidth = 12
+            ctx.strokeStyle = '#000'
+            ctx.strokeRect(6, 6, 588, 768)
+
+            ctx.fillStyle = '#ff5757'
+            ctx.fillRect(40, 35, 520, 70)
+            ctx.lineWidth = 6
+            ctx.strokeRect(40, 35, 520, 70)
+
+            ctx.fillStyle = '#fff'
+            ctx.font = '900 32px sans-serif'
+            ctx.textAlign = 'center'
+            ctx.fillText('KAXEL SUPPORT QRIS', 300, 82)
+
+            ctx.fillStyle = '#fff'
+            ctx.fillRect(75, 130, 450, 450)
+            ctx.strokeRect(75, 130, 450, 450)
+
+            const img = new Image()
+            img.onload = () => {
+                ctx.drawImage(img, 95, 150, 410, 410)
+
+                ctx.fillStyle = '#c1ff72'
+                ctx.fillRect(40, 605, 520, 75)
+                ctx.strokeRect(40, 605, 520, 75)
+
+                ctx.fillStyle = '#000'
+                ctx.font = '900 28px sans-serif'
+                ctx.fillText(`TOTAL BAYAR: ${formatRp(currentTrx.totalAmount)}`, 300, 653)
+
+                ctx.font = '700 18px monospace'
+                ctx.fillText(`ID: ${currentTrx.transactionId} | Dari: ${currentTrx.name || 'Anonim'}`, 300, 725)
+
+                const a = document.createElement('a')
+                a.href = canvas.toDataURL('image/png')
+                a.download = `Invoice-Kaxel-${currentTrx.transactionId}.png`
+                a.click()
+            }
+            img.src = currentTrx.qrImage
+        }
+
+        const startPolling = () => {
+            if (pollTimer) clearTimeout(pollTimer)
+
+            const poll = async () => {
+                if (!currentTrx) return
+
+                try {
+                    const res = await fetch(`/api/status/${currentTrx.transactionId}?key=${currentTrx.accessKey}`)
+                    const json = await res.json()
+
+                    if (json.success && json.data) {
+                        const status = json.data.status
+                        const isExpired = Date.now() > new Date(currentTrx.expiredAt).getTime()
+
+                        if (status === 'sukses' || status === 'success') {
+                            playSuccessSound()
+                            if (typeof confetti === 'function') {
+                                confetti({ particleCount: 140, spread: 90, origin: { y: 0.6 } })
+                            }
+                            loadPublicStats()
+                            return showResult('🎉', 'DONASI DITERIMA!', `Terima kasih banyak ${currentTrx.name || ''} atas dukungan sebesar ${formatRp(currentTrx.amount)}!`)
+                        }
+                        if (status === 'expired' || isExpired) {
+                            return showResult('⌛', 'WAKTU HABIS', 'QRIS sudah kadaluarsa, silakan buat transaksi baru.')
+                        }
+                        if (status === 'cancel' || status === 'cancelled') {
+                            return showResult('❌', 'DIBATALKAN', 'Transaksi donasi telah dibatalkan.')
+                        }
+                    }
+                } catch (e) {}
+
+                pollTimer = setTimeout(poll, 1500)
+            }
+
+            poll()
+        }
+
+        document.getElementById('cancelBtn').addEventListener('click', async () => {
+            if (!currentTrx) return
+            const btn = document.getElementById('cancelBtn')
+            btn.disabled = true
+            btn.textContent = 'MEMBATALKAN...'
+
+            try {
+                await fetch(`/api/cancel/${currentTrx.transactionId}`, { method: 'POST' })
+                showResult('❌', 'DIBATALKAN', 'Transaksi berhasil dibatalkan.')
+            } catch (e) {
+                showAlert('Gagal membatalkan transaksi.')
+                btn.disabled = false
+                btn.textContent = '❌ BATALKAN'
+            }
+        })
+
+        const showResult = (icon, title, desc) => {
+            if (pollTimer) clearTimeout(pollTimer)
+            if (countdownTimer) clearInterval(countdownTimer)
+            clearSession()
+            currentTrx = null
+            document.getElementById('qrSection').classList.add('hidden')
+            document.getElementById('resultSection').classList.remove('hidden')
+            document.getElementById('resultIcon').textContent = icon
+            document.getElementById('resultTitle').textContent = title
+            document.getElementById('resultDesc').textContent = desc
+        }
+
+        const resetUI = () => {
+            clearSession()
+            document.getElementById('resultSection').classList.add('hidden')
+            document.getElementById('donateForm').classList.remove('hidden')
+            document.getElementById('donateForm').reset()
+            updateTierBadge(0)
+            const btn = document.getElementById('submitBtn')
+            btn.disabled = false
+            btn.textContent = 'BUAT QRIS SEKARANG'
+            const cBtn = document.getElementById('cancelBtn')
+            cBtn.disabled = false
+            cBtn.textContent = '❌ BATALKAN'
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadPublicStats()
+            checkSavedSession()
+        })
+    </script>
+</body>
+</html>
