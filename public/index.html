@@ -139,6 +139,8 @@
             cursor: pointer;
             transition: 0.1s;
         }
+        .tab-btn [data-lucide]{width:15px;height:15px;vertical-align:middle;margin-right:3px}
+        .marquee [data-lucide]{width:14px;height:14px;vertical-align:middle;margin-right:5px}
         .tab-btn.active {
             background: #5ce1e6;
             transform: translate(2px, 2px);
@@ -213,6 +215,36 @@
             transform: translate(3px, 3px);
             box-shadow: 0px 0px 0px #000;
         }
+        .payment-picker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:8px 0 20px;align-items:start}
+        .payment-option{position:relative;display:flex;align-items:center;gap:11px;text-align:left;padding:12px;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;min-width:0;width:100%;font:inherit;cursor:pointer;transition:background .15s,transform .15s}
+        .payment-option.selected{background:#e8fbff;outline:3px solid #5ce1e6;transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
+        .payment-option:disabled{cursor:not-allowed;opacity:.82;background:#f8fafc}
+        .payment-logo{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border-radius:10px;color:#fff;font-weight:900;overflow:hidden;background:#fff}
+        .payment-logo svg{width:25px;height:25px;display:block}
+        .payment-logo img{display:block;width:100%;height:100%;object-fit:contain;padding:2px}
+        .payment-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+        .payment-copy strong{font-size:14px;line-height:1.2}
+        .payment-copy small{font-size:10px;font-weight:900;letter-spacing:.35px;color:#475569}
+        .coming-badge{font-size:9px!important;color:#92400e!important;background:#fef3c7;padding:3px 5px;border:1px solid #f59e0b;border-radius:4px;width:max-content}
+        .wallet-toggle{min-height:68px;justify-content:space-between}
+        .wallet-toggle-main{display:flex;align-items:center;gap:10px;min-width:0}
+        .wallet-folder-icon{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border-radius:10px;background:#111827;color:#fff}
+        .wallet-folder-icon svg{width:23px;height:23px}
+        .wallet-chevron{width:18px;height:18px;flex:0 0 18px;transition:transform .18s}
+        .wallet-toggle[aria-expanded="true"] .wallet-chevron{transform:rotate(180deg)}
+        .wallet-options{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000}
+        .wallet-options[hidden]{display:none}
+        .wallet-options .payment-option{box-shadow:3px 3px 0 #000;padding:10px;min-height:66px}
+        .wallet-options .payment-option.selected{box-shadow:2px 2px 0 #000}
+        .wallet-options .payment-logo{width:36px;height:36px;flex-basis:36px}
+        .wallet-options .payment-copy strong{font-size:13px}
+        .payment-hint{grid-column:1/-1;font-size:11px;font-weight:700;color:#475569;margin-top:1px}
+        @media(max-width:380px){.payment-picker{gap:8px}.payment-option{padding:9px;gap:8px}.payment-logo,.wallet-folder-icon{width:34px;height:34px;flex-basis:34px}.wallet-options{gap:8px;padding:9px}.wallet-options .payment-option{padding:8px}.wallet-options .payment-logo{width:32px;height:32px;flex-basis:32px}}
+        .payment-instructions{padding:14px;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;margin-bottom:16px;line-height:1.6}
+        .payment-instructions .neo-btn{margin-top:12px}
+        .payment-detail{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed #aaa;overflow-wrap:anywhere}
+        .payment-detail:last-child{border-bottom:0}
+        @media(max-width:380px){.payment-methods{grid-template-columns:1fr}.payment-option{padding:10px}}
         .emoji-grid {
             display: flex;
             gap: 8px;
@@ -369,7 +401,7 @@
 <body>
 
     <div class="marquee">
-        <span id="marqueeText">⚡ SUPPORT KAXEL DENGAN QRIS OTOMATIS — TRANSAKSI TERSIMPAN OTOMATIS WALAU KELUAR DARI WEB! ⚡</span>
+        <span id="marqueeText"><i data-lucide="heart-handshake" aria-hidden="true"></i> SUPPORT KAXEL DENGAN QRIS OTOMATIS — TRANSAKSI TERSIMPAN OTOMATIS WALAU KELUAR DARI WEB!</span>
     </div>
 
     <div class="container">
@@ -391,9 +423,9 @@
             </div>
 
             <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('donate', this)">⚡ DONATE</button>
-                <button class="tab-btn" onclick="switchTab('leaderboard', this)">🏆 SULTAN</button>
-                <button class="tab-btn" onclick="switchTab('feed', this)">💬 RIWAYAT</button>
+                <button class="tab-btn active" onclick="switchTab('donate', this)"><i data-lucide="heart-handshake" aria-hidden="true"></i> DONATE</button>
+                <button class="tab-btn" onclick="switchTab('leaderboard', this)"><i data-lucide="trophy" aria-hidden="true"></i> SULTAN</button>
+                <button class="tab-btn" onclick="switchTab('feed', this)"><i data-lucide="messages-square" aria-hidden="true"></i> RIWAYAT</button>
             </div>
 
             <div id="alertBox" class="alert-box hidden"></div>
@@ -409,32 +441,66 @@
                     </label>
                     <div class="wa-group">
                         <select id="countryCode" class="wa-select">
-                            <option value="+62">🇮🇩 +62 (ID)</option>
-                            <option value="+60">🇲🇾 +60 (MY)</option>
-                            <option value="+65">🇸🇬 +65 (SG)</option>
-                            <option value="+673">🇧🇳 +673 (BN)</option>
-                            <option value="+63">🇵🇭 +63 (PH)</option>
-                            <option value="+66">🇹🇭 +66 (TH)</option>
-                            <option value="+84">🇻🇳 +84 (VN)</option>
-                            <option value="+81">🇯🇵 +81 (JP)</option>
-                            <option value="+82">🇰🇷 +82 (KR)</option>
-                            <option value="+86">🇨🇳 +86 (CN)</option>
-                            <option value="+852">🇭🇰 +852 (HK)</option>
-                            <option value="+886">🇹🇼 +886 (TW)</option>
-                            <option value="+91">🇮🇳 +91 (IN)</option>
-                            <option value="+966">🇸🇦 +966 (SA)</option>
-                            <option value="+971">🇦🇪 +971 (AE)</option>
-                            <option value="+90">🇹🇷 +90 (TR)</option>
-                            <option value="+61">🇦🇺 +61 (AU)</option>
-                            <option value="+1">🇺🇸 +1 (US)</option>
-                            <option value="+44">🇬🇧 +44 (UK)</option>
-                            <option value="+49">🇩🇪 +49 (DE)</option>
-                            <option value="+33">🇫🇷 +33 (FR)</option>
-                            <option value="+31">🇳🇱 +31 (NL)</option>
-                            <option value="+7">🇷🇺 +7 (RU)</option>
-                            <option value="+55">🇧🇷 +55 (BR)</option>
+                            <option value="+62">ID +62 (ID)</option>
+                            <option value="+60">MY +60 (MY)</option>
+                            <option value="+65">SG +65 (SG)</option>
+                            <option value="+673">BN +673 (BN)</option>
+                            <option value="+63">PH +63 (PH)</option>
+                            <option value="+66">TH +66 (TH)</option>
+                            <option value="+84">VN +84 (VN)</option>
+                            <option value="+81">JP +81 (JP)</option>
+                            <option value="+82">KR +82 (KR)</option>
+                            <option value="+86">CN +86 (CN)</option>
+                            <option value="+852">HK +852 (HK)</option>
+                            <option value="+886">TW +886 (TW)</option>
+                            <option value="+91">IN +91 (IN)</option>
+                            <option value="+966">SA +966 (SA)</option>
+                            <option value="+971">AE +971 (AE)</option>
+                            <option value="+90">TR +90 (TR)</option>
+                            <option value="+61">AU +61 (AU)</option>
+                            <option value="+1">US +1 (US)</option>
+                            <option value="+44">UK +44 (UK)</option>
+                            <option value="+49">DE +49 (DE)</option>
+                            <option value="+33">FR +33 (FR)</option>
+                            <option value="+31">NL +31 (NL)</option>
+                            <option value="+7">RU +7 (RU)</option>
+                            <option value="+55">BR +55 (BR)</option>
                         </select>
                         <input type="tel" id="waNumber" placeholder="8123456789" class="neo-input wa-input">
+                    </div>
+
+                    <label class="label"><span>Metode Pembayaran</span><span style="font-size:11px">PILIH SATU</span></label>
+                    <div class="payment-picker" role="group" aria-label="Pilih metode pembayaran">
+                        <button type="button" class="payment-option selected" data-payment="qris" onclick="selectPaymentMethod('qris', this)" aria-pressed="true">
+                            <span class="payment-logo"><img src="/assets/payment-qris.png" alt="Logo QRIS"></span>
+                            <span class="payment-copy"><strong>QRIS</strong><small>SEMUA E-WALLET & BANK</small></span>
+                        </button>
+                        <button type="button" class="payment-option wallet-toggle" id="walletToggle" aria-expanded="false" aria-controls="walletOptions" onclick="toggleWalletFolder()">
+                            <span class="wallet-toggle-main">
+                                <span class="wallet-folder-icon"><i data-lucide="wallet"></i></span>
+                                <span class="payment-copy"><strong>E-Wallet</strong><small>PILIH PENYEDIA</small></span>
+                            </span>
+                            <i class="wallet-chevron" data-lucide="chevron-down" aria-hidden="true"></i>
+                        </button>
+                        <div class="wallet-options" id="walletOptions" hidden role="group" aria-label="Penyedia E-Wallet">
+                            <button type="button" class="payment-option" data-payment="shopeepay" onclick="selectPaymentMethod('shopeepay', this)" aria-pressed="false">
+                                <span class="payment-logo" style="background:#ee4d2d"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M8 11h16l1.5 15h-19L8 11Z" fill="white"/><path d="M12 12V9a4 4 0 0 1 8 0v3" stroke="white" stroke-width="2.5" stroke-linecap="round"/><path d="M12.5 18c.6-1 1.7-1.5 3.5-1.5 2 0 3.5.8 3.5 2s-1.3 1.8-3.5 2c-2 .2-3.5.9-3.5 2.1 0 1.3 1.5 2 3.7 2 1.5 0 2.8-.5 3.5-1.4" stroke="#ee4d2d" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+                                <span class="payment-copy"><strong>ShopeePay</strong><small>TERSEDIA</small></span>
+                            </button>
+                            <button type="button" class="payment-option" disabled aria-label="DANA segera tersedia">
+                                <span class="payment-logo"><img src="/assets/payment-dana.webp" alt="Logo DANA"></span>
+                                <span class="payment-copy"><strong>DANA</strong><small class="coming-badge">COMING SOON</small></span>
+                            </button>
+                            <button type="button" class="payment-option" disabled aria-label="OVO segera tersedia">
+                                <span class="payment-logo"><img src="/assets/payment-ovo.png" alt="Logo OVO"></span>
+                                <span class="payment-copy"><strong>OVO</strong><small class="coming-badge">COMING SOON</small></span>
+                            </button>
+                            <button type="button" class="payment-option" disabled aria-label="GoPay segera tersedia">
+                                <span class="payment-logo"><img src="/assets/payment-gopay.jpg" alt="Logo GoPay"></span>
+                                <span class="payment-copy"><strong>GoPay</strong><small class="coming-badge">COMING SOON</small></span>
+                            </button>
+                            <p class="payment-hint">ShopeePay sudah tersedia. DANA, OVO, dan GoPay akan segera hadir.</p>
+                        </div>
                     </div>
 
                     <label class="label"><span>Nominal Donasi (Rp)</span></label>
@@ -460,7 +526,7 @@
                     <label class="label"><span>Pesan / Dukungan</span></label>
                     <textarea id="notes" rows="2" placeholder="Semangat terus Kaxel!" class="neo-input"></textarea>
 
-                    <button type="submit" id="submitBtn" class="neo-btn">BUAT QRIS SEKARANG</button>
+                    <button type="submit" id="submitBtn" class="neo-btn"><i data-lucide="qr-code"></i> BUAT QRIS SEKARANG</button>
                 </form>
 
                 <div id="qrSection" class="hidden">
@@ -468,10 +534,11 @@
                         Sesi otomatis tersimpan. Anda dapat membuka aplikasi bank atau dompet digital.
                     </div>
 
-                    <div class="qr-frame">
+                    <div class="qr-frame" id="qrFrame">
                         <img id="qrImage" src="" alt="QRIS">
-                        <div class="timer-badge" id="countdown">⏳ 15:00</div>
                     </div>
+                    <div class="timer-badge" id="countdown" style="margin-bottom:14px">SISA WAKTU: 20:00</div>
+                    <div id="paymentInstructions" class="payment-instructions hidden"></div>
 
                     <div class="info-list">
                         <p>
@@ -489,7 +556,7 @@
                     </div>
 
                     <div class="action-row">
-                        <button type="button" onclick="downloadQrOnly()" class="neo-btn blue icon-btn"><i data-lucide="download"></i> UNDUH QR CODE</button>
+                        <button type="button" id="qrDownloadBtn" onclick="downloadQrOnly()" class="neo-btn blue icon-btn"><i data-lucide="download"></i> UNDUH QR CODE</button>
                         <button type="button" onclick="downloadInvoice()" class="neo-btn icon-btn"><i data-lucide="file-text"></i> UNDUH INVOICE</button>
                         <button type="button" id="cancelBtn" class="neo-btn red icon-btn"><i data-lucide="x-circle"></i> BATALKAN</button>
                     </div>
@@ -498,7 +565,7 @@
                 </div>
 
                 <div id="resultSection" class="hidden" style="text-align: center; padding: 16px 0;">
-                    <div id="resultIcon" style="font-size: 64px; margin-bottom: 8px;">🎉</div>
+                    <div id="resultIcon" style="display:grid;place-items:center;margin:0 auto 12px;width:64px;height:64px;color:#111"><i data-lucide="check-circle" style="width:56px;height:56px"></i></div>
                     <h2 id="resultTitle" style="font-size: 24px; font-weight: 900; text-transform: uppercase; margin-bottom: 12px;"></h2>
                     <p id="resultDesc" class="feed-item" style="font-weight: 700; margin-bottom: 20px;"></p>
                     <button onclick="resetUI()" class="neo-btn blue">BUAT DONASI BARU</button>
@@ -521,6 +588,7 @@
         let countdownTimer = null
         let currentTrx = null
         let selectedEmoji = 'support'
+        let selectedPaymentMethod = 'qris'
 
         const formatRp = (num) => 'Rp' + Number(num).toLocaleString('id-ID')
 
@@ -568,6 +636,38 @@
         const setNominal = (val) => {
             document.getElementById('amount').value = val
             updateTierBadge(val)
+        }
+
+        const toggleWalletFolder = () => {
+            const toggle = document.getElementById('walletToggle')
+            const options = document.getElementById('walletOptions')
+            const expanded = toggle.getAttribute('aria-expanded') === 'true'
+            toggle.setAttribute('aria-expanded', String(!expanded))
+            options.hidden = expanded
+            toggle.classList.toggle('selected', !expanded && selectedPaymentMethod === 'shopeepay')
+            if (window.lucide) lucide.createIcons()
+        }
+
+        const selectPaymentMethod = (method, el) => {
+            selectedPaymentMethod = method
+            document.querySelectorAll('.payment-option[data-payment]').forEach(button => {
+                const active = button.dataset.payment === method
+                button.classList.toggle('selected', active)
+                button.setAttribute('aria-pressed', String(active))
+            })
+            const walletToggle = document.getElementById('walletToggle')
+            if (walletToggle) walletToggle.classList.toggle('selected', method === 'shopeepay')
+            if (method === 'shopeepay') {
+                const options = document.getElementById('walletOptions')
+                const toggle = document.getElementById('walletToggle')
+                if (options && toggle) {
+                    options.hidden = false
+                    toggle.setAttribute('aria-expanded', 'true')
+                }
+            }
+            const btn = document.getElementById('submitBtn')
+            btn.innerHTML = method === 'qris' ? '<i data-lucide="qr-code"></i> BUAT QRIS SEKARANG' : '<i data-lucide="wallet"></i> LANJUT KE SHOPEEPAY'
+            if (window.lucide) lucide.createIcons()
         }
 
         const selectReaction = (reaction, el) => {
@@ -672,14 +772,14 @@
             e.preventDefault()
             const btn = document.getElementById('submitBtn')
             btn.disabled = true
-            btn.textContent = 'MEMPROSES QRIS...'
+            btn.textContent = selectedPaymentMethod === 'qris' ? 'MEMPROSES QRIS...' : 'MEMPROSES SHOPEEPAY...'
 
             const code = document.getElementById('countryCode').value
             let rawPhone = document.getElementById('waNumber').value.trim().replace(/[^0-9]/g, '')
             if (rawPhone.startsWith('0')) rawPhone = rawPhone.slice(1)
             const fullWhatsapp = rawPhone ? `${code}${rawPhone}` : ''
 
-            const payload = { name: document.getElementById('name').value, whatsapp: fullWhatsapp, amount: document.getElementById('amount').value, notes: document.getElementById('notes').value, emoji: selectedEmoji }
+            const payload = { name: document.getElementById('name').value, whatsapp: fullWhatsapp, amount: document.getElementById('amount').value, notes: document.getElementById('notes').value, emoji: selectedEmoji, paymentMethod: selectedPaymentMethod }
 
             try {
                 const res = await fetch('/api/donate', {
@@ -692,7 +792,7 @@
                 if (!json.success) {
                     showAlert(json.message)
                     btn.disabled = false
-                    btn.textContent = 'BUAT QRIS SEKARANG'
+                    btn.innerHTML = selectedPaymentMethod === 'qris' ? '<i data-lucide="qr-code"></i> BUAT QRIS SEKARANG' : '<i data-lucide="wallet"></i> LANJUT KE SHOPEEPAY'
                     return
                 }
 
@@ -703,7 +803,7 @@
             } catch (err) {
                 showAlert('Gagal menghubungi server.')
                 btn.disabled = false
-                btn.textContent = 'BUAT QRIS SEKARANG'
+                btn.innerHTML = selectedPaymentMethod === 'qris' ? '<i data-lucide="qr-code"></i> BUAT QRIS SEKARANG' : '<i data-lucide="wallet"></i> LANJUT KE SHOPEEPAY'
             }
         })
 
@@ -713,7 +813,16 @@
             document.getElementById('qrSection').classList.remove('hidden')
             
 
-            document.getElementById('qrImage').src = trx.qrImage
+            const isQr = (trx.paymentMethod || 'qris') === 'qris' && Boolean(trx.qrImage)
+            document.getElementById('qrFrame').classList.toggle('hidden', !isQr)
+            document.getElementById('qrDownloadBtn').classList.toggle('hidden', !isQr)
+            document.getElementById('paymentInstructions').classList.toggle('hidden', isQr)
+            document.getElementById('qrImage').src = trx.qrImage || ''
+            if (!isQr) {
+                const details = trx.accountDetails || {}
+                document.getElementById('paymentInstructions').innerHTML = `<div class="icon-btn"><i data-lucide="wallet"></i><strong>PEMBAYARAN SHOPEEPAY</strong></div><p>Transaksi berhasil dibuat. Lanjutkan melalui halaman pembayaran Betabotz Paygate untuk mengikuti instruksi resmi.</p>${details.accountNumber ? `<div class="payment-detail"><strong>Nomor tujuan</strong><span>${escapeHtml(details.accountNumber)}</span></div>` : ''}${details.accountName ? `<div class="payment-detail"><strong>Nama tujuan</strong><span>${escapeHtml(details.accountName)}</span></div>` : ''}${details.additionalInfo ? `<div class="payment-detail"><strong>Informasi</strong><span>${escapeHtml(details.additionalInfo)}</span></div>` : ''}${trx.paymentUrl ? `<a class="neo-btn blue icon-btn" href="${escapeHtml(trx.paymentUrl)}" target="_blank" rel="noopener noreferrer" style="display:flex;text-decoration:none;color:#000;justify-content:center"><i data-lucide="external-link"></i> BUKA HALAMAN PEMBAYARAN</a>` : '<p>Halaman pembayaran tidak tersedia. Hubungi admin.</p>'}`
+                if (window.lucide) lucide.createIcons()
+            }
             document.getElementById('trxId').textContent = trx.transactionId
             document.getElementById('trxAmount').textContent = formatRp(trx.amount)
             document.getElementById('trxFee').textContent = formatRp(trx.fee)
@@ -743,6 +852,7 @@
         const downloadQrOnly = () => {
             if (!currentTrx) return
             const a = document.createElement('a')
+            if (!currentTrx.qrImage) return showAlert('QR Code hanya tersedia untuk metode QRIS.')
             a.href = currentTrx.qrImage
             a.download = `QRIS-Kaxel-${currentTrx.transactionId}.png`
             a.click()
@@ -825,7 +935,7 @@
             ctx.fillStyle = '#fff'
             ctx.font = '900 32px sans-serif'
             ctx.textAlign = 'center'
-            ctx.fillText('KAXEL SUPPORT QRIS', 300, 82)
+            ctx.fillText(`KAXEL SUPPORT ${(currentTrx.paymentMethod || 'qris').toUpperCase()}`, 300, 82)
 
             ctx.fillStyle = '#fff'
             ctx.fillRect(75, 130, 450, 450)
@@ -851,6 +961,7 @@
                 a.download = `Invoice-Kaxel-${currentTrx.transactionId}.png`
                 a.click()
             }
+            if (!currentTrx.qrImage) return showAlert('Kartu QR hanya tersedia untuk metode QRIS.')
             img.src = currentTrx.qrImage
         }
 
@@ -915,7 +1026,8 @@
             currentTrx = null
             document.getElementById('qrSection').classList.add('hidden')
             document.getElementById('resultSection').classList.remove('hidden')
-            document.getElementById('resultIcon').textContent = icon
+            document.getElementById('resultIcon').innerHTML = `<i data-lucide="${icon}" style="width:56px;height:56px"></i>`
+            if (window.lucide) lucide.createIcons()
             document.getElementById('resultTitle').textContent = title
             document.getElementById('resultDesc').textContent = desc
         }
@@ -928,7 +1040,7 @@
             updateTierBadge(0)
             const btn = document.getElementById('submitBtn')
             btn.disabled = false
-            btn.textContent = 'BUAT QRIS SEKARANG'
+            btn.innerHTML = selectedPaymentMethod === 'qris' ? '<i data-lucide="qr-code"></i> BUAT QRIS SEKARANG' : '<i data-lucide="wallet"></i> LANJUT KE SHOPEEPAY'
             const cBtn = document.getElementById('cancelBtn')
             cBtn.disabled = false
             cBtn.textContent = 'BATALKAN'
