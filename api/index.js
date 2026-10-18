@@ -16,7 +16,9 @@ app.use(express.json())
 
 let memoryStore = {
     goal: { title: 'Upgrade Server & Kopi Kaxel', target: 1000000 },
-    history: []
+    history: [],
+    notifications: [],
+    comments: []
 }
 
 const loadDb = async () => {
@@ -30,7 +32,7 @@ const loadDb = async () => {
                 if (Array.isArray(json.record)) {
                     memoryStore.history = json.record
                 } else if (json.record.history) {
-                    memoryStore = json.record
+                    memoryStore = { ...memoryStore, ...json.record, notifications: json.record.notifications || [], comments: json.record.comments || [] }
                 }
             }
         } catch (e) {}
@@ -71,7 +73,7 @@ app.post('/api/donate', async (req, res) => {
 
         const senderName = name?.trim() || 'Anonim'
         const trxNotes = notes?.trim() || 'Semangat terus Kaxel!'
-        const chosenEmoji = emoji || '🔥'
+        const chosenEmoji = emoji || 'support'
         const cleanWa = whatsapp ? whatsapp.replace(/[^0-9+]/g, '') : ''
 
         const createRes = await fetch(`${BTZ_BASE_URL}/api/qris/create`, {
@@ -82,7 +84,7 @@ app.post('/api/donate', async (req, res) => {
                 amount: parsedAmount,
                 fee: getFee(parsedAmount),
                 notes: trxNotes,
-                timeout: 900000,
+                timeout: 1200000,
                 metadata: {
                     orderId: `DONASI-${Date.now()}`,
                     sender: senderName
@@ -140,7 +142,8 @@ app.post('/api/donate', async (req, res) => {
             emoji: chosenEmoji,
             status: 'pending',
             createdAt: new Date().toISOString(),
-            expiredAt: trx.expiredAt,
+            expiredAt: trx.expiredAt || new Date(Date.now() + 1200000).toISOString(),
+            comments: [],
             paidAt: null
         })
         await saveDb(db)
@@ -154,7 +157,7 @@ app.post('/api/donate', async (req, res) => {
                 amount: trx.amount,
                 fee: trx.fee,
                 totalAmount: trx.totalAmount,
-                expiredAt: trx.expiredAt,
+                expiredAt: trx.expiredAt || new Date(Date.now() + 1200000).toISOString(),
                 notes: trxNotes,
                 qrImage: qrBase64
             }
@@ -176,10 +179,11 @@ app.get('/api/status/:id', async (req, res) => {
             const db = await loadDb()
             const idx = db.history.findIndex(item => item.transactionId === id)
             if (idx !== -1 && db.history[idx].status !== checkJson.data.status) {
+                const previousStatus = db.history[idx].status
                 db.history[idx].status = checkJson.data.status
-                if (checkJson.data.status === 'sukses' || checkJson.data.status === 'success') {
-                    db.history[idx].paidAt = new Date().toISOString()
-                }
+                if (checkJson.data.status === 'sukses' || checkJson.data.status === 'success') db.history[idx].paidAt = new Date().toISOString()
+                const eventKey = `payment:${id}:${checkJson.data.status}`
+                if (!db.notifications.some(n => n.eventKey === eventKey)) db.notifications.unshift({ id: `NTF-${Date.now()}`, eventKey, transactionId: id, accessKey: db.history[idx].accessKey, type: 'payment', title: 'Status pembayaran diperbarui', message: `Status transaksi berubah dari ${previousStatus} menjadi ${checkJson.data.status}.`, createdAt: new Date().toISOString(), read: false })
                 await saveDb(db)
             }
         }
@@ -214,6 +218,80 @@ app.post('/api/cancel/:id', async (req, res) => {
     } catch (error) {
         res.status(500).json({ success: false, message: 'Gagal membatalkan transaksi.' })
     }
+})
+
+app.get('/api/notifications/:id', async (req, res) => {
+    const db = await loadDb()
+    const trx = db.history.find(item => item.transactionId === req.params.id && item.accessKey === String(req.query.key || ''))
+    if (!trx) return res.status(403).json({ success: false, message: 'Akses transaksi tidak valid.' })
+    const notifications = (db.notifications || []).filter(n => n.transactionId === trx.transactionId).map(({ accessKey, ...n }) => n)
+    res.json({ success: true, notifications })
+})
+
+app.post('/api/notifications/read', async (req, res) => {
+    const { transactionId, key, notificationId } = req.body || {}
+    const db = await loadDb()
+    const trx = db.history.find(item => item.transactionId === transactionId && item.accessKey === String(key || ''))
+    if (!trx) return res.status(403).json({ success: false, message: 'Akses transaksi tidak valid.' })
+    for (const item of db.notifications || []) if (item.transactionId === transactionId && (!notificationId || item.id === notificationId)) item.read = true
+    await saveDb(db)
+    res.json({ success: true })
+})
+
+app.post('/api/comments', async (req, res) => {
+    const { transactionId, key, message } = req.body || {}
+    const text = String(message || '').trim()
+    if (!text || text.length > 1000) return res.status(400).json({ success: false, message: 'Pesan wajib diisi dan maksimal 1000 karakter.' })
+    const db = await loadDb()
+    const trx = db.history.find(item => item.transactionId === transactionId && item.accessKey === String(key || ''))
+    if (!trx) return res.status(403).json({ success: false, message: 'Akses transaksi tidak valid.' })
+    const comment = { id: `MSG-${Date.now()}`, transactionId, sender: 'donor', senderName: trx.name || 'Donatur', message: text, createdAt: new Date().toISOString(), replies: [] }
+    db.comments = db.comments || []
+    db.comments.push(comment)
+    trx.comments = trx.comments || []
+    trx.comments.push(comment.id)
+    await saveDb(db)
+    res.json({ success: true, comment })
+})
+
+app.get('/api/comments/:id', async (req, res) => {
+    const db = await loadDb()
+    const trx = db.history.find(item => item.transactionId === req.params.id && item.accessKey === String(req.query.key || ''))
+    if (!trx) return res.status(403).json({ success: false, message: 'Akses transaksi tidak valid.' })
+    res.json({ success: true, comments: (db.comments || []).filter(c => c.transactionId === trx.transactionId) })
+})
+
+app.post('/api/admin/reply', async (req, res) => {
+    const { password, commentId, message } = req.body || {}
+    if (password !== ADMIN_PASSWORD) return res.status(401).json({ success: false, message: 'Password Admin salah.' })
+    const text = String(message || '').trim()
+    if (!text || text.length > 1000) return res.status(400).json({ success: false, message: 'Balasan wajib diisi dan maksimal 1000 karakter.' })
+    const db = await loadDb()
+    const comment = (db.comments || []).find(c => c.id === commentId)
+    if (!comment) return res.status(404).json({ success: false, message: 'Komentar tidak ditemukan.' })
+    comment.replies = comment.replies || []
+    const reply = { id: `RPL-${Date.now()}`, sender: 'admin', senderName: 'Admin Kaxel', message: text, createdAt: new Date().toISOString() }
+    comment.replies.push(reply)
+    db.notifications = db.notifications || []
+    const eventKey = `reply:${comment.id}:${reply.id}`
+    db.notifications.unshift({ id: `NTF-${Date.now()}`, eventKey, transactionId: comment.transactionId, accessKey: (db.history.find(h => h.transactionId === comment.transactionId) || {}).accessKey, type: 'reply', title: 'Admin membalas pesan Anda', message: text, createdAt: reply.createdAt, read: false })
+    await saveDb(db)
+    res.json({ success: true, reply })
+})
+
+app.get('/api/admin/comments', async (req, res) => {
+    const password = String(req.query.password || '')
+    if (password !== ADMIN_PASSWORD) return res.status(401).json({ success: false, message: 'Password Admin salah.' })
+    const db = await loadDb()
+    res.json({ success: true, comments: db.comments || [] })
+})
+
+app.get('/api/invoice/:id', async (req, res) => {
+    const db = await loadDb()
+    const trx = db.history.find(item => item.transactionId === req.params.id && item.accessKey === String(req.query.key || ''))
+    if (!trx) return res.status(403).send('Akses invoice tidak valid.')
+    const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))
+    res.type('html').send(`<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Invoice ${esc(trx.transactionId)}</title><style>body{font:16px Arial,sans-serif;background:#f1f5f9;color:#0f172a;margin:0;padding:24px}.invoice{max-width:700px;margin:auto;background:white;padding:32px;border:1px solid #cbd5e1;border-radius:18px}.brand{font-size:24px;font-weight:800;color:#2563eb}.line{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid #e2e8f0;padding:13px 0}.amount{font-size:26px;font-weight:800}.status{display:inline-block;background:#dbeafe;border-radius:8px;padding:6px 10px}@media print{body{background:white;padding:0}.invoice{border:0}}</style><main class="invoice"><div class="brand">KAXEL DONASI</div><p>Bukti transaksi donasi</p><div class="line"><b>Nomor transaksi</b><span>${esc(trx.transactionId)}</span></div><div class="line"><b>Donatur</b><span>${esc(trx.name)}</span></div><div class="line"><b>Tanggal</b><span>${esc(new Date(trx.createdAt).toLocaleString('id-ID'))}</span></div><div class="line"><b>Status</b><span class="status">${esc(trx.status)}</span></div><div class="line"><b>Nominal donasi</b><span>${esc(new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(trx.amount))}</span></div><div class="line"><b>Biaya admin</b><span>${esc(new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(trx.fee || 0))}</span></div><div class="line"><b>Total pembayaran</b><span class="amount">${esc(new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(trx.totalAmount || trx.amount))}</span></div>${trx.expiredAt && trx.status==='pending'?`<div class="line"><b>Batas pembayaran</b><span>${esc(new Date(trx.expiredAt).toLocaleString('id-ID'))}</span></div>`:''}<div class="line"><b>Pesan</b><span>${esc(trx.notes || '-')}</span></div><p style="color:#64748b;font-size:12px;margin-top:24px">Invoice ini dibuat dari data transaksi website Kaxel. Gunakan fitur cetak browser untuk menyimpan sebagai PDF.</p><button onclick="window.print()">Cetak / Simpan PDF</button></main></html>`)
 })
 
 app.get('/api/public-stats', async (req, res) => {
