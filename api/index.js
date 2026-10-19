@@ -62,6 +62,27 @@ const saveDb = async (data) => {
 
 const getFee = (amount) => Math.round(Number(amount) * FEE_PERCENT / 100)
 
+const normalizeExpiredTransactions = (db) => {
+    let changed = false
+    const now = Date.now()
+    for (const trx of db.history || []) {
+        if (String(trx.status || '').toLowerCase() !== 'pending') continue
+        const created = new Date(trx.createdAt || 0).getTime()
+        const explicitExpiry = new Date(trx.expiredAt || 0).getTime()
+        const expiry = Number.isFinite(explicitExpiry) && explicitExpiry > 0 ? explicitExpiry : created + 1200000
+        if (now >= expiry || (created > 0 && now - created >= 1200000)) {
+            trx.status = 'cancelled'
+            trx.expiredAt = new Date(expiry).toISOString()
+            trx.cancelledAt = new Date(now).toISOString()
+            db.notifications = db.notifications || []
+            const eventKey = `expired:${trx.transactionId}`
+            if (!db.notifications.some(n => n.eventKey === eventKey)) db.notifications.unshift({ id: `NTF-${now}`, eventKey, transactionId: trx.transactionId, accessKey: trx.accessKey, type: 'payment', title: 'Transaksi dibatalkan', message: 'Batas pembayaran 20 menit telah habis. Transaksi otomatis dibatalkan.', createdAt: new Date(now).toISOString(), read: false })
+            changed = true
+        }
+    }
+    return changed
+}
+
 app.post('/api/donate', async (req, res) => {
     try {
         const { name, amount, notes, emoji, whatsapp, paymentMethod = 'qris' } = req.body
@@ -190,8 +211,18 @@ app.get('/api/status/:id', async (req, res) => {
 
         if (checkJson.success && checkJson.data) {
             const db = await loadDb()
+            const changedByExpiry = normalizeExpiredTransactions(db)
+            if (changedByExpiry) await saveDb(db)
             const idx = db.history.findIndex(item => item.transactionId === id)
-            if (idx !== -1 && db.history[idx].status !== checkJson.data.status) {
+            if (idx !== -1 && ['cancelled', 'canceled', 'expired', 'cancel'].includes(String(db.history[idx].status).toLowerCase())) {
+                return res.json({ success: true, data: { ...checkJson.data, status: db.history[idx].status } })
+            }
+            if (idx !== -1 && db.history[idx].status === 'pending' && new Date(db.history[idx].expiredAt || new Date(new Date(db.history[idx].createdAt).getTime() + 1200000)).getTime() <= Date.now()) {
+                db.history[idx].status = 'cancelled'
+                await saveDb(db)
+                return res.json({ success: true, data: { ...checkJson.data, status: 'cancelled' } })
+            }
+            if (idx !== -1 && db.history[idx].status === 'pending' && db.history[idx].status !== checkJson.data.status) {
                 const previousStatus = db.history[idx].status
                 db.history[idx].status = checkJson.data.status
                 if (checkJson.data.status === 'sukses' || checkJson.data.status === 'success') db.history[idx].paidAt = new Date().toISOString()
@@ -257,11 +288,14 @@ app.post('/api/comments', async (req, res) => {
     const text = String(message || '').trim()
     if (!text || text.length > 1000) return res.status(400).json({ success: false, message: 'Pesan wajib diisi dan maksimal 1000 karakter.' })
     const db = await loadDb()
+    normalizeExpiredTransactions(db)
     const trx = db.history.find(item => item.transactionId === transactionId && item.accessKey === String(key || ''))
     if (!trx) return res.status(403).json({ success: false, message: 'Akses transaksi tidak valid.' })
     const comment = { id: `MSG-${Date.now()}`, transactionId, sender: 'donor', senderName: trx.name || 'Donatur', message: text, createdAt: new Date().toISOString(), replies: [] }
     db.comments = db.comments || []
     db.comments.push(comment)
+    db.notifications = db.notifications || []
+    db.notifications.unshift({ id: `NTF-${Date.now()}`, eventKey: `donor-message:${comment.id}`, transactionId, accessKey: trx.accessKey, type: 'message', title: 'Pesan baru dari donatur', message: text, createdAt: comment.createdAt, read: false })
     trx.comments = trx.comments || []
     trx.comments.push(comment.id)
     await saveDb(db)
@@ -311,6 +345,7 @@ app.get('/api/invoice/:id', async (req, res) => {
 app.get('/api/public-stats', async (req, res) => {
     try {
         const db = await loadDb()
+        if (normalizeExpiredTransactions(db)) await saveDb(db)
         const successList = db.history.filter(h => h.status === 'sukses' || h.status === 'success')
         const currentRaised = successList.reduce((acc, cur) => acc + Number(cur.amount), 0)
 
@@ -344,6 +379,7 @@ app.get('/api/public-stats', async (req, res) => {
                 name: h.name || 'Anonim',
                 amount: Number(h.amount) || 0,
                 notes: h.notes || '',
+                emoji: h.emoji || 'support',
                 status: h.status || 'pending',
                 paymentMethod: h.paymentMethod || h.method || '',
                 createdAt: h.createdAt || null,
@@ -374,6 +410,7 @@ app.post('/api/admin/stats', async (req, res) => {
         }
 
         const db = await loadDb()
+        if (normalizeExpiredTransactions(db)) await saveDb(db)
         const successList = db.history.filter(h => h.status === 'sukses' || h.status === 'success')
         const pendingList = db.history.filter(h => h.status === 'pending')
         const totalRevenue = successList.reduce((acc, cur) => acc + Number(cur.amount), 0)
