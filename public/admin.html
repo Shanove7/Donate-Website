@@ -158,6 +158,11 @@
                     </table>
                 </div>
             </div>
+            <div class="neo-box" style="background:#f2fff0">
+                <h3 style="font-weight:900;margin-bottom:12px;text-transform:uppercase">Live Chat Pengguna Terdaftar</h3>
+                <p>Pesan dari akun WhatsApp terverifikasi akan muncul di sini. Pilih percakapan untuk membalas.</p>
+                <div id="registeredChats" style="display:grid;gap:12px">Memuat percakapan...</div>
+            </div>
         </div>
     </div>
 
@@ -248,6 +253,7 @@
                 }).join('')
                 if (window.lucide) lucide.createIcons()
                 await loadAdminComments()
+                await loadRegisteredChats()
             } catch (e) {
                 alert('Gagal mengambil data dari server.')
             }
@@ -276,7 +282,27 @@
             await fetchAdminData()
         }
 
-        window.addEventListener('DOMContentLoaded', async () => { if (window.lucide) lucide.createIcons(); if (savedPassword) await fetchAdminData(); setInterval(() => { if (savedPassword) fetchAdminData() }, 20000) })
+        const loadRegisteredChats = async () => {
+            const container = document.getElementById('registeredChats')
+            try {
+                const res = await fetch(`/api/admin/chats?password=${encodeURIComponent(savedPassword)}`)
+                const json = await res.json()
+                if (!json.success) { container.textContent = json.message || 'Chat tidak dapat dimuat.'; return }
+                const groups = {}
+                ;(json.messages || []).forEach(item => { (groups[item.userId] ||= []).push(item) })
+                const ids = Object.keys(groups).sort((a,b) => new Date(groups[b].at(-1).createdAt) - new Date(groups[a].at(-1).createdAt))
+                container.innerHTML = ids.length ? ids.map(id => { const messages = groups[id]; const last = messages[messages.length-1]; return `<section style="border:3px solid #111;padding:12px;background:#fff"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><strong>${esc(last.name || 'Pengguna')} · ${esc(last.phone || '')}</strong><small>${new Date(last.createdAt).toLocaleString('id-ID')}</small></div><div style="max-height:260px;overflow:auto;margin:10px 0;display:grid;gap:8px">${messages.map(m => `<div style="padding:9px;border:2px solid #111;background:${m.sender === 'admin' ? '#dff7ff' : '#f2f2f2'}"><b>${m.sender === 'admin' ? 'Admin' : esc(m.name || 'Pengguna')}:</b> ${esc(m.message)}<div style="font-size:11px;margin-top:4px">${new Date(m.createdAt).toLocaleString('id-ID')}</div></div>`).join('')}</div><div style="display:flex;gap:8px;flex-wrap:wrap"><textarea id="chat-reply-${id}" rows="2" placeholder="Tulis balasan..." style="flex:1;min-width:220px;padding:8px;border:2px solid #111;font:inherit"></textarea><button class="neo-btn" onclick="replyRegisteredChat('${id}')">KIRIM BALASAN</button></div></section>` }).join('') : '<div class="notice">Belum ada pesan live chat dari pengguna terdaftar.</div>'
+            } catch (e) { container.textContent = 'Gagal memuat live chat.' }
+        }
+
+        const replyRegisteredChat = async userId => {
+            const field = document.getElementById(`chat-reply-${userId}`)
+            const message = field.value.trim()
+            if (!message) return alert('Isi balasan terlebih dahulu.')
+            try { const res = await fetch('/api/admin/chats/reply', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:savedPassword,userId,message}) }); const json = await res.json(); if (!json.success) return alert(json.message || 'Balasan gagal dikirim.'); await loadRegisteredChats() } catch(e) { alert('Gagal mengirim balasan.') }
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => { if (window.lucide) lucide.createIcons(); if (savedPassword) await fetchAdminData(); setInterval(() => { if (savedPassword) { fetchAdminData(); loadRegisteredChats() } }, 10000) })
     </script>
 </body>
 </html>
