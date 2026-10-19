@@ -162,13 +162,15 @@
     </div>
 
     <script>
-        let savedPassword = ''
+        let savedPassword = localStorage.getItem('kaxel_admin_password') || ''
+        if (savedPassword) document.getElementById('adminPass').value = savedPassword
         const formatRp = (num) => 'Rp' + Number(num).toLocaleString('id-ID')
         const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault()
             savedPassword = document.getElementById('adminPass').value
+            localStorage.setItem('kaxel_admin_password', savedPassword)
             await fetchAdminData()
         })
 
@@ -199,6 +201,8 @@
                 const json = await res.json()
 
                 if (!json.success) {
+                    localStorage.removeItem('kaxel_admin_password')
+                    savedPassword = ''
                     alert(json.message)
                     return
                 }
@@ -272,7 +276,7 @@
             await fetchAdminData()
         }
 
-        window.addEventListener('DOMContentLoaded', () => { if (window.lucide) lucide.createIcons() })
+        window.addEventListener('DOMContentLoaded', async () => { if (window.lucide) lucide.createIcons(); if (savedPassword) await fetchAdminData(); setInterval(() => { if (savedPassword) fetchAdminData() }, 20000) })
     </script>
 </body>
 </html>
