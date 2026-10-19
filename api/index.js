@@ -336,6 +336,20 @@ app.get('/api/public-stats', async (req, res) => {
             .sort((a, b) => b.total - a.total)
             .slice(0, 5)
 
+        const transactions = [...db.history]
+            .sort((a, b) => new Date(b.createdAt || b.paidAt || 0).getTime() - new Date(a.createdAt || a.paidAt || 0).getTime())
+            .slice(0, 15)
+            .map(h => ({
+                transactionId: h.transactionId || h.id || '',
+                name: h.name || 'Anonim',
+                amount: Number(h.amount) || 0,
+                notes: h.notes || '',
+                status: h.status || 'pending',
+                paymentMethod: h.paymentMethod || h.method || '',
+                createdAt: h.createdAt || null,
+                paidAt: h.paidAt || null
+            }))
+
         res.json({
             success: true,
             goal: {
@@ -344,7 +358,8 @@ app.get('/api/public-stats', async (req, res) => {
                 current: currentRaised
             },
             recent,
-            leaderboard
+            leaderboard,
+            transactions
         })
     } catch (error) {
         res.json({ success: true, goal: { title: 'Target Donasi', target: 1000000, current: 0 }, recent: [], leaderboard: [] })
