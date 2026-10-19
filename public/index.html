@@ -507,7 +507,20 @@
             <div id="alertBox" class="alert-box hidden"></div>
 
             <div id="tab-donate">
-                <form id="donateForm">
+                <div id="accountGate" class="feed-item" style="margin-bottom:18px;padding:20px">
+                    <h3 style="margin:0 0 8px">Sebelum berdonasi</h3>
+                    <p style="margin:0 0 14px">Daftar dengan WhatsApp untuk biaya layanan 0,3%, notifikasi status transaksi, dan live chat admin. Kamu juga bisa lanjut anonim.</p>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="neo-btn" onclick="showRegister()">DAFTAR / LOGIN WA</button><button type="button" class="neo-btn" onclick="continueAnonymous()">LANJUT ANONIM</button></div>
+                    <div id="registerPanel" class="hidden" style="margin-top:18px">
+                        <label class="label"><span>Nama</span></label><input id="registerName" class="neo-input" maxlength="60" placeholder="Nama kamu">
+                        <label class="label"><span>Nomor WhatsApp</span></label><div class="wa-group"><select id="registerCountry" class="wa-select"><option value="62">Indonesia +62</option><option value="60">Malaysia +60</option><option value="1">Amerika/Kanada +1</option><option value="92">Pakistan +92</option><option value="65">Singapura +65</option><option value="44">Inggris +44</option><option value="91">India +91</option><option value="61">Australia +61</option><option value="81">Jepang +81</option><option value="63">Filipina +63</option><option value="966">Arab Saudi +966</option></select><input id="registerPhone" class="neo-input wa-input" type="tel" placeholder="8123456789" autocomplete="tel-national"></div>
+                        <button type="button" id="requestOtpBtn" class="neo-btn" onclick="requestOtp()">KIRIM OTP WHATSAPP</button>
+                        <div id="otpPanel" class="hidden" style="margin-top:12px"><label class="label"><span>Kode OTP 6 digit</span></label><input id="registerOtp" class="neo-input" inputmode="numeric" maxlength="6" placeholder="123456"><button type="button" class="neo-btn" onclick="verifyOtp()">VERIFIKASI & MASUK</button></div>
+                        <p id="registerMessage" role="status"></p>
+                    </div>
+                    <p id="accountStatus" style="margin:12px 0 0"></p>
+                </div>
+                <form id="donateForm" class="hidden">
                     <label class="label"><span>Nama / Alias</span></label>
                     <input type="text" id="name" placeholder="Anonim / Nama Kamu" class="neo-input">
 
@@ -690,8 +703,34 @@
         let currentTrx = null
         let selectedEmoji = 'support'
         let selectedPaymentMethod = 'qrisdana'
+        const AUTH_KEY = 'kaxel_user_token_v1'
+        let authToken = localStorage.getItem(AUTH_KEY) || ''
+        let authUser = null
+        let otpChallengeId = ''
+        let otpPhone = ''
+        let anonymousMode = false
 
         const formatRp = (num) => 'Rp' + Number(num).toLocaleString('id-ID')
+
+        const showRegister = () => { document.getElementById('registerPanel').classList.remove('hidden'); document.getElementById('registerName').focus() }
+        const continueAnonymous = () => { anonymousMode = true; authToken = ''; authUser = null; localStorage.removeItem(AUTH_KEY); document.getElementById('accountGate').classList.add('hidden'); document.getElementById('donateForm').classList.remove('hidden'); document.getElementById('name').value = 'Anonim'; document.getElementById('name').readOnly = true; document.getElementById('waNumber').value = ''; document.getElementById('accountStatus').textContent = 'Kamu berdonasi sebagai anonim. Biaya mengikuti konfigurasi ENV.' }
+        const requestOtp = async () => {
+            const name = document.getElementById('registerName').value.trim()
+            let phone = document.getElementById('registerPhone').value.replace(/\D/g, '')
+            if (phone.startsWith('0')) phone = phone.slice(1)
+            phone = document.getElementById('registerCountry').value + phone
+            if (!name || phone.length < 8) { document.getElementById('registerMessage').textContent = 'Isi nama dan nomor WhatsApp yang valid.'; return }
+            const btn = document.getElementById('requestOtpBtn'); btn.disabled = true; btn.textContent = 'MENGIRIM OTP...'
+            try { const res = await fetch('/api/auth/request-otp', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name, phone}) }); const json = await res.json(); document.getElementById('registerMessage').textContent = json.message || 'Gagal meminta OTP.'; if (json.success) { otpChallengeId = json.challengeId; otpPhone = phone; document.getElementById('otpPanel').classList.remove('hidden') } }
+            catch (e) { document.getElementById('registerMessage').textContent = 'Server tidak dapat dihubungi.' }
+            finally { btn.disabled = false; btn.textContent = 'KIRIM OTP WHATSAPP' }
+        }
+        const verifyOtp = async () => {
+            const otp = document.getElementById('registerOtp').value.trim()
+            try { const res = await fetch('/api/auth/verify-otp', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({phone:otpPhone, challengeId:otpChallengeId, otp}) }); const json = await res.json(); if (!json.success) { document.getElementById('registerMessage').textContent = json.message || 'OTP salah.'; return } authToken = json.token; authUser = json.user; localStorage.setItem(AUTH_KEY, authToken); anonymousMode = false; document.getElementById('accountGate').classList.add('hidden'); document.getElementById('donateForm').classList.remove('hidden'); document.getElementById('name').value = authUser.name; document.getElementById('name').readOnly = true; document.getElementById('waNumber').value = ''; document.getElementById('accountStatus').textContent = `Login sebagai ${authUser.name} (${authUser.phone}). Biaya layanan 0,3%.`; showAlert('Pendaftaran berhasil!') }
+            catch (e) { document.getElementById('registerMessage').textContent = 'Verifikasi gagal terhubung ke server.' }
+        }
+        const loadAuthUser = async () => { if (!authToken) return; try { const res = await fetch('/api/auth/me', {headers:{Authorization:`Bearer ${authToken}`}}); const json = await res.json(); if (!json.success) { localStorage.removeItem(AUTH_KEY); authToken=''; return } authUser=json.user; document.getElementById('accountGate').classList.add('hidden'); document.getElementById('donateForm').classList.remove('hidden'); document.getElementById('name').value=authUser.name; document.getElementById('name').readOnly=true; document.getElementById('accountStatus').textContent=`Login sebagai ${authUser.name} (${authUser.phone}). Biaya layanan 0,3%.` } catch(e) {} }
 
         const playSuccessSound = () => {
             try {
@@ -936,12 +975,12 @@
             if (rawPhone.startsWith('0')) rawPhone = rawPhone.slice(1)
             const fullWhatsapp = rawPhone ? `${code}${rawPhone}` : ''
 
-            const payload = { name: document.getElementById('name').value, whatsapp: fullWhatsapp, amount: document.getElementById('amount').value, notes: document.getElementById('notes').value, emoji: selectedEmoji, paymentMethod: selectedPaymentMethod }
+            const payload = { name: authUser ? authUser.name : 'Anonim', whatsapp: authUser ? authUser.phone : '', amount: document.getElementById('amount').value, notes: document.getElementById('notes').value, emoji: selectedEmoji, paymentMethod: selectedPaymentMethod }
 
             try {
                 const res = await fetch('/api/donate', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}) },
                     body: JSON.stringify(payload)
                 })
                 const json = await res.json()
@@ -1023,30 +1062,20 @@
 
         const refreshConversation = async () => {
             const unavailable = document.getElementById('chatUnavailable')
-            if (!currentTrx) { if (unavailable) unavailable.hidden = false; return }
+            if (authToken && authUser) {
+                if (unavailable) unavailable.hidden = true
+                try { const res = await fetch('/api/user/chat', { headers: { Authorization: `Bearer ${authToken}` } }); const json = await res.json(); if (!json.success) throw new Error(json.message); const messages = json.messages || []; document.getElementById('commentList').innerHTML = messages.map(c => `<div class="comment-item"><strong>${escapeHtml(c.sender === 'admin' ? 'Admin Kaxel' : authUser.name)}</strong><p>${escapeHtml(c.message)}</p><small>${new Date(c.createdAt).toLocaleString('id-ID')}</small></div>`).join('') || 'Belum ada pesan. Mulai percakapan dengan admin.'; document.getElementById('notificationList').innerHTML = 'Status transaksi dan informasi donasi akan tampil di sini setelah transaksi dibuat.'; return } catch (e) { if (unavailable) { unavailable.hidden = false; unavailable.textContent = 'Login menggunakan WhatsApp untuk menggunakan live chat admin.' } return }
+            }
+            if (!currentTrx) { if (unavailable) { unavailable.hidden = false; unavailable.textContent = 'Login menggunakan WhatsApp untuk live chat, atau buat transaksi untuk chat terkait transaksi.' } return }
             if (unavailable) unavailable.hidden = true
-            try {
-                const [commentsRes, notificationsRes] = await Promise.all([
-                    fetch(`/api/comments/${currentTrx.transactionId}?key=${encodeURIComponent(currentTrx.accessKey)}`),
-                    fetch(`/api/notifications/${currentTrx.transactionId}?key=${encodeURIComponent(currentTrx.accessKey)}`)
-                ])
-                const commentsJson = await commentsRes.json()
-                const notificationsJson = await notificationsRes.json()
-                const comments = commentsJson.comments || []
-                document.getElementById('commentList').innerHTML = comments.length ? comments.map(c => `<div class="comment-item"><strong>${escapeHtml(c.senderName || 'Donatur')}</strong><p>${escapeHtml(c.message)}</p><small>${new Date(c.createdAt).toLocaleString('id-ID')}</small>${(c.replies || []).map(r => `<div class="comment-item"><strong>${escapeHtml(r.senderName || 'Admin Kaxel')}</strong><p>${escapeHtml(r.message)}</p><small>${new Date(r.createdAt).toLocaleString('id-ID')}</small></div>`).join('')}</div>`).join('') : 'Belum ada pesan.'
-                const notices = notificationsJson.notifications || []
-                document.getElementById('notificationList').innerHTML = notices.length ? notices.slice(0, 8).map(n => `<div class="notice-item"><strong>${escapeHtml(n.title)}</strong><p>${escapeHtml(n.message)}</p><small>${new Date(n.createdAt).toLocaleString('id-ID')}</small></div>`).join('') : 'Belum ada notifikasi.'
-                for (const n of notices.filter(n => !n.read)) {
-                    const shownKey = `kaxel_notice_${n.id}`
-                    if ('Notification' in window && Notification.permission === 'granted' && !localStorage.getItem(shownKey)) { if ('serviceWorker' in navigator && navigator.serviceWorker.controller) navigator.serviceWorker.ready.then(reg => reg.showNotification(n.title, { body: n.message, icon: '/assets/payment-qris.png', tag: shownKey })).catch(() => new Notification(n.title, { body: n.message })); else new Notification(n.title, { body: n.message }); localStorage.setItem(shownKey, '1') }
-                }
-            } catch (e) {}
+            try { const [commentsRes, notificationsRes] = await Promise.all([fetch(`/api/comments/${currentTrx.transactionId}?key=${encodeURIComponent(currentTrx.accessKey)}`), fetch(`/api/notifications/${currentTrx.transactionId}?key=${encodeURIComponent(currentTrx.accessKey)}`)]); const commentsJson = await commentsRes.json(); const notificationsJson = await notificationsRes.json(); const comments = commentsJson.comments || []; document.getElementById('commentList').innerHTML = comments.length ? comments.map(c => `<div class="comment-item"><strong>${escapeHtml(c.senderName || 'Donatur')}</strong><p>${escapeHtml(c.message)}</p><small>${new Date(c.createdAt).toLocaleString('id-ID')}</small>${(c.replies || []).map(r => `<div class="comment-item"><strong>${escapeHtml(r.senderName || 'Admin Kaxel')}</strong><p>${escapeHtml(r.message)}</p><small>${new Date(r.createdAt).toLocaleString('id-ID')}</small></div>`).join('')}</div>`).join('') : 'Belum ada pesan.'; const notices = notificationsJson.notifications || []; document.getElementById('notificationList').innerHTML = notices.length ? notices.slice(0,8).map(n => `<div class="notice-item"><strong>${escapeHtml(n.title)}</strong><p>${escapeHtml(n.message)}</p><small>${new Date(n.createdAt).toLocaleString('id-ID')}</small></div>`).join('') : 'Belum ada notifikasi.' } catch(e) {}
         }
 
         const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))
 
         const sendDonorMessage = async () => {
-            if (!currentTrx) return
+            if (authToken && authUser) { const field = document.getElementById('donorMessage'); const message = field.value.trim(); if (!message) return showAlert('Tulis pesan terlebih dahulu.'); try { const res = await fetch('/api/user/chat', { method:'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${authToken}`}, body:JSON.stringify({message}) }); const json = await res.json(); if (!json.success) return showAlert(json.message || 'Pesan gagal dikirim.'); field.value=''; await refreshConversation(); showAlert('Pesan berhasil dikirim ke admin.'); return } catch(e) { return showAlert('Chat gagal terhubung ke server.') } }
+            if (!currentTrx) return showAlert('Login WhatsApp untuk live chat admin.')
             const field = document.getElementById('donorMessage')
             const message = field.value.trim()
             if (!message) return showAlert('Tulis pesan terlebih dahulu.')
@@ -1199,6 +1228,7 @@
             document.getElementById('resultSection').classList.add('hidden')
             document.getElementById('donateForm').classList.remove('hidden')
             document.getElementById('donateForm').reset()
+            if (authUser) { document.getElementById('name').value = authUser.name; document.getElementById('name').readOnly = true } else { document.getElementById('name').value = 'Anonim'; document.getElementById('name').readOnly = true }
             updateTierBadge(0)
             const btn = document.getElementById('submitBtn')
             btn.disabled = false
@@ -1212,8 +1242,9 @@
             if (window.lucide) lucide.createIcons()
             loadPublicStats()
             checkSavedSession()
+        loadAuthUser()
             setInterval(loadPublicStats, 15000)
-            setInterval(() => { if (currentTrx) refreshConversation() }, 5000)
+            setInterval(() => { if (currentTrx || (authUser && !document.getElementById('tab-chat').classList.contains('hidden'))) refreshConversation() }, 5000)
         })
     </script>
 </body>
