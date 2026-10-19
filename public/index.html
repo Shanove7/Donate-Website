@@ -396,13 +396,60 @@
         .notice-item:last-child,.comment-item:last-child{border-bottom:0}
         .comment-panel textarea{width:100%;padding:10px;border:2px solid #111;font:inherit;margin:8px 0}
         @media(max-width:520px){.action-row{grid-template-columns:1fr}}
+
+        :root{color-scheme:light;--paper:#fff8eb;--ink:#252525;--orange:#faae2b;--orange-soft:#ffd36b;--mint:#39cda2;--cream:#fffdf5;--line:#292929;--shadow:#343434}
+        body{font-family:'Space Grotesk',sans-serif;background-color:var(--paper);background-image:radial-gradient(rgba(37,37,37,.13) .8px,transparent .8px);background-size:15px 15px;color:var(--ink);padding-bottom:28px}
+        .marquee{background:var(--orange);color:#171717;border-bottom:2px solid var(--line);padding:9px 0;font-size:12px;letter-spacing:.2px}
+        .marquee span{animation-duration:22s}
+        .container{max-width:720px;margin:16px auto 0;padding:0 12px}
+        .goal-box{background:var(--cream);border:2px solid var(--line);border-radius:12px;box-shadow:3px 3px 0 var(--shadow);padding:15px;margin-bottom:18px}
+        .goal-header{font-size:12px;margin-bottom:9px}
+        .progress-track{height:17px;background:#f0eee6;border:2px solid var(--line);border-radius:5px;overflow:hidden}
+        .progress-fill{background:var(--mint);border-right:0}
+        .progress-text{font-size:10px}
+        .neo-card{background:var(--cream);border:2px solid var(--line);border-radius:12px;box-shadow:3px 3px 0 var(--shadow);padding:18px; margin-bottom:18px}
+        .card-header-flex{margin-top:-29px;margin-bottom:17px;align-items:center}
+        .badge-title{background:var(--orange);color:#171717;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow);padding:7px 11px;font-size:17px;transform:none}
+        .tier-badge{background:#ffe9a7;border:2px solid var(--line);border-radius:6px;box-shadow:2px 2px 0 var(--shadow);padding:4px 8px;font-size:10px;transform:none}
+        .tabs{gap:7px;margin-bottom:17px}
+        .tab-btn{background:#fff;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow);padding:9px 5px;font-size:11px;letter-spacing:.1px}
+        .tab-btn.active{background:var(--orange);transform:none;box-shadow:2px 2px 0 var(--shadow)}
+        .label{font-size:11px;margin:12px 0 6px}
+        .neo-input{background:#fff;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow);padding:11px;font-size:13px;font-weight:600;margin-bottom:13px}
+        .neo-input:focus{background:#fffdf4;transform:none;box-shadow:2px 2px 0 var(--shadow);border-color:#111}
+        .wa-group{gap:8px;margin-bottom:13px}
+        .wa-select{background:#fff;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow);font-size:11px;padding:10px 5px}
+        .preset-grid{gap:7px;margin-bottom:14px}
+        .preset-btn{background:#fff;border:2px solid var(--line);border-radius:7px;box-shadow:2px 2px 0 var(--shadow);padding:8px 3px;font-size:11px}
+        .preset-btn:focus,.preset-btn:active{background:var(--orange);transform:translate(1px,1px);box-shadow:1px 1px 0 var(--shadow)}
+        .payment-picker{gap:9px;margin:8px 0 17px}
+        .payment-option{background:#fff;border:2px solid var(--line);border-radius:9px;box-shadow:2px 2px 0 var(--shadow);padding:10px;gap:9px;min-height:62px}
+        .payment-option.selected{background:#fff1bd;outline:0;transform:none;box-shadow:2px 2px 0 var(--shadow)}
+        .payment-option:disabled{background:#f6f4ec;opacity:.72}
+        .payment-logo,.wallet-folder-icon{border-radius:7px}
+        .wallet-folder-icon{background:var(--orange);color:#171717;border:1px solid #252525}
+        .wallet-toggle{min-height:62px}
+        .wallet-options{gap:8px;padding:10px;background:#fffdf6;border:2px solid var(--line);border-radius:9px;box-shadow:2px 2px 0 var(--shadow)}
+        .wallet-options .payment-option{box-shadow:1px 1px 0 var(--shadow);border-width:2px;border-radius:7px;padding:8px;min-height:58px}
+        .wallet-options .payment-option.selected{box-shadow:1px 1px 0 var(--shadow);background:#fff1bd}
+        .payment-copy strong{font-size:13px}
+        .payment-copy small{font-size:9px;letter-spacing:.2px;color:#5c5b56}
+        .payment-hint{font-size:10px;color:#5c5b56}
+        .payment-instructions{padding:12px;background:#fffdf6;border:2px solid var(--line);border-radius:9px;box-shadow:2px 2px 0 var(--shadow)}
+        .neo-btn{background:var(--orange);color:#171717;border:2px solid var(--line);border-radius:8px;box-shadow:3px 3px 0 var(--shadow);padding:13px;font-size:13px}
+        .neo-btn:hover,.neo-btn:active{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--shadow)}
+        .neo-btn.red{background:#f17c69;color:#171717}.neo-btn.blue{background:#b8e5f1}.neo-btn.orange{background:var(--orange)}
+        .alert-box{background:#ffe3dc;color:#7c2419;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow)}
+        .session-banner{background:#d9f5e8;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow)}
+        .emoji-btn{background:#fff;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow)}
+        .emoji-btn.selected{background:#ffe6a0;transform:none;box-shadow:2px 2px 0 var(--shadow)}
+        .notice-panel,.comment-panel{border:2px solid var(--line);background:#fffdf6;border-radius:9px;box-shadow:2px 2px 0 var(--shadow)}
+        .comment-panel textarea{border:2px solid var(--line);border-radius:7px}
+        .payment-detail{border-bottom:1px dashed #c9c4b7}
+        @media(max-width:520px){.container{padding:0 11px;margin-top:14px}.neo-card{padding:15px}.card-header-flex{margin-top:-25px}.badge-title{font-size:15px}.tabs{gap:6px}.tab-btn{font-size:10px}.payment-picker{gap:8px}.payment-option{padding:9px;gap:8px}.payment-copy strong{font-size:12px}.wallet-options{padding:8px;gap:7px}}
     </style>
 </head>
 <body>
-
-    <div class="marquee">
-        <span id="marqueeText"><i data-lucide="heart-handshake" aria-hidden="true"></i> SUPPORT KAXEL DENGAN QRIS OTOMATIS — TRANSAKSI TERSIMPAN OTOMATIS WALAU KELUAR DARI WEB!</span>
-    </div>
 
     <div class="container">
         <div class="goal-box">
@@ -471,9 +518,12 @@
 
                     <label class="label"><span>Metode Pembayaran</span><span style="font-size:11px">PILIH SATU</span></label>
                     <div class="payment-picker" role="group" aria-label="Pilih metode pembayaran">
-                        <button type="button" class="payment-option selected" data-payment="qris" onclick="selectPaymentMethod('qris', this)" aria-pressed="true">
-                            <span class="payment-logo"><img src="/assets/payment-qris.png" alt="Logo QRIS"></span>
-                            <span class="payment-copy"><strong>QRIS</strong><small>SEMUA E-WALLET & BANK</small></span>
+                        <button type="button" class="payment-option wallet-toggle selected" id="qrisToggle" aria-expanded="true" aria-controls="qrisOptions" onclick="toggleQrisFolder()">
+                            <span class="wallet-toggle-main">
+                                <span class="wallet-folder-icon"><i data-lucide="qr-code"></i></span>
+                                <span class="payment-copy"><strong>QRIS MUA</strong><small>PILIH PENYEDIA QRIS</small></span>
+                            </span>
+                            <i class="wallet-chevron" data-lucide="chevron-down" aria-hidden="true"></i>
                         </button>
                         <button type="button" class="payment-option wallet-toggle" id="walletToggle" aria-expanded="false" aria-controls="walletOptions" onclick="toggleWalletFolder()">
                             <span class="wallet-toggle-main">
@@ -482,6 +532,16 @@
                             </span>
                             <i class="wallet-chevron" data-lucide="chevron-down" aria-hidden="true"></i>
                         </button>
+                        <div class="wallet-options" id="qrisOptions" role="group" aria-label="Penyedia QRIS MUA">
+                            <button type="button" class="payment-option selected" data-payment="qrisdana" onclick="selectPaymentMethod('qrisdana', this)" aria-pressed="true">
+                                <span class="payment-logo"><img src="/assets/payment-qris.png" alt="Logo QRISDANA"></span>
+                                <span class="payment-copy"><strong>QRIS DANA</strong><small>UTAMA</small></span>
+                            </button>
+                            <button type="button" class="payment-option" data-payment="qris" onclick="selectPaymentMethod('qris', this)" aria-pressed="false">
+                                <span class="payment-logo"><img src="/assets/payment-qris.png" alt="Logo QRIS"></span>
+                                <span class="payment-copy"><strong>QRIS SHOPEE</strong><small>ALTERNATIF KEDUA</small></span>
+                            </button>
+                        </div>
                         <div class="wallet-options" id="walletOptions" hidden role="group" aria-label="Penyedia E-Wallet">
                             <button type="button" class="payment-option" data-payment="shopeepay" onclick="selectPaymentMethod('shopeepay', this)" aria-pressed="false">
                                 <span class="payment-logo" style="background:#ee4d2d"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M8 11h16l1.5 15h-19L8 11Z" fill="white"/><path d="M12 12V9a4 4 0 0 1 8 0v3" stroke="white" stroke-width="2.5" stroke-linecap="round"/><path d="M12.5 18c.6-1 1.7-1.5 3.5-1.5 2 0 3.5.8 3.5 2s-1.3 1.8-3.5 2c-2 .2-3.5.9-3.5 2.1 0 1.3 1.5 2 3.7 2 1.5 0 2.8-.5 3.5-1.4" stroke="#ee4d2d" stroke-width="1.7" stroke-linecap="round"/></svg></span>
@@ -588,7 +648,7 @@
         let countdownTimer = null
         let currentTrx = null
         let selectedEmoji = 'support'
-        let selectedPaymentMethod = 'qris'
+        let selectedPaymentMethod = 'qrisdana'
 
         const formatRp = (num) => 'Rp' + Number(num).toLocaleString('id-ID')
 
@@ -638,13 +698,25 @@
             updateTierBadge(val)
         }
 
+        const isQrMethod = method => ['qrisdana', 'qris'].includes(String(method || '').toLowerCase())
+
+        const toggleQrisFolder = () => {
+            const toggle = document.getElementById('qrisToggle')
+            const options = document.getElementById('qrisOptions')
+            const expanded = toggle.getAttribute('aria-expanded') === 'true'
+            toggle.setAttribute('aria-expanded', String(!expanded))
+            options.hidden = expanded
+            toggle.classList.toggle('selected', isQrMethod(selectedPaymentMethod))
+            if (window.lucide) lucide.createIcons()
+        }
+
         const toggleWalletFolder = () => {
             const toggle = document.getElementById('walletToggle')
             const options = document.getElementById('walletOptions')
             const expanded = toggle.getAttribute('aria-expanded') === 'true'
             toggle.setAttribute('aria-expanded', String(!expanded))
             options.hidden = expanded
-            toggle.classList.toggle('selected', !expanded && selectedPaymentMethod === 'shopeepay')
+            toggle.classList.toggle('selected', selectedPaymentMethod === 'shopeepay')
             if (window.lucide) lucide.createIcons()
         }
 
@@ -655,18 +727,23 @@
                 button.classList.toggle('selected', active)
                 button.setAttribute('aria-pressed', String(active))
             })
+            const qrisToggle = document.getElementById('qrisToggle')
+            const qrisOptions = document.getElementById('qrisOptions')
             const walletToggle = document.getElementById('walletToggle')
-            if (walletToggle) walletToggle.classList.toggle('selected', method === 'shopeepay')
-            if (method === 'shopeepay') {
-                const options = document.getElementById('walletOptions')
-                const toggle = document.getElementById('walletToggle')
-                if (options && toggle) {
-                    options.hidden = false
-                    toggle.setAttribute('aria-expanded', 'true')
-                }
+            const walletOptions = document.getElementById('walletOptions')
+            const isQr = isQrMethod(method)
+            if (qrisToggle && qrisOptions) {
+                qrisToggle.classList.toggle('selected', isQr)
+                qrisToggle.setAttribute('aria-expanded', String(isQr))
+                qrisOptions.hidden = !isQr
+            }
+            if (walletToggle && walletOptions) {
+                walletToggle.classList.toggle('selected', method === 'shopeepay')
+                walletToggle.setAttribute('aria-expanded', String(method === 'shopeepay'))
+                walletOptions.hidden = method !== 'shopeepay'
             }
             const btn = document.getElementById('submitBtn')
-            btn.innerHTML = method === 'qris' ? '<i data-lucide="qr-code"></i> BUAT QRIS SEKARANG' : '<i data-lucide="wallet"></i> LANJUT KE SHOPEEPAY'
+            btn.innerHTML = isQr ? '<i data-lucide="qr-code"></i> BUAT QRIS SEKARANG' : '<i data-lucide="wallet"></i> LANJUT KE SHOPEEPAY'
             if (window.lucide) lucide.createIcons()
         }
 
@@ -772,7 +849,7 @@
             e.preventDefault()
             const btn = document.getElementById('submitBtn')
             btn.disabled = true
-            btn.textContent = selectedPaymentMethod === 'qris' ? 'MEMPROSES QRIS...' : 'MEMPROSES SHOPEEPAY...'
+            btn.textContent = isQrMethod(selectedPaymentMethod) ? 'MEMPROSES QRIS...' : 'MEMPROSES SHOPEEPAY...'
 
             const code = document.getElementById('countryCode').value
             let rawPhone = document.getElementById('waNumber').value.trim().replace(/[^0-9]/g, '')
@@ -792,7 +869,7 @@
                 if (!json.success) {
                     showAlert(json.message)
                     btn.disabled = false
-                    btn.innerHTML = selectedPaymentMethod === 'qris' ? '<i data-lucide="qr-code"></i> BUAT QRIS SEKARANG' : '<i data-lucide="wallet"></i> LANJUT KE SHOPEEPAY'
+                    btn.innerHTML = isQrMethod(selectedPaymentMethod) ? '<i data-lucide="qr-code"></i> BUAT QRIS SEKARANG' : '<i data-lucide="wallet"></i> LANJUT KE SHOPEEPAY'
                     return
                 }
 
@@ -803,7 +880,7 @@
             } catch (err) {
                 showAlert('Gagal menghubungi server.')
                 btn.disabled = false
-                btn.innerHTML = selectedPaymentMethod === 'qris' ? '<i data-lucide="qr-code"></i> BUAT QRIS SEKARANG' : '<i data-lucide="wallet"></i> LANJUT KE SHOPEEPAY'
+                btn.innerHTML = isQrMethod(selectedPaymentMethod) ? '<i data-lucide="qr-code"></i> BUAT QRIS SEKARANG' : '<i data-lucide="wallet"></i> LANJUT KE SHOPEEPAY'
             }
         })
 
@@ -813,7 +890,7 @@
             document.getElementById('qrSection').classList.remove('hidden')
             
 
-            const isQr = (trx.paymentMethod || 'qris') === 'qris' && Boolean(trx.qrImage)
+            const isQr = isQrMethod(trx.paymentMethod || 'qris') && Boolean(trx.qrImage)
             document.getElementById('qrFrame').classList.toggle('hidden', !isQr)
             document.getElementById('qrDownloadBtn').classList.toggle('hidden', !isQr)
             document.getElementById('paymentInstructions').classList.toggle('hidden', isQr)
@@ -1040,7 +1117,7 @@
             updateTierBadge(0)
             const btn = document.getElementById('submitBtn')
             btn.disabled = false
-            btn.innerHTML = selectedPaymentMethod === 'qris' ? '<i data-lucide="qr-code"></i> BUAT QRIS SEKARANG' : '<i data-lucide="wallet"></i> LANJUT KE SHOPEEPAY'
+            btn.innerHTML = isQrMethod(selectedPaymentMethod) ? '<i data-lucide="qr-code"></i> BUAT QRIS SEKARANG' : '<i data-lucide="wallet"></i> LANJUT KE SHOPEEPAY'
             const cBtn = document.getElementById('cancelBtn')
             cBtn.disabled = false
             cBtn.textContent = 'BATALKAN'
