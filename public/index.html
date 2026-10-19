@@ -447,10 +447,38 @@
         .comment-panel textarea{border:2px solid var(--line);border-radius:7px}
         .payment-detail{border-bottom:1px dashed #c9c4b7}
         @media(max-width:520px){.container{padding:0 11px;margin-top:14px}.neo-card{padding:15px}.card-header-flex{margin-top:-25px}.badge-title{font-size:15px}.tabs{gap:6px}.tab-btn{font-size:10px}.payment-picker{gap:8px}.payment-option{padding:9px;gap:8px}.payment-copy strong{font-size:12px}.wallet-options{padding:8px;gap:7px}}
+
+        .site-topbar{min-height:46px;background:var(--orange);border-bottom:2px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px max(14px,calc((100vw - 720px)/2));position:relative;z-index:10}
+        .site-brand{display:flex;align-items:center;gap:8px;font-weight:900;letter-spacing:.2px;font-size:15px}
+        .brand-mark{width:27px;height:27px;display:grid;place-items:center;border:2px solid var(--line);border-radius:8px;background:#fff;font-size:19px;line-height:1;box-shadow:1px 1px 0 var(--shadow)}
+        .brand-tag{font-size:8px;letter-spacing:.5px;padding:3px 5px;background:#fff;border:1px solid var(--line);border-radius:4px}
+        .topbar-status{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:900;border:1.5px solid var(--line);border-radius:20px;padding:5px 9px;background:#d9f5e8;white-space:nowrap}
+        .status-dot{width:7px;height:7px;background:#15976e;border-radius:50%;box-shadow:0 0 0 3px rgba(21,151,110,.15)}
+        .marquee{position:relative;z-index:8;display:flex;align-items:center;gap:8px;min-height:32px;padding:7px 0;background:#fff0c6;color:#242424;border-bottom:1px solid #d9cba9;overflow:hidden;font-size:10px;font-weight:800;letter-spacing:.15px}
+        .marquee>i{flex:0 0 auto;margin-left:12px}
+        .marquee span{padding-left:0;animation:marquee 28s linear infinite}
+        .marquee:hover span{animation-play-state:paused}
+        .live-donation-toast{position:fixed;top:88px;left:50%;transform:translateX(-50%);width:min(92vw,390px);z-index:1000;display:flex;align-items:flex-start;gap:11px;padding:13px 38px 13px 13px;background:#fffdf5;border:2px solid var(--line);border-radius:12px;box-shadow:4px 4px 0 var(--shadow);animation:toast-in .28s ease-out}
+        .live-donation-toast[hidden]{display:none}
+        .toast-icon{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;background:var(--orange);border:2px solid var(--line);border-radius:9px;font-size:22px}
+        .toast-copy{min-width:0}.toast-copy strong{display:block;font-size:12px;line-height:1.4}.toast-copy p{font-size:11px;line-height:1.45;margin-top:3px;overflow-wrap:anywhere}.toast-copy small{display:block;margin-top:5px;color:#6b665d;font-size:9px;font-weight:700}
+        .toast-close{position:absolute;right:7px;top:6px;width:24px;height:24px;border:1.5px solid var(--line);border-radius:6px;background:#fff;font-size:18px;line-height:1;cursor:pointer}
+        @keyframes toast-in{from{opacity:0;transform:translate(-50%,-10px)}to{opacity:1;transform:translate(-50%,0)}}
+        .leaderboard-row{display:flex;justify-content:space-between;align-items:center;gap:10px}.leaderboard-name{display:flex;align-items:center;gap:7px;font-weight:900;min-width:0;overflow-wrap:anywhere}.leaderboard-name small{font-size:10px;font-weight:700;white-space:nowrap}.leader-rank{display:grid;place-items:center;min-width:25px;height:25px;border:1.5px solid var(--line);border-radius:7px;background:#ffe9a7;font-size:13px}.leaderboard-row:first-child .leader-rank{background:var(--orange)}
+        .transaction-row{background:#fffdf6;border:1.5px solid #ded7c7;border-radius:9px;padding:11px;margin-bottom:9px}.transaction-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;font-size:9px;color:#6b665d;overflow-wrap:anywhere}.transaction-status{border:1px solid var(--line);border-radius:5px;padding:3px 6px;font-size:9px;font-weight:900;white-space:nowrap;background:#d9f5e8;color:#175c42}.status-pending{background:#fff0c6;color:#805b00}.status-expired,.status-cancelled,.status-canceled,.status-failed{background:#ffe3dc;color:#8b2b20}.transaction-date{display:block;margin-top:7px;color:#777166;font-size:9px;font-weight:700}.empty-state{text-align:center;font-weight:700;padding:16px}
+        @media(max-width:520px){.site-topbar{padding:8px 12px}.site-brand{font-size:13px}.live-donation-toast{top:78px}.marquee{font-size:9px}.transaction-meta{align-items:flex-start;flex-direction:column}}
     </style>
 </head>
 <body>
-
+    <header class="site-topbar">
+        <div class="site-brand"><span class="brand-mark">♡</span><span>KAXEL SUPPORT</span><span class="brand-tag">DONATE</span></div>
+        <span class="topbar-status"><span class="status-dot"></span> LIVE</span>
+    </header>
+    <div class="marquee" aria-label="Info donasi terbaru"><i data-lucide="radio-tower" aria-hidden="true"></i><span id="marqueeText">LIVE FEED: Terima kasih sudah mendukung Kaxel Support!</span></div>
+    <div id="liveDonationToast" class="live-donation-toast" role="status" aria-live="polite" aria-atomic="true" hidden>
+        <button type="button" class="toast-close" onclick="hideLiveDonationToast()" aria-label="Tutup notifikasi">×</button>
+        <div class="toast-icon">♥</div><div class="toast-copy"><strong id="toastTitle">Donasi baru diterima!</strong><p id="toastDescription"></p><small id="toastTime">Terima kasih atas dukungannya</small></div>
+    </div>
     <div class="container">
         <div class="goal-box">
             <div class="goal-header">
@@ -766,52 +794,88 @@
             if (window.lucide) lucide.createIcons()
         }
 
+        let lastDonationKey = null
+        let statsInitialized = false
+        let liveToastTimer = null
+
+        const hideLiveDonationToast = () => {
+            const toast = document.getElementById('liveDonationToast')
+            toast.hidden = true
+            if (liveToastTimer) clearTimeout(liveToastTimer)
+        }
+
+        const showLiveDonationToast = (donation) => {
+            const toast = document.getElementById('liveDonationToast')
+            document.getElementById('toastTitle').textContent = `${donation.name || 'Anonim'} baru saja berdonasi ${formatRp(donation.amount)}`
+            document.getElementById('toastDescription').textContent = donation.notes ? `“${donation.notes}”` : 'Terima kasih atas dukungannya!'
+            document.getElementById('toastTime').textContent = 'Donasi berhasil diterima'
+            toast.hidden = false
+            if (liveToastTimer) clearTimeout(liveToastTimer)
+            liveToastTimer = setTimeout(() => { toast.hidden = true }, 7000)
+        }
+
         const loadPublicStats = async () => {
             try {
-                const res = await fetch('/api/public-stats')
+                const res = await fetch('/api/public-stats', { cache: 'no-store' })
+                if (!res.ok) throw new Error('Gagal memuat statistik')
                 const json = await res.json()
 
                 if (json.goal) {
-                    const pct = Math.min(100, Math.round((json.goal.current / json.goal.target) * 100))
+                    const pct = json.goal.target > 0 ? Math.min(100, Math.round((json.goal.current / json.goal.target) * 100)) : 0
                     document.getElementById('goalTitle').textContent = ' ' + json.goal.title
                     document.getElementById('goalNumbers').textContent = `${formatRp(json.goal.current)} / ${formatRp(json.goal.target)}`
                     document.getElementById('goalFill').style.width = pct + '%'
                     document.getElementById('goalPercent').textContent = `${pct}% TERCAPAI`
                 }
 
-                if (json.recent && json.recent.length > 0) {
-                    const tickerItems = json.recent.slice(0, 5).map(r => `${r.name} baru saja mendonasikan ${formatRp(r.amount)} ("${r.notes}")`).join(' | ')
-                    document.getElementById('marqueeText').textContent = `LIVE FEED: ${tickerItems} | TERIMA KASIH ATAS DUKUNGANMU!`
+                const recent = Array.isArray(json.recent) ? json.recent : []
+                const ticker = document.getElementById('marqueeText')
+                if (ticker) {
+                    const tickerItems = recent.slice(0, 5).map(r => `${r.name || 'Anonim'} baru saja berdonasi ${formatRp(r.amount)}${r.notes ? ` (“${r.notes}”)` : ''}`).join('  •  ')
+                    ticker.textContent = tickerItems ? `DONASI TERBARU  •  ${tickerItems}  •  TERIMA KASIH ATAS DUKUNGANNYA!` : 'LIVE FEED  •  Jadilah pendukung pertama Kaxel Support!'
                 }
+
+                const newest = recent[0]
+                const newestKey = newest ? [newest.name, newest.amount, newest.notes, newest.paidAt].join('|') : null
+                if (statsInitialized && newest && newestKey && newestKey !== lastDonationKey) showLiveDonationToast(newest)
+                lastDonationKey = newestKey
+                statsInitialized = true
 
                 const lbEl = document.getElementById('leaderboardList')
                 if (!json.leaderboard || json.leaderboard.length === 0) {
-                    lbEl.innerHTML = '<div class="feed-item" style="text-align:center;font-weight:700;">Belum ada data supporter. Jadilah Sultan pertama!</div>'
+                    lbEl.innerHTML = '<div class="feed-item empty-state">Belum ada data supporter. Jadilah Sultan pertama!</div>'
                 } else {
                     lbEl.innerHTML = json.leaderboard.map((u, idx) => `
-                        <div class="feed-item" style="display:flex; justify-content:space-between; align-items:center;">
-                            <div style="font-weight:900; font-size:16px;">${idx === 0 ? '<i data-lucide="crown"></i>' : '#' + (idx + 1)} ${u.name} <span style="font-size:12px; font-weight:700;">(${u.count}x)</span></div>
-                            <div class="feed-amount" style="font-weight:900;">${formatRp(u.total)}</div>
+                        <div class="feed-item leaderboard-row">
+                            <div class="leaderboard-name"><span class="leader-rank">${idx === 0 ? '♛' : '#' + (idx + 1)}</span><span>${escapePublicText(u.name)}</span><small>(${Number(u.count) || 0}x)</small></div>
+                            <div class="feed-amount">${formatRp(u.total)}</div>
                         </div>
                     `).join('')
                 }
 
                 const feedEl = document.getElementById('feedList')
-                if (!json.recent || json.recent.length === 0) {
-                    feedEl.innerHTML = '<div class="feed-item" style="text-align:center;font-weight:700;">Belum ada riwayat donasi.</div>'
+                const transactions = Array.isArray(json.transactions) ? json.transactions : recent.map(r => ({...r, status: 'success'}))
+                if (!transactions.length) {
+                    feedEl.innerHTML = '<div class="feed-item empty-state">Belum ada riwayat transaksi.</div>'
                 } else {
-                    feedEl.innerHTML = json.recent.map(r => `
-                        <div class="feed-item">
-                            <div class="feed-header">
-                                <span><i data-lucide="heart-handshake"></i> ${r.name}</span>
-                                <span class="feed-amount">${formatRp(r.amount)}</span>
-                            </div>
-                            <div class="feed-notes">"${r.notes}"</div>
-                        </div>
-                    `).join('')
+                    feedEl.innerHTML = transactions.map(r => {
+                        const status = String(r.status || 'success').toLowerCase()
+                        const statusLabel = ['success', 'sukses', 'paid'].includes(status) ? 'BERHASIL' : status === 'pending' ? 'MENUNGGU' : status === 'expired' ? 'KEDALUWARSA' : status === 'cancelled' || status === 'canceled' ? 'DIBATALKAN' : status.toUpperCase()
+                        const dateValue = r.paidAt || r.createdAt
+                        const dateLabel = dateValue ? new Date(dateValue).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : 'Waktu tidak tersedia'
+                        return `<div class="feed-item transaction-row"><div class="feed-header"><span class="transaction-name">${escapePublicText(r.name || 'Anonim')}</span><span class="feed-amount">${formatRp(r.amount)}</span></div><div class="transaction-meta"><span class="transaction-status status-${status.replace(/[^a-z]/g, '')}">${statusLabel}</span><span>${escapePublicText(r.transactionId || '')}</span></div><div class="feed-notes">${escapePublicText(r.notes || 'Dukungan untuk kreator')}</div><small class="transaction-date">${dateLabel}</small></div>`
+                    }).join('')
                 }
-            } catch (e) {}
+                if (window.lucide) lucide.createIcons()
+            } catch (e) {
+                const lbEl = document.getElementById('leaderboardList')
+                const feedEl = document.getElementById('feedList')
+                if (lbEl && lbEl.textContent.trim() === 'Memuat data...') lbEl.innerHTML = '<div class="feed-item empty-state">Data Sultan belum dapat dimuat. Coba muat ulang halaman.</div>'
+                if (feedEl && feedEl.textContent.trim() === 'Memuat riwayat...') feedEl.innerHTML = '<div class="feed-item empty-state">Riwayat belum dapat dimuat. Coba muat ulang halaman.</div>'
+            }
         }
+
+        const escapePublicText = (value) => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))
 
         const saveSession = (trx) => {
             try {
@@ -1127,6 +1191,7 @@
             if (window.lucide) lucide.createIcons()
             loadPublicStats()
             checkSavedSession()
+            setInterval(loadPublicStats, 15000)
         })
     </script>
 </body>
