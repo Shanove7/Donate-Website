@@ -454,9 +454,9 @@
         .brand-tag{font-size:8px;letter-spacing:.5px;padding:3px 5px;background:#fff;border:1px solid var(--line);border-radius:4px}
         .topbar-status{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:900;border:1.5px solid var(--line);border-radius:20px;padding:5px 9px;background:#d9f5e8;white-space:nowrap}
         .status-dot{width:7px;height:7px;background:#15976e;border-radius:50%;box-shadow:0 0 0 3px rgba(21,151,110,.15)}
-        .marquee{position:relative;z-index:8;display:flex;align-items:center;gap:8px;min-height:32px;padding:7px 0;background:#fff0c6;color:#242424;border-bottom:1px solid #d9cba9;overflow:hidden;font-size:10px;font-weight:800;letter-spacing:.15px}
+        .marquee{position:relative;z-index:8;display:flex;align-items:center;gap:8px;min-height:44px;padding:10px 0;background:#fff0c6;color:#242424;border-bottom:1px solid #d9cba9;overflow:hidden;font-size:13px;font-weight:900;letter-spacing:.2px}
         .marquee>i{flex:0 0 auto;margin-left:12px}
-        .marquee span{padding-left:0;animation:marquee 28s linear infinite}
+        .marquee span{padding-left:0;white-space:nowrap;animation:marquee 19s linear infinite}
         .marquee:hover span{animation-play-state:paused}
         .live-donation-toast{position:fixed;top:88px;left:50%;transform:translateX(-50%);width:min(92vw,390px);z-index:1000;display:flex;align-items:flex-start;gap:11px;padding:13px 38px 13px 13px;background:#fffdf5;border:2px solid var(--line);border-radius:12px;box-shadow:4px 4px 0 var(--shadow);animation:toast-in .28s ease-out}
         .live-donation-toast[hidden]{display:none}
@@ -466,7 +466,7 @@
         @keyframes toast-in{from{opacity:0;transform:translate(-50%,-10px)}to{opacity:1;transform:translate(-50%,0)}}
         .leaderboard-row{display:flex;justify-content:space-between;align-items:center;gap:10px}.leaderboard-name{display:flex;align-items:center;gap:7px;font-weight:900;min-width:0;overflow-wrap:anywhere}.leaderboard-name small{font-size:10px;font-weight:700;white-space:nowrap}.leader-rank{display:grid;place-items:center;min-width:25px;height:25px;border:1.5px solid var(--line);border-radius:7px;background:#ffe9a7;font-size:13px}.leaderboard-row:first-child .leader-rank{background:var(--orange)}
         .transaction-row{background:#fffdf6;border:1.5px solid #ded7c7;border-radius:9px;padding:11px;margin-bottom:9px}.transaction-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;font-size:9px;color:#6b665d;overflow-wrap:anywhere}.transaction-status{border:1px solid var(--line);border-radius:5px;padding:3px 6px;font-size:9px;font-weight:900;white-space:nowrap;background:#d9f5e8;color:#175c42}.status-pending{background:#fff0c6;color:#805b00}.status-expired,.status-cancelled,.status-canceled,.status-failed{background:#ffe3dc;color:#8b2b20}.transaction-date{display:block;margin-top:7px;color:#777166;font-size:9px;font-weight:700}.empty-state{text-align:center;font-weight:700;padding:16px}
-        @media(max-width:520px){.site-topbar{padding:8px 12px}.site-brand{font-size:13px}.live-donation-toast{top:78px}.marquee{font-size:9px}.transaction-meta{align-items:flex-start;flex-direction:column}}
+        @media(max-width:520px){.site-topbar{padding:8px 12px}.site-brand{font-size:13px}.live-donation-toast{top:78px}.marquee{font-size:12px;min-height:42px}.transaction-meta{align-items:flex-start;flex-direction:column}}
     </style>
 </head>
 <body>
@@ -501,6 +501,7 @@
                 <button class="tab-btn active" onclick="switchTab('donate', this)"><i data-lucide="heart-handshake" aria-hidden="true"></i> DONATE</button>
                 <button class="tab-btn" onclick="switchTab('leaderboard', this)"><i data-lucide="trophy" aria-hidden="true"></i> SULTAN</button>
                 <button class="tab-btn" onclick="switchTab('feed', this)"><i data-lucide="messages-square" aria-hidden="true"></i> RIWAYAT</button>
+                <button class="tab-btn" onclick="switchTab('chat', this)"><i data-lucide="message-circle" aria-hidden="true"></i> CHAT ADMIN</button>
             </div>
 
             <div id="alertBox" class="alert-box hidden"></div>
@@ -648,8 +649,8 @@
                         <button type="button" onclick="downloadInvoice()" class="neo-btn icon-btn"><i data-lucide="file-text"></i> UNDUH INVOICE</button>
                         <button type="button" id="cancelBtn" class="neo-btn red icon-btn"><i data-lucide="x-circle"></i> BATALKAN</button>
                     </div>
-                    <div class="notice-panel"><div class="icon-btn"><i data-lucide="bell-ring"></i><strong>NOTIFIKASI</strong></div><button type="button" class="neo-btn" onclick="enableNotifications()">IZINKAN NOTIFIKASI</button><div id="notificationList">Belum ada notifikasi.</div></div>
-                    <div class="comment-panel"><div class="icon-btn"><i data-lucide="messages-square"></i><strong>PESAN UNTUK ADMIN</strong></div><div id="commentList">Memuat percakapan...</div><textarea id="donorMessage" rows="2" maxlength="1000" placeholder="Tulis pesan atau komentar untuk admin"></textarea><button type="button" class="neo-btn" onclick="sendDonorMessage()">KIRIM PESAN</button></div>
+                    
+                    
                 </div>
 
                 <div id="resultSection" class="hidden" style="text-align: center; padding: 16px 0;">
@@ -666,6 +667,18 @@
 
             <div id="tab-feed" class="hidden">
                 <div id="feedList">Memuat riwayat...</div>
+            </div>
+
+            <div id="tab-chat" class="hidden">
+                <div class="comment-panel">
+                    <div class="icon-btn"><i data-lucide="messages-square"></i><strong>LIVE CHAT ADMIN</strong></div>
+                    <p style="margin:8px 0 12px">Kirim pesan ke admin dan lihat balasannya di sini. Percakapan terhubung ke transaksi terakhir di perangkat ini.</p>
+                    <div id="chatUnavailable" class="empty-state">Buat transaksi donasi terlebih dahulu agar chat dapat terhubung.</div>
+                    <div id="commentList">Memuat percakapan...</div>
+                    <textarea id="donorMessage" rows="3" maxlength="1000" placeholder="Tulis pesan untuk admin..."></textarea>
+                    <button type="button" class="neo-btn" onclick="sendDonorMessage()">KIRIM PESAN</button>
+                    <div class="notice-panel" style="margin-top:14px"><div class="icon-btn"><i data-lucide="bell-ring"></i><strong>NOTIFIKASI</strong></div><button type="button" class="neo-btn" onclick="enableNotifications()">IZINKAN NOTIFIKASI HP</button><div id="notificationList">Belum ada notifikasi.</div></div>
+                </div>
             </div>
         </div>
     </div>
@@ -788,7 +801,9 @@
             document.getElementById('tab-donate').classList.add('hidden')
             document.getElementById('tab-leaderboard').classList.add('hidden')
             document.getElementById('tab-feed').classList.add('hidden')
+            document.getElementById('tab-chat').classList.add('hidden')
             document.getElementById(`tab-${tab}`).classList.remove('hidden')
+            if (tab === 'chat') refreshConversation()
 
             if (tab !== 'donate') loadPublicStats()
             if (window.lucide) lucide.createIcons()
@@ -863,7 +878,8 @@
                         const statusLabel = ['success', 'sukses', 'paid'].includes(status) ? 'BERHASIL' : status === 'pending' ? 'MENUNGGU' : status === 'expired' ? 'KEDALUWARSA' : status === 'cancelled' || status === 'canceled' ? 'DIBATALKAN' : status.toUpperCase()
                         const dateValue = r.paidAt || r.createdAt
                         const dateLabel = dateValue ? new Date(dateValue).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : 'Waktu tidak tersedia'
-                        return `<div class="feed-item transaction-row"><div class="feed-header"><span class="transaction-name">${escapePublicText(r.name || 'Anonim')}</span><span class="feed-amount">${formatRp(r.amount)}</span></div><div class="transaction-meta"><span class="transaction-status status-${status.replace(/[^a-z]/g, '')}">${statusLabel}</span><span>${escapePublicText(r.transactionId || '')}</span></div><div class="feed-notes">${escapePublicText(r.notes || 'Dukungan untuk kreator')}</div><small class="transaction-date">${dateLabel}</small></div>`
+                        const reactionIcons = { support: '🤝', heart: '❤️', rocket: '🚀', coffee: '☕', crown: '👑' }
+                        return `<div class="feed-item transaction-row"><div class="feed-header"><span class="transaction-name">${reactionIcons[r.emoji] || '🤝'} ${escapePublicText(r.name || 'Anonim')}</span><span class="feed-amount">${formatRp(r.amount)}</span></div><div class="transaction-meta"><span class="transaction-status status-${status.replace(/[^a-z]/g, '')}">${statusLabel}</span><span>${escapePublicText(r.transactionId || '')}</span></div><div class="feed-notes">${escapePublicText(r.notes || 'Dukungan untuk kreator')}</div><small class="transaction-date">${dateLabel}</small></div>`
                     }).join('')
                 }
                 if (window.lucide) lucide.createIcons()
@@ -1006,7 +1022,9 @@
         }
 
         const refreshConversation = async () => {
-            if (!currentTrx) return
+            const unavailable = document.getElementById('chatUnavailable')
+            if (!currentTrx) { if (unavailable) unavailable.hidden = false; return }
+            if (unavailable) unavailable.hidden = true
             try {
                 const [commentsRes, notificationsRes] = await Promise.all([
                     fetch(`/api/comments/${currentTrx.transactionId}?key=${encodeURIComponent(currentTrx.accessKey)}`),
@@ -1020,7 +1038,7 @@
                 document.getElementById('notificationList').innerHTML = notices.length ? notices.slice(0, 8).map(n => `<div class="notice-item"><strong>${escapeHtml(n.title)}</strong><p>${escapeHtml(n.message)}</p><small>${new Date(n.createdAt).toLocaleString('id-ID')}</small></div>`).join('') : 'Belum ada notifikasi.'
                 for (const n of notices.filter(n => !n.read)) {
                     const shownKey = `kaxel_notice_${n.id}`
-                    if (Notification.permission === 'granted' && !sessionStorage.getItem(shownKey)) { new Notification(n.title, { body: n.message }); sessionStorage.setItem(shownKey, '1') }
+                    if ('Notification' in window && Notification.permission === 'granted' && !localStorage.getItem(shownKey)) { if ('serviceWorker' in navigator && navigator.serviceWorker.controller) navigator.serviceWorker.ready.then(reg => reg.showNotification(n.title, { body: n.message, icon: '/assets/payment-qris.png', tag: shownKey })).catch(() => new Notification(n.title, { body: n.message })); else new Notification(n.title, { body: n.message }); localStorage.setItem(shownKey, '1') }
                 }
             } catch (e) {}
         }
@@ -1032,8 +1050,11 @@
             const field = document.getElementById('donorMessage')
             const message = field.value.trim()
             if (!message) return showAlert('Tulis pesan terlebih dahulu.')
-            const res = await fetch('/api/comments', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ transactionId: currentTrx.transactionId, key: currentTrx.accessKey, message }) })
-            const json = await res.json()
+            let res, json
+            try {
+                res = await fetch('/api/comments', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ transactionId: currentTrx.transactionId, key: currentTrx.accessKey, message }) })
+                json = await res.json()
+            } catch (e) { return showAlert('Pesan gagal terhubung ke server. Coba lagi.') }
             if (!json.success) return showAlert(json.message || 'Pesan gagal dikirim.')
             field.value = ''
             refreshConversation()
@@ -1192,6 +1213,7 @@
             loadPublicStats()
             checkSavedSession()
             setInterval(loadPublicStats, 15000)
+            setInterval(() => { if (currentTrx) refreshConversation() }, 5000)
         })
     </script>
 </body>
