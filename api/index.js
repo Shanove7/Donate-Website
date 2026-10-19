@@ -1,6 +1,7 @@
 import express from 'express'
 import fetch from 'node-fetch'
 import dotenv from 'dotenv'
+import crypto from 'node:crypto'
 
 dotenv.config()
 
@@ -15,6 +16,12 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123'
 const FEE_PERCENT = parseFloat(process.env.FEE_PERCENT || '0.7')
 const JSONBIN_ID = process.env.JSONBIN_ID || ''
 const JSONBIN_KEY = process.env.JSONBIN_KEY || ''
+const WASENDER_API_KEY = process.env.WASENDER_API_KEY || ''
+const WASENDER_API_URL = process.env.WASENDER_API_URL || 'https://api.wasender.dev/messages/text'
+const OTP_TTL_MS = 5 * 60 * 1000
+const OTP_RESEND_MS = 60 * 1000
+const OTP_MAX_ATTEMPTS = 5
+const OTP_FEE_PERCENT = 0.3
 
 app.use(express.json())
 
@@ -22,7 +29,10 @@ let memoryStore = {
     goal: { title: 'Upgrade Server & Kopi Kaxel', target: 1000000 },
     history: [],
     notifications: [],
-    comments: []
+    comments: [],
+    users: [],
+    otpChallenges: [],
+    chatMessages: []
 }
 
 const loadDb = async () => {
@@ -36,7 +46,7 @@ const loadDb = async () => {
                 if (Array.isArray(json.record)) {
                     memoryStore.history = json.record
                 } else if (json.record.history) {
-                    memoryStore = { ...memoryStore, ...json.record, notifications: json.record.notifications || [], comments: json.record.comments || [] }
+                    memoryStore = { ...memoryStore, ...json.record, notifications: json.record.notifications || [], comments: json.record.comments || [], users: json.record.users || [], otpChallenges: json.record.otpChallenges || [], chatMessages: json.record.chatMessages || [] }
                 }
             }
         } catch (e) {}
@@ -60,7 +70,16 @@ const saveDb = async (data) => {
     }
 }
 
-const getFee = (amount) => Math.round(Number(amount) * FEE_PERCENT / 100)
+const getFee = (amount, percent = FEE_PERCENT) => Math.round(Number(amount) * percent / 100)
+const sendWhatsApp = async (to, body) => {
+    if (!WASENDER_API_KEY || !to) throw new Error('WASENDER_API_KEY atau nomor WhatsApp belum dikonfigurasi.')
+    const response = await fetch(WASENDER_API_URL, { method: 'POST', headers: { Authorization: `Bearer ${WASENDER_API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ to: String(to).replace(/\D/g, ''), body }) })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok || result.sent === false || result.success === false) throw new Error(result.message || 'Gateway WhatsApp gagal mengirim pesan.')
+    return result
+}
+const getUserFromToken = (req, db) => { const token = String(req.headers.authorization || '').replace(/^Bearer\s+/i, ''); return token ? (db.users || []).find(user => user.token === token) : null }
+const cleanPhone = value => String(value || '').replace(/\D/g, '')
 
 const normalizeExpiredTransactions = (db) => {
     let changed = false
@@ -77,11 +96,97 @@ const normalizeExpiredTransactions = (db) => {
             db.notifications = db.notifications || []
             const eventKey = `expired:${trx.transactionId}`
             if (!db.notifications.some(n => n.eventKey === eventKey)) db.notifications.unshift({ id: `NTF-${now}`, eventKey, transactionId: trx.transactionId, accessKey: trx.accessKey, type: 'payment', title: 'Transaksi dibatalkan', message: 'Batas pembayaran 20 menit telah habis. Transaksi otomatis dibatalkan.', createdAt: new Date(now).toISOString(), read: false })
+            if (trx.registered && trx.whatsapp && trx.lastNotifiedStatus !== 'cancelled') {
+                sendWhatsApp(trx.whatsapp, `KAXEL SUPPORT - Informasi transaksi donasi\nID: ${trx.transactionId}\nStatus: cancelled\nAlasan: batas pembayaran 20 menit habis.`).catch(() => {})
+                trx.lastNotifiedStatus = 'cancelled'
+            }
             changed = true
         }
     }
     return changed
 }
+
+app.post('/api/auth/request-otp', async (req, res) => {
+    try {
+        if (!WASENDER_API_KEY) return res.status(503).json({ success: false, message: 'Registrasi OTP belum aktif. Admin perlu mengisi WASENDER_API_KEY di ENV.' })
+        const phone = cleanPhone(req.body?.phone)
+        const name = String(req.body?.name || '').trim().slice(0, 60)
+        if (!name) return res.status(400).json({ success: false, message: 'Nama wajib diisi.' })
+        if (phone.length < 8 || phone.length > 15) return res.status(400).json({ success: false, message: 'Nomor WhatsApp tidak valid.' })
+        const db = await loadDb()
+        const now = Date.now()
+        const previous = (db.otpChallenges || []).find(x => x.phone === phone && now - x.createdAtMs < OTP_RESEND_MS)
+        if (previous) return res.status(429).json({ success: false, message: 'Tunggu 60 detik sebelum meminta OTP lagi.' })
+        const otp = String(crypto.randomInt(0, 1000000)).padStart(6, '0')
+        const challenge = { id: crypto.randomUUID(), phone, name, otpHash: crypto.createHash('sha256').update(otp).digest('hex'), attempts: 0, createdAtMs: now, expiresAtMs: now + OTP_TTL_MS }
+        db.otpChallenges = (db.otpChallenges || []).filter(x => x.expiresAtMs > now && x.phone !== phone)
+        db.otpChallenges.push(challenge)
+        await saveDb(db)
+        try { await sendWhatsApp(phone, `Kode OTP Kaxel Support kamu: ${otp}\nBerlaku 5 menit. Jangan bagikan kode ini kepada siapa pun.`) }
+        catch (e) { db.otpChallenges = db.otpChallenges.filter(x => x.id !== challenge.id); await saveDb(db); return res.status(502).json({ success: false, message: 'Gagal mengirim OTP WhatsApp. Periksa nomor, koneksi sesi Wasender, dan API key.' }) }
+        res.json({ success: true, message: 'OTP dikirim ke WhatsApp kamu.', challengeId: challenge.id, expiresIn: 300 })
+    } catch (e) { res.status(500).json({ success: false, message: 'Gagal meminta OTP.' }) }
+})
+
+app.post('/api/auth/verify-otp', async (req, res) => {
+    try {
+        const phone = cleanPhone(req.body?.phone)
+        const challengeId = String(req.body?.challengeId || '')
+        const otp = String(req.body?.otp || '').trim()
+        const db = await loadDb()
+        const challenge = (db.otpChallenges || []).find(x => x.id === challengeId && x.phone === phone)
+        if (!challenge) return res.status(400).json({ success: false, message: 'OTP tidak ditemukan. Minta kode baru.' })
+        if (Date.now() > challenge.expiresAtMs) { db.otpChallenges = db.otpChallenges.filter(x => x.id !== challengeId); await saveDb(db); return res.status(400).json({ success: false, message: 'OTP sudah kedaluwarsa.' }) }
+        challenge.attempts = Number(challenge.attempts || 0) + 1
+        const otpHash = crypto.createHash('sha256').update(otp).digest('hex')
+        if (challenge.attempts > OTP_MAX_ATTEMPTS || otpHash !== challenge.otpHash) { if (challenge.attempts >= OTP_MAX_ATTEMPTS) db.otpChallenges = db.otpChallenges.filter(x => x.id !== challengeId); await saveDb(db); return res.status(400).json({ success: false, message: challenge.attempts >= OTP_MAX_ATTEMPTS ? 'Batas percobaan habis. Minta OTP baru.' : 'Kode OTP salah.' }) }
+        let user = (db.users || []).find(x => x.phone === phone)
+        if (!user) { user = { id: crypto.randomUUID(), phone, name: challenge.name, createdAt: new Date().toISOString(), token: crypto.randomBytes(32).toString('hex') }; db.users.push(user) }
+        else { user.name = challenge.name || user.name; user.token = crypto.randomBytes(32).toString('hex') }
+        db.otpChallenges = db.otpChallenges.filter(x => x.id !== challengeId)
+        await saveDb(db)
+        res.json({ success: true, user: { id: user.id, name: user.name, phone: user.phone }, token: user.token })
+    } catch (e) { res.status(500).json({ success: false, message: 'Verifikasi OTP gagal.' }) }
+})
+
+app.get('/api/auth/me', async (req, res) => {
+    const db = await loadDb(); const user = getUserFromToken(req, db)
+    if (!user) return res.status(401).json({ success: false, message: 'Sesi login tidak valid.' })
+    res.json({ success: true, user: { id: user.id, name: user.name, phone: user.phone } })
+})
+
+app.post('/api/user/chat', async (req, res) => {
+    const db = await loadDb(); const user = getUserFromToken(req, db)
+    if (!user) return res.status(401).json({ success: false, message: 'Login WhatsApp diperlukan untuk chat admin.' })
+    const message = String(req.body?.message || '').trim()
+    if (!message || message.length > 1000) return res.status(400).json({ success: false, message: 'Pesan wajib diisi dan maksimal 1000 karakter.' })
+    const item = { id: crypto.randomUUID(), userId: user.id, phone: user.phone, name: user.name, sender: 'user', message, createdAt: new Date().toISOString(), read: false }
+    db.chatMessages = db.chatMessages || []; db.chatMessages.push(item); await saveDb(db)
+    res.json({ success: true, message: item })
+})
+
+app.get('/api/user/chat', async (req, res) => {
+    const db = await loadDb(); const user = getUserFromToken(req, db)
+    if (!user) return res.status(401).json({ success: false, message: 'Login WhatsApp diperlukan.' })
+    res.json({ success: true, messages: (db.chatMessages || []).filter(x => x.userId === user.id) })
+})
+
+app.get('/api/admin/chats', async (req, res) => {
+    if (String(req.query.password || '') !== ADMIN_PASSWORD) return res.status(401).json({ success: false, message: 'Password Admin salah.' })
+    const db = await loadDb(); res.json({ success: true, messages: db.chatMessages || [], users: (db.users || []).map(({id,name,phone,createdAt}) => ({id,name,phone,createdAt})) })
+})
+
+app.post('/api/admin/chats/reply', async (req, res) => {
+    const { password, userId, message } = req.body || {}
+    if (password !== ADMIN_PASSWORD) return res.status(401).json({ success: false, message: 'Password Admin salah.' })
+    const text = String(message || '').trim()
+    if (!text || text.length > 1000) return res.status(400).json({ success: false, message: 'Balasan wajib diisi dan maksimal 1000 karakter.' })
+    const db = await loadDb(); const user = (db.users || []).find(x => x.id === userId)
+    if (!user) return res.status(404).json({ success: false, message: 'Pengguna tidak ditemukan.' })
+    const item = { id: crypto.randomUUID(), userId, phone: user.phone, name: user.name, sender: 'admin', senderName: 'Admin Kaxel', message: text, createdAt: new Date().toISOString(), read: false }
+    db.chatMessages = db.chatMessages || []; db.chatMessages.push(item); await saveDb(db)
+    res.json({ success: true, message: item })
+})
 
 app.post('/api/donate', async (req, res) => {
     try {
@@ -104,10 +209,13 @@ app.post('/api/donate', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Nominal minimal Rp100.' })
         }
 
-        const senderName = name?.trim() || 'Anonim'
+        const db = await loadDb()
+        const registeredUser = getUserFromToken(req, db)
+        const senderName = registeredUser ? (registeredUser.name || name?.trim() || 'Donatur') : 'Anonim'
         const trxNotes = notes?.trim() || 'Semangat terus Kaxel!'
         const chosenEmoji = emoji || 'support'
-        const cleanWa = whatsapp ? whatsapp.replace(/[^0-9+]/g, '') : ''
+        const cleanWa = registeredUser ? registeredUser.phone : ''
+        const feePercent = registeredUser ? OTP_FEE_PERCENT : FEE_PERCENT
 
         const createRes = await fetch(`${BTZ_BASE_URL}/api/qris/create`, {
             method: 'POST',
@@ -115,7 +223,7 @@ app.post('/api/donate', async (req, res) => {
             body: JSON.stringify({
                 apikey: selectedApiKey,
                 amount: parsedAmount,
-                fee: getFee(parsedAmount),
+                fee: getFee(parsedAmount, feePercent),
                 notes: trxNotes,
                 timeout: 1200000,
                 metadata: {
@@ -157,12 +265,14 @@ app.post('/api/donate', async (req, res) => {
             return res.status(502).json({ success: false, message: 'Gateway tidak mengembalikan paymentUrl ShopeePay. Periksa konfigurasi payment method di Betabotz Paygate.' })
         }
 
-        const db = await loadDb()
         db.history.unshift({
             transactionId: trx.transactionId,
             accessKey: trx.accessKey,
             name: senderName,
             whatsapp: cleanWa,
+            userId: registeredUser?.id || null,
+            registered: Boolean(registeredUser),
+            feePercent,
             amount: trx.amount,
             fee: trx.fee,
             totalAmount: trx.totalAmount,
@@ -228,6 +338,11 @@ app.get('/api/status/:id', async (req, res) => {
                 if (checkJson.data.status === 'sukses' || checkJson.data.status === 'success') db.history[idx].paidAt = new Date().toISOString()
                 const eventKey = `payment:${id}:${checkJson.data.status}`
                 if (!db.notifications.some(n => n.eventKey === eventKey)) db.notifications.unshift({ id: `NTF-${Date.now()}`, eventKey, transactionId: id, accessKey: db.history[idx].accessKey, type: 'payment', title: 'Status pembayaran diperbarui', message: `Status transaksi berubah dari ${previousStatus} menjadi ${checkJson.data.status}.`, createdAt: new Date().toISOString(), read: false })
+                if (db.history[idx].registered && db.history[idx].whatsapp && db.history[idx].lastNotifiedStatus !== checkJson.data.status) {
+                    const statusText = String(checkJson.data.status || 'pending')
+                    sendWhatsApp(db.history[idx].whatsapp, `KAXEL SUPPORT - Informasi transaksi donasi\nID: ${id}\nStatus: ${statusText}\nNominal: Rp${Number(db.history[idx].amount || 0).toLocaleString('id-ID')}\nTerima kasih telah mendukung kami.`).then(() => {}).catch(() => {})
+                    db.history[idx].lastNotifiedStatus = statusText
+                }
                 await saveDb(db)
             }
         }
@@ -256,6 +371,14 @@ app.post('/api/cancel/:id', async (req, res) => {
         const idx = db.history.findIndex(item => item.transactionId === id)
         if (idx !== -1 && cancelJson.success) {
             db.history[idx].status = cancelJson.data?.status || 'cancel'
+            const cancelledStatus = String(db.history[idx].status)
+            if (db.history[idx].registered && db.history[idx].whatsapp && db.history[idx].lastNotifiedStatus !== cancelledStatus) {
+                sendWhatsApp(db.history[idx].whatsapp, `KAXEL SUPPORT - Informasi transaksi donasi\nID: ${id}\nStatus: ${cancelledStatus}\nNominal: Rp${Number(db.history[idx].amount || 0).toLocaleString('id-ID')}`).catch(() => {})
+                db.history[idx].lastNotifiedStatus = cancelledStatus
+            }
+            const eventKey = `payment:${id}:${cancelledStatus}`
+            db.notifications = db.notifications || []
+            if (!db.notifications.some(n => n.eventKey === eventKey)) db.notifications.unshift({ id: `NTF-${Date.now()}`, eventKey, transactionId: id, accessKey: db.history[idx].accessKey, type: 'payment', title: 'Transaksi dibatalkan', message: `Transaksi ${id} dibatalkan.`, createdAt: new Date().toISOString(), read: false })
             await saveDb(db)
         }
 
