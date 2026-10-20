@@ -472,13 +472,21 @@ app.get('/api/public-stats', async (req, res) => {
         const successList = db.history.filter(h => h.status === 'sukses' || h.status === 'success')
         const currentRaised = successList.reduce((acc, cur) => acc + Number(cur.amount), 0)
 
-        const recent = successList.slice(0, 10).map(h => ({
-            name: h.name,
-            amount: h.amount,
-            notes: h.notes,
-            emoji: h.emoji,
-            paidAt: h.paidAt || h.createdAt
-        }))
+        const now = Date.now()
+        const recent = successList
+            .filter(h => {
+                const paidAt = new Date(h.paidAt || h.createdAt || 0).getTime()
+                return Number.isFinite(paidAt) && paidAt > 0 && paidAt <= now && now - paidAt < 24 * 60 * 60 * 1000
+            })
+            .sort((a, b) => new Date(b.paidAt || b.createdAt || 0).getTime() - new Date(a.paidAt || a.createdAt || 0).getTime())
+            .slice(0, 10)
+            .map(h => ({
+                name: h.name,
+                amount: h.amount,
+                notes: h.notes,
+                emoji: h.emoji,
+                paidAt: h.paidAt || h.createdAt
+            }))
 
         const mapTop = {}
         successList.forEach(h => {
