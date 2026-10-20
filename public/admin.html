@@ -261,7 +261,7 @@
 
         const loadAdminComments = async () => {
             try {
-                const res = await fetch(`/api/admin/comments?password=${encodeURIComponent(savedPassword)}`)
+                const res = await fetch('/api/admin/comments', { headers: { Authorization: `Bearer ${savedPassword}` } })
                 const json = await res.json()
                 if (!json.success) return
                 document.querySelectorAll('[id^="replies-"]').forEach(el => {
@@ -285,7 +285,7 @@
         const loadRegisteredChats = async () => {
             const container = document.getElementById('registeredChats')
             try {
-                const res = await fetch(`/api/admin/chats?password=${encodeURIComponent(savedPassword)}`)
+                const res = await fetch('/api/admin/chats', { headers: { Authorization: `Bearer ${savedPassword}` } })
                 const json = await res.json()
                 if (!json.success) { container.textContent = json.message || 'Chat tidak dapat dimuat.'; return }
                 const groups = {}
