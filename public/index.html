@@ -1,295 +1,1251 @@
-
-<!DOCTYPE html>
+.<!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#f7f7f2" />
-  <title>Maintenance — Donate</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KAXEL SUPPORT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #f4f0ea;
+            background-image: radial-gradient(#000 1.25px, transparent 1.25px);
+            background-size: 20px 20px;
+            color: #000;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+        .marquee {
+            background: #000;
+            color: #ffde59;
+            font-weight: 900;
+            padding: 8px 0;
+            border-bottom: 4px solid #000;
+            overflow: hidden;
+            white-space: nowrap;
+            font-size: 13px;
+            letter-spacing: 1px;
+        }
+        .marquee span {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 16s linear infinite;
+        }
+        @keyframes marquee {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+        .container {
+            max-width: 480px;
+            margin: 28px auto 0;
+            padding: 0 16px;
+        }
+        .goal-box {
+            background: #fff;
+            border: 4px solid #000;
+            box-shadow: 6px 6px 0px #000;
+            padding: 14px;
+            margin-bottom: 28px;
+        }
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 900;
+            font-size: 13px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .progress-track {
+            width: 100%;
+            height: 22px;
+            background: #f4f0ea;
+            border: 3px solid #000;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #7ed957;
+            border-right: 3px solid #000;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        .progress-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 900;
+        }
+        .neo-card {
+            background: #ffde59;
+            border: 4px solid #000;
+            box-shadow: 8px 8px 0px #000;
+            padding: 24px;
+            position: relative;
+            margin-bottom: 24px;
+        }
+        .card-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: -42px;
+            margin-bottom: 16px;
+        }
+        .badge-title {
+            background: #ff5757;
+            color: #fff;
+            border: 4px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            padding: 6px 14px;
+            font-size: 20px;
+            font-weight: 900;
+            text-transform: uppercase;
+            transform: rotate(-2deg);
+        }
+        .tier-badge {
+            background: #c1ff72;
+            border: 3px solid #000;
+            box-shadow: 3px 3px 0px #000;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            transform: rotate(2deg);
+        }
+        .tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            background: #fff;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            padding: 8px;
+            font-weight: 900;
+            font-family: inherit;
+            font-size: 13px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .tab-btn [data-lucide]{width:15px;height:15px;vertical-align:middle;margin-right:3px}
+        .marquee [data-lucide]{width:14px;height:14px;vertical-align:middle;margin-right:5px}
+        .tab-btn.active {
+            background: #5ce1e6;
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000;
+        }
+        .label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 900;
+            font-size: 13px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .neo-input {
+            width: 100%;
+            padding: 12px;
+            background: #fff;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 16px;
+            transition: 0.1s;
+        }
+        .neo-input:focus {
+            outline: none;
+            background: #fff9db;
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000;
+        }
+        .wa-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .wa-select {
+            width: 125px;
+            padding: 12px 6px;
+            background: #5ce1e6;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            font-family: inherit;
+            font-weight: 900;
+            font-size: 13px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .wa-input {
+            margin-bottom: 0 !important;
+            flex: 1;
+        }
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: -8px;
+            margin-bottom: 16px;
+        }
+        .preset-btn {
+            background: #c1ff72;
+            border: 3px solid #000;
+            box-shadow: 3px 3px 0px #000;
+            padding: 8px 4px;
+            font-weight: 900;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .preset-btn:active {
+            transform: translate(3px, 3px);
+            box-shadow: 0px 0px 0px #000;
+        }
+        .payment-picker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:8px 0 20px;align-items:start}
+        .payment-option{position:relative;display:flex;align-items:center;gap:11px;text-align:left;padding:12px;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;min-width:0;width:100%;font:inherit;cursor:pointer;transition:background .15s,transform .15s}
+        .payment-option.selected{background:#e8fbff;outline:3px solid #5ce1e6;transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
+        .payment-option:disabled{cursor:not-allowed;opacity:.82;background:#f8fafc}
+        .payment-logo{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border-radius:10px;color:#fff;font-weight:900;overflow:hidden;background:#fff}
+        .payment-logo svg{width:25px;height:25px;display:block}
+        .payment-logo img{display:block;width:100%;height:100%;object-fit:contain;padding:2px}
+        .payment-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+        .payment-copy strong{font-size:14px;line-height:1.2}
+        .payment-copy small{font-size:10px;font-weight:900;letter-spacing:.35px;color:#475569}
+        .coming-badge{font-size:9px!important;color:#92400e!important;background:#fef3c7;padding:3px 5px;border:1px solid #f59e0b;border-radius:4px;width:max-content}
+        .wallet-toggle{min-height:68px;justify-content:space-between}
+        .wallet-toggle-main{display:flex;align-items:center;gap:10px;min-width:0}
+        .wallet-folder-icon{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border-radius:10px;background:#111827;color:#fff}
+        .wallet-folder-icon svg{width:23px;height:23px}
+        .wallet-chevron{width:18px;height:18px;flex:0 0 18px;transition:transform .18s}
+        .wallet-toggle[aria-expanded="true"] .wallet-chevron{transform:rotate(180deg)}
+        .wallet-options{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000}
+        .wallet-options[hidden]{display:none}
+        .wallet-options .payment-option{box-shadow:3px 3px 0 #000;padding:10px;min-height:66px}
+        .wallet-options .payment-option.selected{box-shadow:2px 2px 0 #000}
+        .wallet-options .payment-logo{width:36px;height:36px;flex-basis:36px}
+        .wallet-options .payment-copy strong{font-size:13px}
+        .payment-hint{grid-column:1/-1;font-size:11px;font-weight:700;color:#475569;margin-top:1px}
+        @media(max-width:380px){.payment-picker{gap:8px}.payment-option{padding:9px;gap:8px}.payment-logo,.wallet-folder-icon{width:34px;height:34px;flex-basis:34px}.wallet-options{gap:8px;padding:9px}.wallet-options .payment-option{padding:8px}.wallet-options .payment-logo{width:32px;height:32px;flex-basis:32px}}
+        .payment-instructions{padding:14px;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;margin-bottom:16px;line-height:1.6}
+        .payment-instructions .neo-btn{margin-top:12px}
+        .payment-detail{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed #aaa;overflow-wrap:anywhere}
+        .payment-detail:last-child{border-bottom:0}
+        @media(max-width:380px){.payment-methods{grid-template-columns:1fr}.payment-option{padding:10px}}
+        .emoji-grid {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .emoji-btn {
+            flex: 1;
+            background: #fff;
+            border: 3px solid #000;
+            box-shadow: 3px 3px 0px #000;
+            padding: 8px;
+            font-size: 20px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .emoji-btn.selected {
+            background: #ff914d;
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #000;
+        }
+        .neo-btn {
+            width: 100%;
+            background: #7ed957;
+            border: 4px solid #000;
+            box-shadow: 5px 5px 0px #000;
+            padding: 14px;
+            font-weight: 900;
+            font-family: inherit;
+            font-size: 15px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .neo-btn:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 3px 3px 0px #000;
+        }
+        .neo-btn:active {
+            transform: translate(5px, 5px);
+            box-shadow: 0px 0px 0px #000;
+        }
+        .neo-btn.red { background: #ff5757; color: #fff; }
+        .neo-btn.blue { background: #5ce1e6; color: #000; }
+        .neo-btn.orange { background: #ff914d; color: #000; }
+        .hidden { display: none !important; }
+        .alert-box {
+            background: #ff5757;
+            color: #fff;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            padding: 12px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        .session-banner {
+            background: #5ce1e6;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            padding: 10px;
+            font-weight: 900;
+            font-size: 12px;
+            margin-bottom: 14px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        .qr-frame {
+            background: #fff;
+            border: 4px solid #000;
+            box-shadow: 5px 5px 0px #000;
+            padding: 16px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .qr-frame img {
+            width: 240px;
+            height: 240px;
+            border: 3px solid #000;
+            display: block;
+            margin: 0 auto 12px;
+        }
+        .info-list {
+            background: #fff;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            padding: 14px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .info-list p {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 2px dashed #000;
+        }
+        .info-list p:last-child { border-bottom: none; }
+        .feed-item {
+            background: #fff;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .feed-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 900;
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+        .feed-amount {
+            background: #c1ff72;
+            border: 2px solid #000;
+            padding: 2px 8px;
+            font-size: 13px;
+        }
+        .feed-notes {
+            font-size: 14px;
+            font-weight: 700;
+            color: #222;
+            background: #f4f0ea;
+            padding: 8px;
+            border: 2px solid #000;
+        }
+        .timer-badge {
+            background: #000;
+            color: #ffde59;
+            padding: 4px 10px;
+            font-weight: 900;
+            display: inline-block;
+            font-size: 13px;
+        }
+        .dl-menu {
+            background: #fff;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            padding: 10px;
+            margin-top: 10px;
+            display: grid;
+            gap: 8px;
+        }
+    
+        .icon-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+        .icon-btn svg,.lucide{width:18px;height:18px;stroke-width:2.2;vertical-align:middle}
+        .action-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+        .notice-panel,.comment-panel{margin-top:14px;padding:14px;border:2px solid #111;background:#fff;border-radius:12px}
+        .notice-item,.comment-item{padding:10px 0;border-bottom:1px solid #ddd;text-align:left}
+        .notice-item:last-child,.comment-item:last-child{border-bottom:0}
+        .comment-panel textarea{width:100%;padding:10px;border:2px solid #111;font:inherit;margin:8px 0}
+        @media(max-width:520px){.action-row{grid-template-columns:1fr}}
 
-  <style>
-    :root {
-      --bg: #f7f7f2;
-      --surface: #ffffff;
-      --ink: #171717;
-      --yellow: #f9e547;
-      --green: #b7f7c4;
-      --border: 3px solid var(--ink);
-      --shadow: 6px 6px 0 var(--ink);
-    }
+        :root{color-scheme:light;--paper:#fff8eb;--ink:#252525;--orange:#faae2b;--orange-soft:#ffd36b;--mint:#39cda2;--cream:#fffdf5;--line:#292929;--shadow:#343434}
+        body{font-family:'Space Grotesk',sans-serif;background-color:var(--paper);background-image:radial-gradient(rgba(37,37,37,.13) .8px,transparent .8px);background-size:15px 15px;color:var(--ink);padding-bottom:28px}
+        .marquee{background:var(--orange);color:#171717;border-bottom:2px solid var(--line);padding:9px 0;font-size:12px;letter-spacing:.2px}
+        .marquee span{animation-duration:22s}
+        .container{max-width:720px;margin:16px auto 0;padding:0 12px}
+        .goal-box{background:var(--cream);border:2px solid var(--line);border-radius:12px;box-shadow:3px 3px 0 var(--shadow);padding:15px;margin-bottom:18px}
+        .goal-header{font-size:12px;margin-bottom:9px}
+        .progress-track{height:17px;background:#f0eee6;border:2px solid var(--line);border-radius:5px;overflow:hidden}
+        .progress-fill{background:var(--mint);border-right:0}
+        .progress-text{font-size:10px}
+        .neo-card{background:var(--cream);border:2px solid var(--line);border-radius:12px;box-shadow:3px 3px 0 var(--shadow);padding:18px; margin-bottom:18px}
+        .card-header-flex{margin-top:-29px;margin-bottom:17px;align-items:center}
+        .badge-title{background:var(--orange);color:#171717;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow);padding:7px 11px;font-size:17px;transform:none}
+        .tier-badge{background:#ffe9a7;border:2px solid var(--line);border-radius:6px;box-shadow:2px 2px 0 var(--shadow);padding:4px 8px;font-size:10px;transform:none}
+        .tabs{gap:7px;margin-bottom:17px}
+        .tab-btn{background:#fff;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow);padding:9px 5px;font-size:11px;letter-spacing:.1px}
+        .tab-btn.active{background:var(--orange);transform:none;box-shadow:2px 2px 0 var(--shadow)}
+        .label{font-size:11px;margin:12px 0 6px}
+        .neo-input{background:#fff;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow);padding:11px;font-size:13px;font-weight:600;margin-bottom:13px}
+        .neo-input:focus{background:#fffdf4;transform:none;box-shadow:2px 2px 0 var(--shadow);border-color:#111}
+        .wa-group{gap:8px;margin-bottom:13px}
+        .wa-select{background:#fff;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow);font-size:11px;padding:10px 5px}
+        .preset-grid{gap:7px;margin-bottom:14px}
+        .preset-btn{background:#fff;border:2px solid var(--line);border-radius:7px;box-shadow:2px 2px 0 var(--shadow);padding:8px 3px;font-size:11px}
+        .preset-btn:focus,.preset-btn:active{background:var(--orange);transform:translate(1px,1px);box-shadow:1px 1px 0 var(--shadow)}
+        .payment-picker{gap:9px;margin:8px 0 17px}
+        .payment-option{background:#fff;border:2px solid var(--line);border-radius:9px;box-shadow:2px 2px 0 var(--shadow);padding:10px;gap:9px;min-height:62px}
+        .payment-option.selected{background:#fff1bd;outline:0;transform:none;box-shadow:2px 2px 0 var(--shadow)}
+        .payment-option:disabled{background:#f6f4ec;opacity:.72}
+        .payment-logo,.wallet-folder-icon{border-radius:7px}
+        .wallet-folder-icon{background:var(--orange);color:#171717;border:1px solid #252525}
+        .wallet-toggle{min-height:62px}
+        .wallet-options{gap:8px;padding:10px;background:#fffdf6;border:2px solid var(--line);border-radius:9px;box-shadow:2px 2px 0 var(--shadow)}
+        .wallet-options .payment-option{box-shadow:1px 1px 0 var(--shadow);border-width:2px;border-radius:7px;padding:8px;min-height:58px}
+        .wallet-options .payment-option.selected{box-shadow:1px 1px 0 var(--shadow);background:#fff1bd}
+        .payment-copy strong{font-size:13px}
+        .payment-copy small{font-size:9px;letter-spacing:.2px;color:#5c5b56}
+        .payment-hint{font-size:10px;color:#5c5b56}
+        .payment-instructions{padding:12px;background:#fffdf6;border:2px solid var(--line);border-radius:9px;box-shadow:2px 2px 0 var(--shadow)}
+        .neo-btn{background:var(--orange);color:#171717;border:2px solid var(--line);border-radius:8px;box-shadow:3px 3px 0 var(--shadow);padding:13px;font-size:13px}
+        .neo-btn:hover,.neo-btn:active{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--shadow)}
+        .neo-btn.red{background:#f17c69;color:#171717}.neo-btn.blue{background:#b8e5f1}.neo-btn.orange{background:var(--orange)}
+        .alert-box{background:#ffe3dc;color:#7c2419;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow)}
+        .session-banner{background:#d9f5e8;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow)}
+        .emoji-btn{background:#fff;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow)}
+        .emoji-btn.selected{background:#ffe6a0;transform:none;box-shadow:2px 2px 0 var(--shadow)}
+        .notice-panel,.comment-panel{border:2px solid var(--line);background:#fffdf6;border-radius:9px;box-shadow:2px 2px 0 var(--shadow)}
+        .comment-panel textarea{border:2px solid var(--line);border-radius:7px}
+        .payment-detail{border-bottom:1px dashed #c9c4b7}
+        @media(max-width:520px){.container{padding:0 11px;margin-top:14px}.neo-card{padding:15px}.card-header-flex{margin-top:-25px}.badge-title{font-size:15px}.tabs{gap:6px}.tab-btn{font-size:10px}.payment-picker{gap:8px}.payment-option{padding:9px;gap:8px}.payment-copy strong{font-size:12px}.wallet-options{padding:8px;gap:7px}}
 
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100svh;
-      padding: 24px;
-      display: grid;
-      place-items: center;
-      background-color: var(--bg);
-      color: var(--ink);
-      font-family: Arial, Helvetica, sans-serif;
-    }
-
-    .page {
-      width: 100%;
-      max-width: 580px;
-    }
-
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 22px;
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: -0.3px;
-      text-transform: uppercase;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-    }
-
-    .brand-mark {
-      display: grid;
-      place-items: center;
-      width: 30px;
-      height: 30px;
-      background: var(--yellow);
-      border: 2px solid var(--ink);
-      font-size: 17px;
-    }
-
-    .status {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 7px 10px;
-      border: 2px solid var(--ink);
-      background: var(--green);
-      font-size: 10px;
-      letter-spacing: 0;
-    }
-
-    .status::before {
-      content: "";
-      width: 7px;
-      height: 7px;
-      background: var(--ink);
-      border-radius: 50%;
-    }
-
-    .card {
-      padding: clamp(24px, 6vw, 42px);
-      background: var(--surface);
-      border: var(--border);
-      box-shadow: var(--shadow);
-    }
-
-    .eyebrow {
-      display: inline-block;
-      padding: 7px 10px;
-      margin-bottom: 23px;
-      background: var(--yellow);
-      border: 2px solid var(--ink);
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-
-    .icon-box {
-      display: grid;
-      place-items: center;
-      width: 76px;
-      height: 76px;
-      margin-bottom: 25px;
-      background: var(--yellow);
-      border: var(--border);
-      box-shadow: 4px 4px 0 var(--ink);
-    }
-
-    .icon-box svg {
-      width: 42px;
-      height: 42px;
-    }
-
-    h1 {
-      max-width: 460px;
-      margin: 0;
-      font-size: clamp(36px, 8vw, 58px);
-      line-height: 0.98;
-      font-weight: 900;
-      letter-spacing: -2.8px;
-    }
-
-    h1 span {
-      display: block;
-      margin-top: 8px;
-      color: #6b5cff;
-    }
-
-    .description {
-      margin: 22px 0 0;
-      max-width: 390px;
-      font-size: 16px;
-      line-height: 1.7;
-      color: #454545;
-    }
-
-    .divider {
-      margin: 28px 0;
-      border: 0;
-      border-top: 2px dashed #b7b7b0;
-    }
-
-    .contact-label {
-      margin: 0 0 12px;
-      font-size: 11px;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .contact {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 15px;
-      background: var(--green);
-      border: var(--border);
-      color: var(--ink);
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 800;
-      overflow-wrap: anywhere;
-      transition: transform 120ms ease, box-shadow 120ms ease;
-    }
-
-    .contact:hover {
-      transform: translate(-2px, -2px);
-      box-shadow: 4px 4px 0 var(--ink);
-    }
-
-    .contact:active {
-      transform: translate(2px, 2px);
-      box-shadow: none;
-    }
-
-    .arrow {
-      flex-shrink: 0;
-      font-size: 22px;
-    }
-
-    .footer {
-      margin-top: 27px;
-      text-align: center;
-      font-size: 11px;
-      font-weight: 700;
-      color: #686868;
-    }
-
-    @media (max-width: 380px) {
-      body {
-        padding: 17px;
-      }
-
-      .card {
-        padding: 23px 19px;
-      }
-
-      .topbar {
-        font-size: 11px;
-      }
-
-      .contact {
-        font-size: 12px;
-        padding: 12px;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
-        transition: none !important;
-      }
-    }
-  </style>
+        .site-topbar{min-height:46px;background:var(--orange);border-bottom:2px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px max(14px,calc((100vw - 720px)/2));position:relative;z-index:10}
+        .site-brand{display:flex;align-items:center;gap:8px;font-weight:900;letter-spacing:.2px;font-size:15px}
+        .brand-mark{width:27px;height:27px;display:grid;place-items:center;border:2px solid var(--line);border-radius:8px;background:#fff;font-size:19px;line-height:1;box-shadow:1px 1px 0 var(--shadow)}
+        .brand-tag{font-size:8px;letter-spacing:.5px;padding:3px 5px;background:#fff;border:1px solid var(--line);border-radius:4px}
+        .topbar-status{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:900;border:1.5px solid var(--line);border-radius:20px;padding:5px 9px;background:#d9f5e8;white-space:nowrap}
+        .status-dot{width:7px;height:7px;background:#15976e;border-radius:50%;box-shadow:0 0 0 3px rgba(21,151,110,.15)}
+        .marquee{position:relative;z-index:8;display:flex;align-items:center;gap:8px;min-height:44px;padding:10px 0;background:#fff0c6;color:#242424;border-bottom:1px solid #d9cba9;overflow:hidden;font-size:13px;font-weight:900;letter-spacing:.2px}
+        .marquee>i{flex:0 0 auto;margin-left:12px}
+        .marquee span{padding-left:0;white-space:nowrap;animation:marquee 19s linear infinite}
+        .marquee:hover span{animation-play-state:paused}
+        .live-donation-toast{position:fixed;top:88px;left:50%;transform:translateX(-50%);width:min(92vw,390px);z-index:1000;display:flex;align-items:flex-start;gap:11px;padding:13px 38px 13px 13px;background:#fffdf5;border:2px solid var(--line);border-radius:12px;box-shadow:4px 4px 0 var(--shadow);animation:toast-in .28s ease-out}
+        .live-donation-toast[hidden]{display:none}
+        .toast-icon{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;background:var(--orange);border:2px solid var(--line);border-radius:9px;font-size:22px}
+        .toast-copy{min-width:0}.toast-copy strong{display:block;font-size:12px;line-height:1.4}.toast-copy p{font-size:11px;line-height:1.45;margin-top:3px;overflow-wrap:anywhere}.toast-copy small{display:block;margin-top:5px;color:#6b665d;font-size:9px;font-weight:700}
+        .toast-close{position:absolute;right:7px;top:6px;width:24px;height:24px;border:1.5px solid var(--line);border-radius:6px;background:#fff;font-size:18px;line-height:1;cursor:pointer}
+        @keyframes toast-in{from{opacity:0;transform:translate(-50%,-10px)}to{opacity:1;transform:translate(-50%,0)}}
+        .leaderboard-row{display:flex;justify-content:space-between;align-items:center;gap:10px}.leaderboard-name{display:flex;align-items:center;gap:7px;font-weight:900;min-width:0;overflow-wrap:anywhere}.leaderboard-name small{font-size:10px;font-weight:700;white-space:nowrap}.leader-rank{display:grid;place-items:center;min-width:25px;height:25px;border:1.5px solid var(--line);border-radius:7px;background:#ffe9a7;font-size:13px}.leaderboard-row:first-child .leader-rank{background:var(--orange)}
+        .transaction-row{background:#fffdf6;border:1.5px solid #ded7c7;border-radius:9px;padding:11px;margin-bottom:9px}.transaction-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;font-size:9px;color:#6b665d;overflow-wrap:anywhere}.transaction-status{border:1px solid var(--line);border-radius:5px;padding:3px 6px;font-size:9px;font-weight:900;white-space:nowrap;background:#d9f5e8;color:#175c42}.status-pending{background:#fff0c6;color:#805b00}.status-expired,.status-cancelled,.status-canceled,.status-failed{background:#ffe3dc;color:#8b2b20}.transaction-date{display:block;margin-top:7px;color:#777166;font-size:9px;font-weight:700}.empty-state{text-align:center;font-weight:700;padding:16px}
+        @media(max-width:520px){.site-topbar{padding:8px 12px}.site-brand{font-size:13px}.live-donation-toast{top:78px}.marquee{font-size:12px;min-height:42px}.transaction-meta{align-items:flex-start;flex-direction:column}}
+    </style>
 </head>
-
 <body>
-  <main class="page">
-    <header class="topbar">
-      <div class="brand">
-        <span class="brand-mark">×</span>
-        <span>KAXEL</span>
-      </div>
-
-      <span class="status">Maintenance</span>
+    <header class="site-topbar">
+        <div class="site-brand"><span class="brand-mark">♡</span><span>KAXEL SUPPORT</span><span class="brand-tag">DONATE</span></div>
+        <span class="topbar-status"><span class="status-dot"></span> LIVE</span>
     </header>
+    <div class="marquee" aria-label="Info donasi terbaru"><i data-lucide="radio-tower" aria-hidden="true"></i><span id="marqueeText">LIVE FEED: Terima kasih sudah mendukung Kaxel Support!</span></div>
+    <div id="liveDonationToast" class="live-donation-toast" role="status" aria-live="polite" aria-atomic="true" hidden>
+        <button type="button" class="toast-close" onclick="hideLiveDonationToast()" aria-label="Tutup notifikasi">×</button>
+        <div class="toast-icon">♥</div><div class="toast-copy"><strong id="toastTitle">Donasi baru diterima!</strong><p id="toastDescription"></p><small id="toastTime">Terima kasih atas dukungannya</small></div>
+    </div>
+    <div class="container">
+        <div class="goal-box">
+            <div class="goal-header">
+                <span id="goalTitle"> TARGET DONASI</span>
+                <span id="goalNumbers">Rp0 / Rp1.000.000</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="goalFill"></div>
+                <div class="progress-text" id="goalPercent">0% TERCAPAI</div>
+            </div>
+        </div>
 
-    <section class="card">
-      <span class="eyebrow">Sedang dalam perbaikan</span>
+        <div class="neo-card">
+            <div class="card-header-flex">
+                <div class="badge-title">KAXEL SUPPORT</div>
+                <div class="tier-badge" id="tierBadge">TRAKTIR KOPI</div>
+            </div>
 
-      <div class="icon-box" aria-hidden="true">
-        <svg
-          viewBox="0 0 48 48"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="3.5"
-          stroke-linecap="square"
-          stroke-linejoin="miter"
-        >
-          <rect x="7" y="9" width="34" height="25" rx="1" />
-          <path d="M3 39H45" />
-          <path d="M17 39L19 34H29L31 39" />
-          <path d="M18 19L22 23L30 15" />
-        </svg>
-      </div>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('donate', this)"><i data-lucide="heart-handshake" aria-hidden="true"></i> DONATE</button>
+                <button class="tab-btn" onclick="switchTab('leaderboard', this)"><i data-lucide="trophy" aria-hidden="true"></i> SULTAN</button>
+                <button class="tab-btn" onclick="switchTab('feed', this)"><i data-lucide="messages-square" aria-hidden="true"></i> RIWAYAT</button>
+                <button class="tab-btn" onclick="switchTab('chat', this)"><i data-lucide="message-circle" aria-hidden="true"></i> CHAT ADMIN</button>
+            </div>
 
-      <h1>
-        Website sedang
-        <span>maintenance.</span>
-      </h1>
+            <div id="alertBox" class="alert-box hidden"></div>
 
-      <p class="description">
-        Lagi ada yang dibenerin sama admin :)
-        <br />
-        Harap bersabar ya, kami bakal kembali secepatnya.
-      </p>
+            <div id="tab-donate">
+                <div id="accountGate" class="feed-item" style="margin-bottom:18px;padding:20px">
+                    <h3 style="margin:0 0 8px">Sebelum berdonasi</h3>
+                    <p style="margin:0 0 14px">Daftar dengan WhatsApp untuk biaya layanan 0,3%, notifikasi status transaksi, dan live chat admin. atau bisa lanjut anonim dengan biaya layanan 0.7%.</p>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="neo-btn" onclick="showRegister()">DAFTAR / LOGIN WA</button><button type="button" class="neo-btn" onclick="continueAnonymous()">LANJUT ANONIM</button></div>
+                    <div id="registerPanel" class="hidden" style="margin-top:18px">
+                        <label class="label"><span>Nama</span></label><input id="registerName" class="neo-input" maxlength="60" placeholder="Nama kamu">
+                        <label class="label"><span>Nomor WhatsApp</span></label><div class="wa-group"><select id="registerCountry" class="wa-select"><option value="62">Indonesia +62</option><option value="60">Malaysia +60</option><option value="1">Amerika/Kanada +1</option><option value="92">Pakistan +92</option><option value="65">Singapura +65</option><option value="44">Inggris +44</option><option value="91">India +91</option><option value="61">Australia +61</option><option value="81">Jepang +81</option><option value="63">Filipina +63</option><option value="966">Arab Saudi +966</option></select><input id="registerPhone" class="neo-input wa-input" type="tel" placeholder="8123456789" autocomplete="tel-national"></div>
+                        <button type="button" id="requestOtpBtn" class="neo-btn" onclick="requestOtp()">KIRIM OTP WHATSAPP</button>
+                        <div id="otpPanel" class="hidden" style="margin-top:12px"><label class="label"><span>Kode OTP 6 digit</span></label><input id="registerOtp" class="neo-input" inputmode="numeric" maxlength="6" placeholder="123456"><button type="button" class="neo-btn" onclick="verifyOtp()">VERIFIKASI & MASUK</button></div>
+                        <p id="registerMessage" role="status"></p>
+                    </div>
+                    <p id="accountStatus" style="margin:12px 0 0"></p>
+                </div>
+                <form id="donateForm" class="hidden">
+                    <label class="label"><span>Nama / Alias</span></label>
+                    <input type="text" id="name" placeholder="Anonim / Nama Kamu" class="neo-input">
 
-      <hr class="divider" />
+                    <label class="label">
+                        <span>Nomor WhatsApp</span>
+                        <span style="font-size:11px; background:#fff; padding:0 6px; border:2px solid #000;">OPSIONAL (PRIVASI AMAN)</span>
+                    </label>
+                    <div class="wa-group">
+                        <select id="countryCode" class="wa-select">
+                            <option value="+62">ID +62 (ID)</option>
+                            <option value="+60">MY +60 (MY)</option>
+                            <option value="+65">SG +65 (SG)</option>
+                            <option value="+673">BN +673 (BN)</option>
+                            <option value="+63">PH +63 (PH)</option>
+                            <option value="+66">TH +66 (TH)</option>
+                            <option value="+84">VN +84 (VN)</option>
+                            <option value="+81">JP +81 (JP)</option>
+                            <option value="+82">KR +82 (KR)</option>
+                            <option value="+86">CN +86 (CN)</option>
+                            <option value="+852">HK +852 (HK)</option>
+                            <option value="+886">TW +886 (TW)</option>
+                            <option value="+91">IN +91 (IN)</option>
+                            <option value="+966">SA +966 (SA)</option>
+                            <option value="+971">AE +971 (AE)</option>
+                            <option value="+90">TR +90 (TR)</option>
+                            <option value="+61">AU +61 (AU)</option>
+                            <option value="+1">US +1 (US)</option>
+                            <option value="+44">UK +44 (UK)</option>
+                            <option value="+49">DE +49 (DE)</option>
+                            <option value="+33">FR +33 (FR)</option>
+                            <option value="+31">NL +31 (NL)</option>
+                            <option value="+7">RU +7 (RU)</option>
+                            <option value="+55">BR +55 (BR)</option>
+                        </select>
+                        <input type="tel" id="waNumber" placeholder="8123456789" class="neo-input wa-input">
+                    </div>
 
-      <p class="contact-label">Butuh bantuan? Hubungi admin</p>
+                    <label class="label"><span>Metode Pembayaran</span><span style="font-size:11px">PILIH SATU</span></label>
+                    <div class="payment-picker" role="group" aria-label="Pilih metode pembayaran">
+                        <button type="button" class="payment-option wallet-toggle selected" id="qrisToggle" aria-expanded="true" aria-controls="qrisOptions" onclick="toggleQrisFolder()">
+                            <span class="wallet-toggle-main">
+                                <span class="wallet-folder-icon"><i data-lucide="qr-code"></i></span>
+                                <span class="payment-copy"><strong>QRIS MUA</strong><small>PILIH PENYEDIA QRIS</small></span>
+                            </span>
+                            <i class="wallet-chevron" data-lucide="chevron-down" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="payment-option wallet-toggle" id="walletToggle" aria-expanded="false" aria-controls="walletOptions" onclick="toggleWalletFolder()">
+                            <span class="wallet-toggle-main">
+                                <span class="wallet-folder-icon"><i data-lucide="wallet"></i></span>
+                                <span class="payment-copy"><strong>E-Wallet</strong><small>PILIH PENYEDIA</small></span>
+                            </span>
+                            <i class="wallet-chevron" data-lucide="chevron-down" aria-hidden="true"></i>
+                        </button>
+                        <div class="wallet-options" id="qrisOptions" role="group" aria-label="Penyedia QRIS MUA">
+                            <button type="button" class="payment-option selected" data-payment="qrisdana" onclick="selectPaymentMethod('qrisdana', this)" aria-pressed="true">
+                                <span class="payment-logo"><img src="/assets/payment-qris.png" alt="Logo QRISDANA"></span>
+                                <span class="payment-copy"><strong>QRIS DANA</strong><small>UTAMA</small></span>
+                            </button>
+                            <button type="button" class="payment-option" data-payment="qris" onclick="selectPaymentMethod('qris', this)" aria-pressed="false">
+                                <span class="payment-logo"><img src="/assets/payment-qris.png" alt="Logo QRIS"></span>
+                                <span class="payment-copy"><strong>QRIS SHOPEE</strong><small>ALTERNATIF KEDUA</small></span>
+                            </button>
+                        </div>
+                        <div class="wallet-options" id="walletOptions" hidden role="group" aria-label="Penyedia E-Wallet">
+                            <button type="button" class="payment-option" data-payment="shopeepay" onclick="selectPaymentMethod('shopeepay', this)" aria-pressed="false">
+                                <span class="payment-logo" style="background:#ee4d2d"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M8 11h16l1.5 15h-19L8 11Z" fill="white"/><path d="M12 12V9a4 4 0 0 1 8 0v3" stroke="white" stroke-width="2.5" stroke-linecap="round"/><path d="M12.5 18c.6-1 1.7-1.5 3.5-1.5 2 0 3.5.8 3.5 2s-1.3 1.8-3.5 2c-2 .2-3.5.9-3.5 2.1 0 1.3 1.5 2 3.7 2 1.5 0 2.8-.5 3.5-1.4" stroke="#ee4d2d" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+                                <span class="payment-copy"><strong>ShopeePay</strong><small>TERSEDIA</small></span>
+                            </button>
+                            <button type="button" class="payment-option" disabled aria-label="DANA segera tersedia">
+                                <span class="payment-logo"><img src="/assets/payment-dana.webp" alt="Logo DANA"></span>
+                                <span class="payment-copy"><strong>DANA</strong><small class="coming-badge">COMING SOON</small></span>
+                            </button>
+                            <button type="button" class="payment-option" disabled aria-label="OVO segera tersedia">
+                                <span class="payment-logo"><img src="/assets/payment-ovo.png" alt="Logo OVO"></span>
+                                <span class="payment-copy"><strong>OVO</strong><small class="coming-badge">COMING SOON</small></span>
+                            </button>
+                            <button type="button" class="payment-option" disabled aria-label="GoPay segera tersedia">
+                                <span class="payment-logo"><img src="/assets/payment-gopay.jpg" alt="Logo GoPay"></span>
+                                <span class="payment-copy"><strong>GoPay</strong><small class="coming-badge">COMING SOON</small></span>
+                            </button>
+                            <p class="payment-hint">ShopeePay sudah tersedia. DANA, OVO, dan GoPay akan segera hadir.</p>
+                        </div>
+                    </div>
 
-      <a
-        class="contact"
-        href="https://wa.me/6287767510608"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Hubungi admin melalui WhatsApp"
-      >
-        <span>WhatsApp Admin ↗</span>
-        <span class="arrow" aria-hidden="true">→</span>
-      </a>
-    </section>
+                    <label class="label"><span>Nominal Donasi (Rp)</span></label>
+                    <input type="number" id="amount" placeholder="10000" required min="100" class="neo-input" oninput="updateTierBadge(this.value)">
+                    <div class="preset-grid">
+                        <button type="button" class="preset-btn" onclick="setNominal(5000)">5K</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(10000)">10K</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(25000)">25K</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(50000)">50K</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(100000)">100K</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(250000)">250K</button>
+                    </div>
 
-    <footer class="footer">
-      © <span id="year"></span> KAXEL — Thanks for your patience.
-    </footer>
-  </main>
+                    <label class="label"><span>Pilih Stiker Reaksi</span></label>
+                    <div class="emoji-grid">
+                        <button type="button" class="emoji-btn selected" data-reaction="support" onclick="selectReaction('support', this)" aria-label="Dukungan"><i data-lucide="heart-handshake"></i></button>
+                        <button type="button" class="emoji-btn" data-reaction="heart" onclick="selectReaction('heart', this)" aria-label="Apresiasi"><i data-lucide="heart"></i></button>
+                        <button type="button" class="emoji-btn" data-reaction="rocket" onclick="selectReaction('rocket', this)" aria-label="Semangat"><i data-lucide="rocket"></i></button>
+                        <button type="button" class="emoji-btn" data-reaction="coffee" onclick="selectReaction('coffee', this)" aria-label="Traktir kopi"><i data-lucide="coffee"></i></button>
+                        <button type="button" class="emoji-btn" data-reaction="crown" onclick="selectReaction('crown', this)" aria-label="VIP"><i data-lucide="crown"></i></button>
+                    </div>
 
-  <script>
-    document.getElementById("year").textContent =
-      new Date().getFullYear();
-  </script>
+                    <label class="label"><span>Pesan / Dukungan</span></label>
+                    <textarea id="notes" rows="2" placeholder="Semangat terus Kaxel!" class="neo-input"></textarea>
+
+                    <button type="submit" id="submitBtn" class="neo-btn"><i data-lucide="qr-code"></i> BUAT QRIS SEKARANG</button>
+                </form>
+
+                <div id="qrSection" class="hidden">
+                    <div class="session-banner">
+                        Sesi otomatis tersimpan. Anda dapat membuka aplikasi bank atau dompet digital.
+                    </div>
+
+                    <div class="qr-frame" id="qrFrame">
+                        <img id="qrImage" src="" alt="QRIS">
+                    </div>
+                    <div class="timer-badge" id="countdown" style="margin-bottom:14px">SISA WAKTU: 20:00</div>
+                    <div id="paymentInstructions" class="payment-instructions hidden"></div>
+
+                    <div class="info-list">
+                        <p>
+                            <span>ID TRX</span>
+                            <span>
+                                <span id="trxId"></span>
+                                <button type="button" onclick="copyTrxId()" style="background:#ffde59; border:2px solid #000; padding:1px 6px; font-weight:900; font-size:11px; cursor:pointer;">SALIN</button>
+                            </span>
+                        </p>
+                        <p><span>NOMINAL</span> <span id="trxAmount"></span></p>
+                        <p><span>BIAYA ADMIN</span> <span id="trxFee"></span></p>
+                        <p style="font-size: 16px; background: #c1ff72; padding: 6px; border: 2px solid #000; margin-top: 4px;">
+                            <span>TOTAL BAYAR</span> <span id="trxTotal"></span>
+                        </p>
+                    </div>
+
+                    <div class="action-row">
+                        <button type="button" id="qrDownloadBtn" onclick="downloadQrOnly()" class="neo-btn blue icon-btn"><i data-lucide="download"></i> UNDUH QR CODE</button>
+                        <button type="button" onclick="downloadInvoice()" class="neo-btn icon-btn"><i data-lucide="file-text"></i> UNDUH INVOICE</button>
+                        <button type="button" id="cancelBtn" class="neo-btn red icon-btn"><i data-lucide="x-circle"></i> BATALKAN</button>
+                    </div>
+                    
+                    
+                </div>
+
+                <div id="resultSection" class="hidden" style="text-align: center; padding: 16px 0;">
+                    <div id="resultIcon" style="display:grid;place-items:center;margin:0 auto 12px;width:64px;height:64px;color:#111"><i data-lucide="check-circle" style="width:56px;height:56px"></i></div>
+                    <h2 id="resultTitle" style="font-size: 24px; font-weight: 900; text-transform: uppercase; margin-bottom: 12px;"></h2>
+                    <p id="resultDesc" class="feed-item" style="font-weight: 700; margin-bottom: 20px;"></p>
+                    <button onclick="resetUI()" class="neo-btn blue">BUAT DONASI BARU</button>
+                </div>
+            </div>
+
+            <div id="tab-leaderboard" class="hidden">
+                <div id="leaderboardList">Memuat data...</div>
+            </div>
+
+            <div id="tab-feed" class="hidden">
+                <div id="feedList">Memuat riwayat...</div>
+            </div>
+
+            <div id="tab-chat" class="hidden">
+                <div class="comment-panel">
+                    <div class="icon-btn"><i data-lucide="messages-square"></i><strong>LIVE CHAT ADMIN</strong></div>
+                    <p style="margin:8px 0 12px">Kirim pesan ke admin dan lihat balasannya di sini. Percakapan terhubung ke transaksi terakhir di perangkat ini.</p>
+                    <div id="chatUnavailable" class="empty-state">Buat transaksi donasi terlebih dahulu agar chat dapat terhubung.</div>
+                    <div id="commentList">Memuat percakapan...</div>
+                    <textarea id="donorMessage" rows="3" maxlength="1000" placeholder="Tulis pesan untuk admin..."></textarea>
+                    <button type="button" class="neo-btn" onclick="sendDonorMessage()">KIRIM PESAN</button>
+                    <div class="notice-panel" style="margin-top:14px"><div class="icon-btn"><i data-lucide="bell-ring"></i><strong>NOTIFIKASI</strong></div><button type="button" class="neo-btn" onclick="enableNotifications()">IZINKAN NOTIFIKASI HP</button><div id="notificationList">Belum ada notifikasi.</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'kaxel_active_donation_v2'
+        let pollTimer = null
+        let countdownTimer = null
+        let currentTrx = null
+        let selectedEmoji = 'support'
+        let selectedPaymentMethod = 'qrisdana'
+        const AUTH_KEY = 'kaxel_user_token_v1'
+        let authToken = localStorage.getItem(AUTH_KEY) || ''
+        let authUser = null
+        let otpChallengeId = ''
+        let otpPhone = ''
+        let anonymousMode = false
+
+        const formatRp = (num) => 'Rp' + Number(num).toLocaleString('id-ID')
+
+        const showRegister = () => { document.getElementById('registerPanel').classList.remove('hidden'); document.getElementById('registerName').focus() }
+        const continueAnonymous = () => { anonymousMode = true; authToken = ''; authUser = null; localStorage.removeItem(AUTH_KEY); document.getElementById('accountGate').classList.add('hidden'); document.getElementById('donateForm').classList.remove('hidden'); document.getElementById('name').value = 'Anonim'; document.getElementById('name').readOnly = true; document.getElementById('waNumber').value = ''; document.getElementById('accountStatus').textContent = 'Kamu berdonasi sebagai anonim. Biaya mengikuti konfigurasi ENV.' }
+        const requestOtp = async () => {
+            const name = document.getElementById('registerName').value.trim()
+            let phone = document.getElementById('registerPhone').value.replace(/\D/g, '')
+            if (phone.startsWith('0')) phone = phone.slice(1)
+            phone = document.getElementById('registerCountry').value + phone
+            if (!name || phone.length < 8) { document.getElementById('registerMessage').textContent = 'Isi nama dan nomor WhatsApp yang valid.'; return }
+            const btn = document.getElementById('requestOtpBtn'); btn.disabled = true; btn.textContent = 'MENGIRIM OTP...'
+            try { const res = await fetch('/api/auth/request-otp', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name, phone}) }); const json = await res.json(); document.getElementById('registerMessage').textContent = json.message || 'Gagal meminta OTP.'; if (json.success) { otpChallengeId = json.challengeId; otpPhone = phone; document.getElementById('otpPanel').classList.remove('hidden') } }
+            catch (e) { document.getElementById('registerMessage').textContent = 'Server tidak dapat dihubungi.' }
+            finally { btn.disabled = false; btn.textContent = 'KIRIM OTP WHATSAPP' }
+        }
+        const verifyOtp = async () => {
+            const otp = document.getElementById('registerOtp').value.trim()
+            try { const res = await fetch('/api/auth/verify-otp', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({phone:otpPhone, challengeId:otpChallengeId, otp}) }); const json = await res.json(); if (!json.success) { document.getElementById('registerMessage').textContent = json.message || 'OTP salah.'; return } authToken = json.token; authUser = json.user; localStorage.setItem(AUTH_KEY, authToken); anonymousMode = false; document.getElementById('accountGate').classList.add('hidden'); document.getElementById('donateForm').classList.remove('hidden'); document.getElementById('name').value = authUser.name; document.getElementById('name').readOnly = true; document.getElementById('waNumber').value = ''; document.getElementById('accountStatus').textContent = `Login sebagai ${authUser.name} (${authUser.phone}). Biaya layanan 0,3%.`; showAlert('Pendaftaran berhasil!') }
+            catch (e) { document.getElementById('registerMessage').textContent = 'Verifikasi gagal terhubung ke server.' }
+        }
+        const loadAuthUser = async () => { if (!authToken) return; try { const res = await fetch('/api/auth/me', {headers:{Authorization:`Bearer ${authToken}`}}); const json = await res.json(); if (!json.success) { localStorage.removeItem(AUTH_KEY); authToken=''; return } authUser=json.user; document.getElementById('accountGate').classList.add('hidden'); document.getElementById('donateForm').classList.remove('hidden'); document.getElementById('name').value=authUser.name; document.getElementById('name').readOnly=true; document.getElementById('accountStatus').textContent=`Login sebagai ${authUser.name} (${authUser.phone}). Biaya layanan 0,3%.` } catch(e) {} }
+
+        const playSuccessSound = () => {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)()
+                const notes = [523.25, 659.25, 783.99, 1046.50]
+                notes.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator()
+                    const gain = ctx.createGain()
+                    osc.type = 'triangle'
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.12)
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime + idx * 0.12)
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.12 + 0.35)
+                    osc.connect(gain)
+                    gain.connect(ctx.destination)
+                    osc.start(ctx.currentTime + idx * 0.12)
+                    osc.stop(ctx.currentTime + idx * 0.12 + 0.35)
+                })
+            } catch (e) {}
+        }
+
+        const updateTierBadge = (val) => {
+            const num = parseInt(val) || 0
+            const badge = document.getElementById('tierBadge')
+            if (num >= 100000) {
+                badge.textContent = 'VIP SUPPORTER'
+                badge.style.background = '#ff914d'
+            } else if (num >= 25000) {
+                badge.textContent = 'PRO SUPPORTER'
+                badge.style.background = '#5ce1e6'
+            } else {
+                badge.textContent = 'TRAKTIR KOPI'
+                badge.style.background = '#c1ff72'
+            }
+        }
+
+        const showAlert = (msg) => {
+            const box = document.getElementById('alertBox')
+            box.textContent = msg
+            box.classList.remove('hidden')
+            setTimeout(() => box.classList.add('hidden'), 4000)
+        }
+
+        const setNominal = (val) => {
+            document.getElementById('amount').value = val
+            updateTierBadge(val)
+        }
+
+        const isQrMethod = method => ['qrisdana', 'qris'].includes(String(method || '').toLowerCase())
+
+        const toggleQrisFolder = () => {
+            const toggle = document.getElementById('qrisToggle')
+            const options = document.getElementById('qrisOptions')
+            const expanded = toggle.getAttribute('aria-expanded') === 'true'
+            toggle.setAttribute('aria-expanded', String(!expanded))
+            options.hidden = expanded
+            toggle.classList.toggle('selected', isQrMethod(selectedPaymentMethod))
+            if (window.lucide) lucide.createIcons()
+        }
+
+        const toggleWalletFolder = () => {
+            const toggle = document.getElementById('walletToggle')
+            const options = document.getElementById('walletOptions')
+            const expanded = toggle.getAttribute('aria-expanded') === 'true'
+            toggle.setAttribute('aria-expanded', String(!expanded))
+            options.hidden = expanded
+            toggle.classList.toggle('selected', selectedPaymentMethod === 'shopeepay')
+            if (window.lucide) lucide.createIcons()
+        }
+
+        const selectPaymentMethod = (method, el) => {
+            selectedPaymentMethod = method
+            document.querySelectorAll('.payment-option[data-payment]').forEach(button => {
+                const active = button.dataset.payment === method
+                button.classList.toggle('selected', active)
+                button.setAttribute('aria-pressed', String(active))
+            })
+            const qrisToggle = document.getElementById('qrisToggle')
+            const qrisOptions = document.getElementById('qrisOptions')
+            const walletToggle = document.getElementById('walletToggle')
+            const walletOptions = document.getElementById('walletOptions')
+            const isQr = isQrMethod(method)
+            if (qrisToggle && qrisOptions) {
+                qrisToggle.classList.toggle('selected', isQr)
+                qrisToggle.setAttribute('aria-expanded', String(isQr))
+                qrisOptions.hidden = !isQr
+            }
+            if (walletToggle && walletOptions) {
+                walletToggle.classList.toggle('selected', method === 'shopeepay')
+                walletToggle.setAttribute('aria-expanded', String(method === 'shopeepay'))
+                walletOptions.hidden = method !== 'shopeepay'
+            }
+            const btn = document.getElementById('submitBtn')
+            btn.innerHTML = isQr ? '<i data-lucide="qr-code"></i> BUAT QRIS SEKARANG' : '<i data-lucide="wallet"></i> LANJUT KE SHOPEEPAY'
+            if (window.lucide) lucide.createIcons()
+        }
+
+        const selectReaction = (reaction, el) => {
+            selectedEmoji = reaction
+            document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'))
+            el.classList.add('selected')
+        }
+
+        const switchTab = (tab, btn) => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'))
+            btn.classList.add('active')
+
+            document.getElementById('tab-donate').classList.add('hidden')
+            document.getElementById('tab-leaderboard').classList.add('hidden')
+            document.getElementById('tab-feed').classList.add('hidden')
+            document.getElementById('tab-chat').classList.add('hidden')
+            document.getElementById(`tab-${tab}`).classList.remove('hidden')
+            if (tab === 'chat') refreshConversation()
+
+            if (tab !== 'donate') loadPublicStats()
+            if (window.lucide) lucide.createIcons()
+        }
+
+        let lastDonationKey = null
+        let statsInitialized = false
+        let liveToastTimer = null
+
+        const hideLiveDonationToast = () => {
+            const toast = document.getElementById('liveDonationToast')
+            toast.hidden = true
+            if (liveToastTimer) clearTimeout(liveToastTimer)
+        }
+
+        const showLiveDonationToast = (donation) => {
+            const toast = document.getElementById('liveDonationToast')
+            document.getElementById('toastTitle').textContent = `${donation.name || 'Anonim'} baru saja berdonasi ${formatRp(donation.amount)}`
+            document.getElementById('toastDescription').textContent = donation.notes ? `“${donation.notes}”` : 'Terima kasih atas dukungannya!'
+            document.getElementById('toastTime').textContent = 'Donasi berhasil diterima'
+            toast.hidden = false
+            if (liveToastTimer) clearTimeout(liveToastTimer)
+            liveToastTimer = setTimeout(() => { toast.hidden = true }, 7000)
+        }
+
+        const loadPublicStats = async () => {
+            try {
+                const res = await fetch('/api/public-stats', { cache: 'no-store' })
+                if (!res.ok) throw new Error('Gagal memuat statistik')
+                const json = await res.json()
+
+                if (json.goal) {
+                    const pct = json.goal.target > 0 ? Math.min(100, Math.round((json.goal.current / json.goal.target) * 100)) : 0
+                    document.getElementById('goalTitle').textContent = ' ' + json.goal.title
+                    document.getElementById('goalNumbers').textContent = `${formatRp(json.goal.current)} / ${formatRp(json.goal.target)}`
+                    document.getElementById('goalFill').style.width = pct + '%'
+                    document.getElementById('goalPercent').textContent = `${pct}% TERCAPAI`
+                }
+
+                const recent = Array.isArray(json.recent) ? json.recent : []
+                const ticker = document.getElementById('marqueeText')
+                if (ticker) {
+                    const tickerItems = recent.slice(0, 5).map(r => `${r.name || 'Anonim'} baru saja berdonasi ${formatRp(r.amount)}${r.notes ? ` (“${r.notes}”)` : ''}`).join('  •  ')
+                    ticker.textContent = tickerItems ? `DONASI TERBARU  •  ${tickerItems}  •  TERIMA KASIH ATAS DUKUNGANNYA!` : 'LIVE FEED  •  Jadilah pendukung pertama Kaxel Support!'
+                }
+
+                const newest = recent[0]
+                const newestKey = newest ? [newest.name, newest.amount, newest.notes, newest.paidAt].join('|') : null
+                if (statsInitialized && newest && newestKey && newestKey !== lastDonationKey) showLiveDonationToast(newest)
+                lastDonationKey = newestKey
+                statsInitialized = true
+
+                const lbEl = document.getElementById('leaderboardList')
+                if (!json.leaderboard || json.leaderboard.length === 0) {
+                    lbEl.innerHTML = '<div class="feed-item empty-state">Belum ada data supporter. Jadilah Sultan pertama!</div>'
+                } else {
+                    lbEl.innerHTML = json.leaderboard.map((u, idx) => `
+                        <div class="feed-item leaderboard-row">
+                            <div class="leaderboard-name"><span class="leader-rank">${idx === 0 ? '♛' : '#' + (idx + 1)}</span><span>${escapePublicText(u.name)}</span><small>(${Number(u.count) || 0}x)</small></div>
+                            <div class="feed-amount">${formatRp(u.total)}</div>
+                        </div>
+                    `).join('')
+                }
+
+                const feedEl = document.getElementById('feedList')
+                const transactions = Array.isArray(json.transactions) ? json.transactions : recent.map(r => ({...r, status: 'success'}))
+                if (!transactions.length) {
+                    feedEl.innerHTML = '<div class="feed-item empty-state">Belum ada riwayat transaksi.</div>'
+                } else {
+                    feedEl.innerHTML = transactions.map(r => {
+                        const status = String(r.status || 'success').toLowerCase()
+                        const statusLabel = ['success', 'sukses', 'paid'].includes(status) ? 'BERHASIL' : status === 'pending' ? 'MENUNGGU' : status === 'expired' ? 'KEDALUWARSA' : status === 'cancelled' || status === 'canceled' ? 'DIBATALKAN' : status.toUpperCase()
+                        const dateValue = r.paidAt || r.createdAt
+                        const dateLabel = dateValue ? new Date(dateValue).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : 'Waktu tidak tersedia'
+                        const reactionIcons = { support: '🤝', heart: '❤️', rocket: '🚀', coffee: '☕', crown: '👑' }
+                        return `<div class="feed-item transaction-row"><div class="feed-header"><span class="transaction-name">${reactionIcons[r.emoji] || '🤝'} ${escapePublicText(r.name || 'Anonim')}</span><span class="feed-amount">${formatRp(r.amount)}</span></div><div class="transaction-meta"><span class="transaction-status status-${status.replace(/[^a-z]/g, '')}">${statusLabel}</span><span>${escapePublicText(r.transactionId || '')}</span></div><div class="feed-notes">${escapePublicText(r.notes || 'Dukungan untuk kreator')}</div><small class="transaction-date">${dateLabel}</small></div>`
+                    }).join('')
+                }
+                if (window.lucide) lucide.createIcons()
+            } catch (e) {
+                const lbEl = document.getElementById('leaderboardList')
+                const feedEl = document.getElementById('feedList')
+                if (lbEl && lbEl.textContent.trim() === 'Memuat data...') lbEl.innerHTML = '<div class="feed-item empty-state">Data Sultan belum dapat dimuat. Coba muat ulang halaman.</div>'
+                if (feedEl && feedEl.textContent.trim() === 'Memuat riwayat...') feedEl.innerHTML = '<div class="feed-item empty-state">Riwayat belum dapat dimuat. Coba muat ulang halaman.</div>'
+            }
+        }
+
+        const escapePublicText = (value) => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))
+
+        const saveSession = (trx) => {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(trx))
+            } catch (e) {}
+        }
+
+        const clearSession = () => {
+            try {
+                localStorage.removeItem(STORAGE_KEY)
+            } catch (e) {}
+        }
+
+        const checkSavedSession = () => {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY)
+                if (!raw) return
+                const saved = JSON.parse(raw)
+                if (!saved || !saved.transactionId) return
+
+                if (Date.now() > new Date(saved.expiredAt).getTime()) {
+                    clearSession()
+                    return
+                }
+
+                currentTrx = saved
+                showQrScreen(currentTrx)
+                startPolling()
+            } catch (e) {
+                clearSession()
+            }
+        }
+
+        document.getElementById('donateForm').addEventListener('submit', async (e) => {
+            e.preventDefault()
+            const btn = document.getElementById('submitBtn')
+            btn.disabled = true
+            btn.textContent = isQrMethod(selectedPaymentMethod) ? 'MEMPROSES QRIS...' : 'MEMPROSES SHOPEEPAY...'
+
+            const code = document.getElementById('countryCode').value
+            let rawPhone = document.getElementById('waNumber').value.trim().replace(/[^0-9]/g, '')
+            if (rawPhone.startsWith('0')) rawPhone = rawPhone.slice(1)
+            const fullWhatsapp = rawPhone ? `${code}${rawPhone}` : ''
+
+            const payload = { name: authUser ? authUser.name : 'Anonim', whatsapp: authUser ? authUser.phone : '', amount: document.getElementById('amount').value, notes: document.getElementById('notes').value, emoji: selectedEmoji, paymentMethod: selectedPaymentMethod }
+
+            try {
+                const res = await fetch('/api/donate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}) },
+                    body: JSON.stringify(payload)
+                })
+                const json = await res.json()
+
+                if (!json.success) {
+                    showAlert(json.message)
+                    btn.disabled = false
+                    btn.innerHTML = isQrMethod(selectedPaymentMethod) ? '<i data-lucide="qr-code"></i> BUAT QRIS SEKARANG' : '<i data-lucide="wallet"></i> LANJUT KE SHOPEEPAY'
+                    return
+                }
+
+                currentTrx = json.data
+                saveSession(currentTrx)
+                showQrScreen(currentTrx)
+                startPolling()
+            } catch (err) {
+                showAlert('Gagal menghubungi server.')
+                btn.disabled = false
+                btn.innerHTML = isQrMethod(selectedPaymentMethod) ? '<i data-lucide="qr-code"></i> BUAT QRIS SEKARANG' : '<i data-lucide="wallet"></i> LANJUT KE SHOPEEPAY'
+            }
+        })
+
+        const showQrScreen = (trx) => {
+            document.getElementById('donateForm').classList.add('hidden')
+            document.getElementById('resultSection').classList.add('hidden')
+            document.getElementById('qrSection').classList.remove('hidden')
+            
+
+            const isQr = isQrMethod(trx.paymentMethod || 'qris') && Boolean(trx.qrImage)
+            document.getElementById('qrFrame').classList.toggle('hidden', !isQr)
+            document.getElementById('qrDownloadBtn').classList.toggle('hidden', !isQr)
+            document.getElementById('paymentInstructions').classList.toggle('hidden', isQr)
+            document.getElementById('qrImage').src = trx.qrImage || ''
+            if (!isQr) {
+                const details = trx.accountDetails || {}
+                document.getElementById('paymentInstructions').innerHTML = `<div class="icon-btn"><i data-lucide="wallet"></i><strong>PEMBAYARAN SHOPEEPAY</strong></div><p>Transaksi berhasil dibuat. Lanjutkan melalui halaman pembayaran Betabotz Paygate untuk mengikuti instruksi resmi.</p>${details.accountNumber ? `<div class="payment-detail"><strong>Nomor tujuan</strong><span>${escapeHtml(details.accountNumber)}</span></div>` : ''}${details.accountName ? `<div class="payment-detail"><strong>Nama tujuan</strong><span>${escapeHtml(details.accountName)}</span></div>` : ''}${details.additionalInfo ? `<div class="payment-detail"><strong>Informasi</strong><span>${escapeHtml(details.additionalInfo)}</span></div>` : ''}${trx.paymentUrl ? `<a class="neo-btn blue icon-btn" href="${escapeHtml(trx.paymentUrl)}" target="_blank" rel="noopener noreferrer" style="display:flex;text-decoration:none;color:#000;justify-content:center"><i data-lucide="external-link"></i> BUKA HALAMAN PEMBAYARAN</a>` : '<p>Halaman pembayaran tidak tersedia. Hubungi admin.</p>'}`
+                if (window.lucide) lucide.createIcons()
+            }
+            document.getElementById('trxId').textContent = trx.transactionId
+            document.getElementById('trxAmount').textContent = formatRp(trx.amount)
+            document.getElementById('trxFee').textContent = formatRp(trx.fee)
+            document.getElementById('trxTotal').textContent = formatRp(trx.totalAmount)
+            refreshConversation()
+
+            if (countdownTimer) clearInterval(countdownTimer)
+            const expTime = new Date(trx.expiredAt).getTime()
+            const updateClock = () => {
+                const diff = Math.max(0, Math.floor((expTime - Date.now()) / 1000))
+                const m = String(Math.floor(diff / 60)).padStart(2, '0')
+                const s = String(diff % 60).padStart(2, '0')
+                document.getElementById('countdown').textContent = `SISA WAKTU: ${m}:${s}`
+                if (diff <= 0) clearInterval(countdownTimer)
+            }
+            updateClock()
+            countdownTimer = setInterval(updateClock, 1000)
+        }
+
+        const copyTrxId = () => {
+            if (!currentTrx) return
+            navigator.clipboard.writeText(currentTrx.transactionId)
+            showAlert('ID Transaksi berhasil disalin!')
+        }
+
+
+        const downloadQrOnly = () => {
+            if (!currentTrx) return
+            const a = document.createElement('a')
+            if (!currentTrx.qrImage) return showAlert('QR Code hanya tersedia untuk metode QRIS.')
+            a.href = currentTrx.qrImage
+            a.download = `QRIS-Kaxel-${currentTrx.transactionId}.png`
+            a.click()
+        }
+
+        const enableNotifications = async () => {
+            if (!('Notification' in window)) return showAlert('Browser ini tidak mendukung notifikasi perangkat.')
+            const permission = await Notification.requestPermission()
+            showAlert(permission === 'granted' ? 'Notifikasi perangkat diaktifkan.' : 'Izin notifikasi tidak diberikan. Notifikasi website tetap tersedia.')
+        }
+
+        const refreshConversation = async () => {
+            const unavailable = document.getElementById('chatUnavailable')
+            if (authToken && authUser) {
+                if (unavailable) unavailable.hidden = true
+                try { const res = await fetch('/api/user/chat', { headers: { Authorization: `Bearer ${authToken}` } }); const json = await res.json(); if (!json.success) throw new Error(json.message); const messages = json.messages || []; document.getElementById('commentList').innerHTML = messages.map(c => `<div class="comment-item"><strong>${escapeHtml(c.sender === 'admin' ? 'Admin Kaxel' : authUser.name)}</strong><p>${escapeHtml(c.message)}</p><small>${new Date(c.createdAt).toLocaleString('id-ID')}</small></div>`).join('') || 'Belum ada pesan. Mulai percakapan dengan admin.'; document.getElementById('notificationList').innerHTML = 'Status transaksi dan informasi donasi akan tampil di sini setelah transaksi dibuat.'; return } catch (e) { if (unavailable) { unavailable.hidden = false; unavailable.textContent = 'Login menggunakan WhatsApp untuk menggunakan live chat admin.' } return }
+            }
+            if (!currentTrx) { if (unavailable) { unavailable.hidden = false; unavailable.textContent = 'Login menggunakan WhatsApp untuk live chat, atau buat transaksi untuk chat terkait transaksi.' } return }
+            if (unavailable) unavailable.hidden = true
+            try { const [commentsRes, notificationsRes] = await Promise.all([fetch(`/api/comments/${currentTrx.transactionId}?key=${encodeURIComponent(currentTrx.accessKey)}`), fetch(`/api/notifications/${currentTrx.transactionId}?key=${encodeURIComponent(currentTrx.accessKey)}`)]); const commentsJson = await commentsRes.json(); const notificationsJson = await notificationsRes.json(); const comments = commentsJson.comments || []; document.getElementById('commentList').innerHTML = comments.length ? comments.map(c => `<div class="comment-item"><strong>${escapeHtml(c.senderName || 'Donatur')}</strong><p>${escapeHtml(c.message)}</p><small>${new Date(c.createdAt).toLocaleString('id-ID')}</small>${(c.replies || []).map(r => `<div class="comment-item"><strong>${escapeHtml(r.senderName || 'Admin Kaxel')}</strong><p>${escapeHtml(r.message)}</p><small>${new Date(r.createdAt).toLocaleString('id-ID')}</small></div>`).join('')}</div>`).join('') : 'Belum ada pesan.'; const notices = notificationsJson.notifications || []; document.getElementById('notificationList').innerHTML = notices.length ? notices.slice(0,8).map(n => `<div class="notice-item"><strong>${escapeHtml(n.title)}</strong><p>${escapeHtml(n.message)}</p><small>${new Date(n.createdAt).toLocaleString('id-ID')}</small></div>`).join('') : 'Belum ada notifikasi.' } catch(e) {}
+        }
+
+        const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))
+
+        const sendDonorMessage = async () => {
+            if (authToken && authUser) { const field = document.getElementById('donorMessage'); const message = field.value.trim(); if (!message) return showAlert('Tulis pesan terlebih dahulu.'); try { const res = await fetch('/api/user/chat', { method:'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${authToken}`}, body:JSON.stringify({message}) }); const json = await res.json(); if (!json.success) return showAlert(json.message || 'Pesan gagal dikirim.'); field.value=''; await refreshConversation(); showAlert('Pesan berhasil dikirim ke admin.'); return } catch(e) { return showAlert('Chat gagal terhubung ke server.') } }
+            if (!currentTrx) return showAlert('Login WhatsApp untuk live chat admin.')
+            const field = document.getElementById('donorMessage')
+            const message = field.value.trim()
+            if (!message) return showAlert('Tulis pesan terlebih dahulu.')
+            let res, json
+            try {
+                res = await fetch('/api/comments', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ transactionId: currentTrx.transactionId, key: currentTrx.accessKey, message }) })
+                json = await res.json()
+            } catch (e) { return showAlert('Pesan gagal terhubung ke server. Coba lagi.') }
+            if (!json.success) return showAlert(json.message || 'Pesan gagal dikirim.')
+            field.value = ''
+            refreshConversation()
+            showAlert('Pesan berhasil dikirim ke admin.')
+        }
+
+        const downloadInvoice = async () => {
+            if (!currentTrx) return
+            try {
+                const res = await fetch(`/api/invoice/${currentTrx.transactionId}?key=${encodeURIComponent(currentTrx.accessKey)}`)
+                if (!res.ok) throw new Error('Invoice tidak dapat dibuat.')
+                const blob = await res.blob()
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `Invoice-${currentTrx.transactionId}.html`
+                a.click()
+                URL.revokeObjectURL(url)
+            } catch (e) { showAlert('Gagal mengunduh invoice.') }
+        }
+
+        const downloadQrCard = () => {
+            if (!currentTrx) return
+            const canvas = document.createElement('canvas')
+            canvas.width = 600
+            canvas.height = 780
+            const ctx = canvas.getContext('2d')
+
+            ctx.fillStyle = '#ffde59'
+            ctx.fillRect(0, 0, 600, 780)
+            ctx.lineWidth = 12
+            ctx.strokeStyle = '#000'
+            ctx.strokeRect(6, 6, 588, 768)
+
+            ctx.fillStyle = '#ff5757'
+            ctx.fillRect(40, 35, 520, 70)
+            ctx.lineWidth = 6
+            ctx.strokeRect(40, 35, 520, 70)
+
+            ctx.fillStyle = '#fff'
+            ctx.font = '900 32px sans-serif'
+            ctx.textAlign = 'center'
+            ctx.fillText(`KAXEL SUPPORT ${(currentTrx.paymentMethod || 'qris').toUpperCase()}`, 300, 82)
+
+            ctx.fillStyle = '#fff'
+            ctx.fillRect(75, 130, 450, 450)
+            ctx.strokeRect(75, 130, 450, 450)
+
+            const img = new Image()
+            img.onload = () => {
+                ctx.drawImage(img, 95, 150, 410, 410)
+
+                ctx.fillStyle = '#c1ff72'
+                ctx.fillRect(40, 605, 520, 75)
+                ctx.strokeRect(40, 605, 520, 75)
+
+                ctx.fillStyle = '#000'
+                ctx.font = '900 28px sans-serif'
+                ctx.fillText(`TOTAL BAYAR: ${formatRp(currentTrx.totalAmount)}`, 300, 653)
+
+                ctx.font = '700 18px monospace'
+                ctx.fillText(`ID: ${currentTrx.transactionId} | Dari: ${currentTrx.name || 'Anonim'}`, 300, 725)
+
+                const a = document.createElement('a')
+                a.href = canvas.toDataURL('image/png')
+                a.download = `Invoice-Kaxel-${currentTrx.transactionId}.png`
+                a.click()
+            }
+            if (!currentTrx.qrImage) return showAlert('Kartu QR hanya tersedia untuk metode QRIS.')
+            img.src = currentTrx.qrImage
+        }
+
+        const startPolling = () => {
+            if (pollTimer) clearTimeout(pollTimer)
+
+            const poll = async () => {
+                if (!currentTrx) return
+                refreshConversation()
+
+                try {
+                    const res = await fetch(`/api/status/${currentTrx.transactionId}?key=${currentTrx.accessKey}`)
+                    const json = await res.json()
+
+                    if (json.success && json.data) {
+                        const status = json.data.status
+                        const isExpired = Date.now() > new Date(currentTrx.expiredAt).getTime()
+
+                        if (status === 'sukses' || status === 'success') {
+                            playSuccessSound()
+                            if (typeof confetti === 'function') {
+                                confetti({ particleCount: 140, spread: 90, origin: { y: 0.6 } })
+                            }
+                            loadPublicStats()
+                            return showResult('check-circle', 'DONASI DITERIMA!', `Terima kasih banyak ${currentTrx.name || ''} atas dukungan sebesar ${formatRp(currentTrx.amount)}!`)
+                        }
+                        if (status === 'expired' || isExpired) {
+                            return showResult('clock', 'WAKTU HABIS', 'QRIS sudah kadaluarsa, silakan buat transaksi baru.')
+                        }
+                        if (status === 'cancel' || status === 'cancelled') {
+                            return showResult('x-circle', 'DIBATALKAN', 'Transaksi donasi telah dibatalkan.')
+                        }
+                    }
+                } catch (e) {}
+
+                pollTimer = setTimeout(poll, 1500)
+            }
+
+            poll()
+        }
+
+        document.getElementById('cancelBtn').addEventListener('click', async () => {
+            if (!currentTrx) return
+            const btn = document.getElementById('cancelBtn')
+            btn.disabled = true
+            btn.textContent = 'MEMBATALKAN...'
+
+            try {
+                await fetch(`/api/cancel/${currentTrx.transactionId}`, { method: 'POST' })
+                showResult('x-circle', 'DIBATALKAN', 'Transaksi berhasil dibatalkan.')
+            } catch (e) {
+                showAlert('Gagal membatalkan transaksi.')
+                btn.disabled = false
+                btn.textContent = 'BATALKAN'
+            }
+        })
+
+        const showResult = (icon, title, desc) => {
+            if (pollTimer) clearTimeout(pollTimer)
+            if (countdownTimer) clearInterval(countdownTimer)
+            clearSession()
+            currentTrx = null
+            document.getElementById('qrSection').classList.add('hidden')
+            document.getElementById('resultSection').classList.remove('hidden')
+            document.getElementById('resultIcon').innerHTML = `<i data-lucide="${icon}" style="width:56px;height:56px"></i>`
+            if (window.lucide) lucide.createIcons()
+            document.getElementById('resultTitle').textContent = title
+            document.getElementById('resultDesc').textContent = desc
+        }
+
+        const resetUI = () => {
+            clearSession()
+            document.getElementById('resultSection').classList.add('hidden')
+            document.getElementById('donateForm').classList.remove('hidden')
+            document.getElementById('donateForm').reset()
+            if (authUser) { document.getElementById('name').value = authUser.name; document.getElementById('name').readOnly = true } else { document.getElementById('name').value = 'Anonim'; document.getElementById('name').readOnly = true }
+            updateTierBadge(0)
+            const btn = document.getElementById('submitBtn')
+            btn.disabled = false
+            btn.innerHTML = isQrMethod(selectedPaymentMethod) ? '<i data-lucide="qr-code"></i> BUAT QRIS SEKARANG' : '<i data-lucide="wallet"></i> LANJUT KE SHOPEEPAY'
+            const cBtn = document.getElementById('cancelBtn')
+            cBtn.disabled = false
+            cBtn.textContent = 'BATALKAN'
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons()
+            loadPublicStats()
+            checkSavedSession()
+        loadAuthUser()
+            setInterval(loadPublicStats, 15000)
+            setInterval(() => { if (currentTrx || (authUser && !document.getElementById('tab-chat').classList.contains('hidden'))) refreshConversation() }, 5000)
+        })
+    </script>
 </body>
 </html>
