@@ -4,485 +4,1520 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KAXEL SUPPORT</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;900&family=JetBrains+Mono:wght@600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            color-scheme: light;
+            --paper: #fdf9f1;
+            --ink: #18181b;
+            --orange: #f59e0b;
+            --orange-soft: #fef3c7;
+            --mint: #10b981;
+            --mint-soft: #d1fae5;
+            --sky: #38bdf8;
+            --sky-soft: #e0f2fe;
+            --coral: #f43f5e;
+            --coral-soft: #ffe4e6;
+            --cream: #ffffff;
+            --surface-alt: #f8f5ec;
+            --line: #18181b;
+            --shadow: #18181b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Space Grotesk', sans-serif;
-            background-color: #f4f0ea;
-            background-image: radial-gradient(#000 1.25px, transparent 1.25px);
-            background-size: 20px 20px;
-            color: #000;
+            background-color: var(--paper);
+            background-image: radial-gradient(rgba(24, 24, 27, 0.14) 1px, transparent 1px);
+            background-size: 18px 18px;
+            color: var(--ink);
             min-height: 100vh;
-            padding-bottom: 40px;
+            padding-bottom: 44px;
+            line-height: 1.5;
         }
-        .marquee {
-            background: #000;
-            color: #ffde59;
+
+        /* Topbar & Marquee */
+        .site-topbar {
+            min-height: 54px;
+            background: var(--orange);
+            border-bottom: 2.5px solid var(--line);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px max(16px, calc((100vw - 740px) / 2));
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            box-shadow: 0 2px 0 rgba(0,0,0,0.06);
+        }
+
+        .site-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             font-weight: 900;
-            padding: 8px 0;
-            border-bottom: 4px solid #000;
-            overflow: hidden;
-            white-space: nowrap;
-            font-size: 13px;
-            letter-spacing: 1px;
+            letter-spacing: 0.3px;
+            font-size: 16px;
         }
+
+        .brand-mark {
+            width: 32px;
+            height: 32px;
+            display: grid;
+            place-items: center;
+            border: 2px solid var(--line);
+            border-radius: 9px;
+            background: #fff;
+            font-size: 18px;
+            line-height: 1;
+            box-shadow: 2px 2px 0 var(--shadow);
+        }
+
+        .brand-tag {
+            font-size: 9px;
+            font-weight: 900;
+            letter-spacing: 0.6px;
+            padding: 3px 7px;
+            background: #fff;
+            border: 1.5px solid var(--line);
+            border-radius: 6px;
+            box-shadow: 1px 1px 0 var(--shadow);
+        }
+
+        .topbar-status {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 11px;
+            font-weight: 900;
+            border: 2px solid var(--line);
+            border-radius: 999px;
+            padding: 5px 12px;
+            background: var(--mint-soft);
+            box-shadow: 2px 2px 0 var(--shadow);
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #059669;
+            border-radius: 50%;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.25);
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.15); opacity: 0.8; }
+        }
+
+        .marquee {
+            position: relative;
+            z-index: 8;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 42px;
+            padding: 8px 0;
+            background: #fff3cd;
+            color: var(--ink);
+            border-bottom: 2px solid var(--line);
+            overflow: hidden;
+            font-size: 12.5px;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+        }
+
+        .marquee > i, .marquee > svg {
+            flex: 0 0 auto;
+            margin-left: 14px;
+            width: 16px;
+            height: 16px;
+        }
+
         .marquee span {
             display: inline-block;
             padding-left: 100%;
-            animation: marquee 16s linear infinite;
+            white-space: nowrap;
+            animation: marquee 24s linear infinite;
         }
+
+        .marquee:hover span {
+            animation-play-state: paused;
+        }
+
         @keyframes marquee {
             0% { transform: translate(0, 0); }
             100% { transform: translate(-100%, 0); }
         }
+
+        /* Container & Goal Box */
         .container {
-            max-width: 480px;
-            margin: 28px auto 0;
-            padding: 0 16px;
+            max-width: 740px;
+            margin: 22px auto 0;
+            padding: 0 14px;
         }
+
         .goal-box {
-            background: #fff;
-            border: 4px solid #000;
-            box-shadow: 6px 6px 0px #000;
-            padding: 14px;
-            margin-bottom: 28px;
+            background: var(--cream);
+            border: 2.5px solid var(--line);
+            border-radius: 16px;
+            box-shadow: 4px 4px 0 var(--shadow);
+            padding: 16px 18px;
+            margin-bottom: 24px;
+            position: relative;
         }
+
         .goal-header {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
             font-weight: 900;
-            font-size: 13px;
+            font-size: 12.5px;
             text-transform: uppercase;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
+
         .progress-track {
             width: 100%;
             height: 22px;
-            background: #f4f0ea;
-            border: 3px solid #000;
+            background: #efeae0;
+            border: 2px solid var(--line);
+            border-radius: 999px;
             position: relative;
             overflow: hidden;
         }
+
         .progress-fill {
             height: 100%;
-            background: #7ed957;
-            border-right: 3px solid #000;
+            background: linear-gradient(90deg, #34d399 0%, #10b981 100%);
+            border-right: 2px solid var(--line);
             width: 0%;
-            transition: width 0.5s ease;
+            transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
         }
+
         .progress-text {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 11px;
             font-weight: 900;
+            letter-spacing: 0.4px;
+            color: var(--ink);
+            text-shadow: 0 1px 0 rgba(255,255,255,0.7);
         }
+
+        /* Main Neo Card */
         .neo-card {
-            background: #ffde59;
-            border: 4px solid #000;
-            box-shadow: 8px 8px 0px #000;
-            padding: 24px;
+            background: var(--cream);
+            border: 2.5px solid var(--line);
+            border-radius: 18px;
+            box-shadow: 5px 5px 0 var(--shadow);
+            padding: 22px;
             position: relative;
             margin-bottom: 24px;
         }
+
         .card-header-flex {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-top: -42px;
-            margin-bottom: 16px;
+            align-items: center;
+            gap: 12px;
+            margin-top: -36px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
         }
+
         .badge-title {
-            background: #ff5757;
-            color: #fff;
-            border: 4px solid #000;
-            box-shadow: 4px 4px 0px #000;
-            padding: 6px 14px;
-            font-size: 20px;
+            background: var(--orange);
+            color: var(--ink);
+            border: 2.5px solid var(--line);
+            border-radius: 10px;
+            box-shadow: 3px 3px 0 var(--shadow);
+            padding: 7px 14px;
+            font-size: 17px;
             font-weight: 900;
             text-transform: uppercase;
-            transform: rotate(-2deg);
+            letter-spacing: 0.4px;
         }
+
         .tier-badge {
-            background: #c1ff72;
-            border: 3px solid #000;
-            box-shadow: 3px 3px 0px #000;
-            padding: 4px 10px;
-            font-size: 12px;
+            background: #fde68a;
+            border: 2px solid var(--line);
+            border-radius: 8px;
+            box-shadow: 2.5px 2.5px 0 var(--shadow);
+            padding: 5px 11px;
+            font-size: 11px;
             font-weight: 900;
             text-transform: uppercase;
-            transform: rotate(2deg);
+            letter-spacing: 0.3px;
         }
+
+        /* Navigation Tabs */
         .tabs {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
             gap: 8px;
             margin-bottom: 20px;
         }
+
         .tab-btn {
-            background: #fff;
-            border: 3px solid #000;
-            box-shadow: 4px 4px 0px #000;
-            padding: 8px;
+            background: var(--surface-alt);
+            border: 2px solid var(--line);
+            border-radius: 10px;
+            box-shadow: 2.5px 2.5px 0 var(--shadow);
+            padding: 10px 6px;
             font-weight: 900;
             font-family: inherit;
-            font-size: 13px;
+            font-size: 11.5px;
             text-transform: uppercase;
             cursor: pointer;
-            transition: 0.1s;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            color: var(--ink);
+            white-space: nowrap;
         }
-        .tab-btn [data-lucide]{width:15px;height:15px;vertical-align:middle;margin-right:3px}
-        .marquee [data-lucide]{width:14px;height:14px;vertical-align:middle;margin-right:5px}
+
+        .tab-btn svg {
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
+        }
+
+        .tab-btn:hover {
+            background: #fff3cd;
+            transform: translateY(-1px);
+        }
+
         .tab-btn.active {
-            background: #5ce1e6;
-            transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0px #000;
+            background: var(--orange);
+            transform: translate(1.5px, 1.5px);
+            box-shadow: 1px 1px 0 var(--shadow);
         }
+
         .label {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            gap: 8px;
             font-weight: 900;
-            font-size: 13px;
+            font-size: 11.5px;
             text-transform: uppercase;
-            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+            margin: 14px 0 6px;
         }
+
         .neo-input {
             width: 100%;
-            padding: 12px;
+            padding: 12px 14px;
             background: #fff;
-            border: 3px solid #000;
-            box-shadow: 4px 4px 0px #000;
+            border: 2px solid var(--line);
+            border-radius: 10px;
+            box-shadow: 2.5px 2.5px 0 var(--shadow);
             font-family: inherit;
             font-weight: 700;
-            font-size: 15px;
-            margin-bottom: 16px;
-            transition: 0.1s;
+            font-size: 14px;
+            color: var(--ink);
+            margin-bottom: 12px;
+            transition: all 0.15s ease;
         }
+
         .neo-input:focus {
             outline: none;
-            background: #fff9db;
-            transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0px #000;
+            background: #fffdf5;
+            border-color: #000;
+            box-shadow: 3.5px 3.5px 0 var(--orange);
         }
+
+        .neo-input[readonly] {
+            background: #f3f0e6;
+            color: #52525b;
+            cursor: not-allowed;
+        }
+
         .wa-group {
             display: flex;
             gap: 8px;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
+
         .wa-select {
-            width: 125px;
-            padding: 12px 6px;
-            background: #5ce1e6;
-            border: 3px solid #000;
-            box-shadow: 4px 4px 0px #000;
+            width: 138px;
+            padding: 11px 8px;
+            background: var(--surface-alt);
+            border: 2px solid var(--line);
+            border-radius: 10px;
+            box-shadow: 2.5px 2.5px 0 var(--shadow);
             font-family: inherit;
-            font-weight: 900;
-            font-size: 13px;
+            font-weight: 800;
+            font-size: 12px;
             cursor: pointer;
             flex-shrink: 0;
+            color: var(--ink);
         }
+
         .wa-input {
             margin-bottom: 0 !important;
             flex: 1;
+            min-width: 0;
         }
+
         .preset-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 8px;
-            margin-top: -8px;
+            margin-top: 6px;
             margin-bottom: 16px;
         }
+
         .preset-btn {
-            background: #c1ff72;
-            border: 3px solid #000;
-            box-shadow: 3px 3px 0px #000;
-            padding: 8px 4px;
+            background: #fff;
+            border: 2px solid var(--line);
+            border-radius: 9px;
+            box-shadow: 2.5px 2.5px 0 var(--shadow);
+            padding: 10px 6px;
             font-weight: 900;
             font-family: inherit;
-            font-size: 12px;
+            font-size: 12.5px;
             cursor: pointer;
-            transition: 0.1s;
+            transition: all 0.12s ease;
+            color: var(--ink);
         }
-        .preset-btn:active {
-            transform: translate(3px, 3px);
-            box-shadow: 0px 0px 0px #000;
+
+        .preset-btn:hover {
+            background: var(--orange-soft);
         }
-        .payment-picker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:8px 0 20px;align-items:start}
-        .payment-option{position:relative;display:flex;align-items:center;gap:11px;text-align:left;padding:12px;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;min-width:0;width:100%;font:inherit;cursor:pointer;transition:background .15s,transform .15s}
-        .payment-option.selected{background:#e8fbff;outline:3px solid #5ce1e6;transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
-        .payment-option:disabled{cursor:not-allowed;opacity:.82;background:#f8fafc}
-        .payment-logo{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border-radius:10px;color:#fff;font-weight:900;overflow:hidden;background:#fff}
-        .payment-logo svg{width:25px;height:25px;display:block}
-        .payment-logo img{display:block;width:100%;height:100%;object-fit:contain;padding:2px}
-        .payment-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
-        .payment-copy strong{font-size:14px;line-height:1.2}
-        .payment-copy small{font-size:10px;font-weight:900;letter-spacing:.35px;color:#475569}
-        .coming-badge{font-size:9px!important;color:#92400e!important;background:#fef3c7;padding:3px 5px;border:1px solid #f59e0b;border-radius:4px;width:max-content}
-        .wallet-toggle{min-height:68px;justify-content:space-between}
-        .wallet-toggle-main{display:flex;align-items:center;gap:10px;min-width:0}
-        .wallet-folder-icon{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border-radius:10px;background:#111827;color:#fff}
-        .wallet-folder-icon svg{width:23px;height:23px}
-        .wallet-chevron{width:18px;height:18px;flex:0 0 18px;transition:transform .18s}
-        .wallet-toggle[aria-expanded="true"] .wallet-chevron{transform:rotate(180deg)}
-        .wallet-options{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000}
-        .wallet-options[hidden]{display:none}
-        .wallet-options .payment-option{box-shadow:3px 3px 0 #000;padding:10px;min-height:66px}
-        .wallet-options .payment-option.selected{box-shadow:2px 2px 0 #000}
-        .wallet-options .payment-logo{width:36px;height:36px;flex-basis:36px}
-        .wallet-options .payment-copy strong{font-size:13px}
-        .payment-hint{grid-column:1/-1;font-size:11px;font-weight:700;color:#475569;margin-top:1px}
-        @media(max-width:380px){.payment-picker{gap:8px}.payment-option{padding:9px;gap:8px}.payment-logo,.wallet-folder-icon{width:34px;height:34px;flex-basis:34px}.wallet-options{gap:8px;padding:9px}.wallet-options .payment-option{padding:8px}.wallet-options .payment-logo{width:32px;height:32px;flex-basis:32px}}
-        .payment-instructions{padding:14px;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;margin-bottom:16px;line-height:1.6}
-        .payment-instructions .neo-btn{margin-top:12px}
-        .payment-detail{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed #aaa;overflow-wrap:anywhere}
-        .payment-detail:last-child{border-bottom:0}
-        @media(max-width:380px){.payment-methods{grid-template-columns:1fr}.payment-option{padding:10px}}
+
+        .preset-btn:active, .preset-btn:focus {
+            background: var(--orange);
+            transform: translate(1.5px, 1.5px);
+            box-shadow: 1px 1px 0 var(--shadow);
+        }
+
+        /* Payment Picker */
+        .payment-picker {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin: 6px 0 18px;
+            align-items: start;
+        }
+
+        .payment-option {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-align: left;
+            padding: 11px 12px;
+            background: #fff;
+            border: 2px solid var(--line);
+            border-radius: 11px;
+            box-shadow: 2.5px 2.5px 0 var(--shadow);
+            min-width: 0;
+            width: 100%;
+            min-height: 64px;
+            font: inherit;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            color: var(--ink);
+        }
+
+        .payment-option:hover:not(:disabled) {
+            background: #fffbeb;
+        }
+
+        .payment-option.selected {
+            background: #fef3c7;
+            border-color: var(--line);
+            box-shadow: 3px 3px 0 var(--shadow);
+        }
+
+        .payment-option:disabled {
+            cursor: not-allowed;
+            opacity: 0.68;
+            background: #f4f1ea;
+        }
+
+        .payment-logo, .wallet-folder-icon {
+            width: 40px;
+            height: 40px;
+            flex: 0 0 40px;
+            display: grid;
+            place-items: center;
+            border-radius: 9px;
+            font-weight: 900;
+            overflow: hidden;
+            border: 1.5px solid var(--line);
+            background: #fff;
+        }
+
+        .wallet-folder-icon {
+            background: var(--orange);
+            color: var(--ink);
+        }
+
+        .payment-logo svg, .wallet-folder-icon svg {
+            width: 22px;
+            height: 22px;
+            display: block;
+        }
+
+        .payment-logo img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 3px;
+        }
+
+        .payment-copy {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 0;
+        }
+
+        .payment-copy strong {
+            font-size: 13px;
+            line-height: 1.2;
+            overflow-wrap: anywhere;
+        }
+
+        .payment-copy small {
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: 0.25px;
+            color: #57534e;
+        }
+
+        .coming-badge {
+            display: inline-block;
+            font-size: 9px !important;
+            font-weight: 900 !important;
+            color: #92400e !important;
+            background: #fef3c7;
+            padding: 2px 6px;
+            border: 1.5px solid #d97706;
+            border-radius: 5px;
+            width: max-content;
+        }
+
+        .wallet-toggle {
+            justify-content: space-between;
+        }
+
+        .wallet-toggle-main {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .wallet-chevron {
+            width: 18px;
+            height: 18px;
+            flex: 0 0 18px;
+            transition: transform 0.2s ease;
+        }
+
+        .wallet-toggle[aria-expanded="true"] .wallet-chevron {
+            transform: rotate(180deg);
+        }
+
+        .wallet-options {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 9px;
+            padding: 12px;
+            background: var(--surface-alt);
+            border: 2px solid var(--line);
+            border-radius: 12px;
+            box-shadow: 2.5px 2.5px 0 var(--shadow);
+        }
+
+        .wallet-options[hidden] {
+            display: none;
+        }
+
+        .wallet-options .payment-option {
+            box-shadow: 2px 2px 0 var(--shadow);
+            padding: 9px 10px;
+            min-height: 58px;
+        }
+
+        .payment-hint {
+            grid-column: 1 / -1;
+            font-size: 11px;
+            font-weight: 700;
+            color: #57534e;
+            margin-top: 2px;
+        }
+
+        /* Emoji & Buttons */
         .emoji-grid {
             display: flex;
             gap: 8px;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
+
         .emoji-btn {
             flex: 1;
             background: #fff;
-            border: 3px solid #000;
-            box-shadow: 3px 3px 0px #000;
-            padding: 8px;
-            font-size: 20px;
+            border: 2px solid var(--line);
+            border-radius: 10px;
+            box-shadow: 2.5px 2.5px 0 var(--shadow);
+            padding: 10px 6px;
+            font-size: 18px;
             cursor: pointer;
-            text-align: center;
+            display: grid;
+            place-items: center;
+            transition: all 0.12s ease;
         }
+
+        .emoji-btn:hover {
+            background: var(--orange-soft);
+        }
+
         .emoji-btn.selected {
-            background: #ff914d;
-            transform: translate(2px, 2px);
-            box-shadow: 1px 1px 0px #000;
+            background: var(--orange);
+            transform: translate(1px, 1px);
+            box-shadow: 1.5px 1.5px 0 var(--shadow);
         }
+
         .neo-btn {
             width: 100%;
-            background: #7ed957;
-            border: 4px solid #000;
-            box-shadow: 5px 5px 0px #000;
-            padding: 14px;
+            background: var(--orange);
+            color: var(--ink);
+            border: 2px solid var(--line);
+            border-radius: 10px;
+            box-shadow: 3px 3px 0 var(--shadow);
+            padding: 13px 16px;
             font-weight: 900;
             font-family: inherit;
-            font-size: 15px;
+            font-size: 13.5px;
             text-transform: uppercase;
+            letter-spacing: 0.3px;
             cursor: pointer;
-            transition: 0.1s;
+            transition: all 0.12s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        .neo-btn:hover {
-            transform: translate(2px, 2px);
-            box-shadow: 3px 3px 0px #000;
+
+        .neo-btn:hover:not(:disabled) {
+            transform: translate(1px, 1px);
+            box-shadow: 2px 2px 0 var(--shadow);
+            filter: brightness(1.03);
         }
-        .neo-btn:active {
-            transform: translate(5px, 5px);
-            box-shadow: 0px 0px 0px #000;
+
+        .neo-btn:active:not(:disabled) {
+            transform: translate(2.5px, 2.5px);
+            box-shadow: 0.5px 0.5px 0 var(--shadow);
         }
-        .neo-btn.red { background: #ff5757; color: #fff; }
-        .neo-btn.blue { background: #5ce1e6; color: #000; }
-        .neo-btn.orange { background: #ff914d; color: #000; }
+
+        .neo-btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .neo-btn.red { background: #fb7185; color: var(--ink); }
+        .neo-btn.blue { background: #7dd3fc; color: var(--ink); }
+        .neo-btn.mint { background: #6ee7b7; color: var(--ink); }
+        .neo-btn.ghost { background: #fff; color: var(--ink); }
+        .neo-btn.sm { width: auto; padding: 8px 13px; font-size: 11.5px; border-radius: 8px; box-shadow: 2px 2px 0 var(--shadow); }
+
         .hidden { display: none !important; }
+
         .alert-box {
-            background: #ff5757;
-            color: #fff;
-            border: 3px solid #000;
-            box-shadow: 4px 4px 0px #000;
-            padding: 12px;
-            font-weight: 700;
+            background: var(--coral-soft);
+            color: #881337;
+            border: 2px solid var(--line);
+            border-radius: 10px;
+            box-shadow: 3px 3px 0 var(--shadow);
+            padding: 12px 14px;
+            font-weight: 800;
             margin-bottom: 16px;
-            font-size: 14px;
+            font-size: 13px;
         }
+
         .session-banner {
-            background: #5ce1e6;
-            border: 3px solid #000;
-            box-shadow: 4px 4px 0px #000;
-            padding: 10px;
+            background: var(--mint-soft);
+            border: 2px solid var(--line);
+            border-radius: 10px;
+            box-shadow: 2.5px 2.5px 0 var(--shadow);
+            padding: 10px 12px;
             font-weight: 900;
-            font-size: 12px;
+            font-size: 11.5px;
             margin-bottom: 14px;
             text-align: center;
             text-transform: uppercase;
         }
+
         .qr-frame {
             background: #fff;
-            border: 4px solid #000;
-            box-shadow: 5px 5px 0px #000;
-            padding: 16px;
+            border: 2.5px solid var(--line);
+            border-radius: 14px;
+            box-shadow: 4px 4px 0 var(--shadow);
+            padding: 18px;
             text-align: center;
             margin-bottom: 16px;
         }
+
         .qr-frame img {
-            width: 240px;
-            height: 240px;
-            border: 3px solid #000;
+            width: min(240px, 100%);
+            height: auto;
+            aspect-ratio: 1 / 1;
+            border: 2px solid var(--line);
+            border-radius: 10px;
             display: block;
-            margin: 0 auto 12px;
+            margin: 0 auto;
         }
+
+        .timer-badge {
+            background: var(--ink);
+            color: #fde047;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-weight: 900;
+            display: inline-block;
+            font-size: 12.5px;
+            letter-spacing: 0.4px;
+        }
+
+        .payment-instructions {
+            padding: 14px;
+            background: var(--surface-alt);
+            border: 2px solid var(--line);
+            border-radius: 12px;
+            box-shadow: 2.5px 2.5px 0 var(--shadow);
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .payment-detail {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px dashed #c7c2b8;
+            overflow-wrap: anywhere;
+        }
+
+        .payment-detail:last-child { border-bottom: 0; }
+
         .info-list {
             background: #fff;
-            border: 3px solid #000;
-            box-shadow: 4px 4px 0px #000;
-            padding: 14px;
+            border: 2px solid var(--line);
+            border-radius: 12px;
+            box-shadow: 3px 3px 0 var(--shadow);
+            padding: 14px 16px;
             margin-bottom: 16px;
-            font-size: 14px;
+            font-size: 13.5px;
             font-weight: 700;
         }
+
         .info-list p {
             display: flex;
             justify-content: space-between;
-            padding: 4px 0;
-            border-bottom: 2px dashed #000;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 0;
+            border-bottom: 1.5px dashed #d6d3cd;
+            flex-wrap: wrap;
         }
+
         .info-list p:last-child { border-bottom: none; }
+
+        .trx-id-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            max-width: 100%;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        #trxId {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            background: var(--surface-alt);
+            padding: 3px 7px;
+            border-radius: 6px;
+            border: 1.5px solid var(--line);
+            word-break: break-all;
+        }
+
         .feed-item {
             background: #fff;
-            border: 3px solid #000;
-            box-shadow: 4px 4px 0px #000;
-            padding: 12px;
+            border: 2px solid var(--line);
+            border-radius: 12px;
+            box-shadow: 3px 3px 0 var(--shadow);
+            padding: 14px;
             margin-bottom: 12px;
+            min-width: 0;
+            overflow: hidden;
         }
+
         .feed-header {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            gap: 10px;
             font-weight: 900;
-            font-size: 15px;
-            margin-bottom: 6px;
+            font-size: 14.5px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
         }
+
         .feed-amount {
-            background: #c1ff72;
-            border: 2px solid #000;
-            padding: 2px 8px;
+            background: var(--mint-soft);
+            color: #065f46;
+            border: 1.5px solid var(--line);
+            border-radius: 7px;
+            padding: 3px 9px;
             font-size: 13px;
-        }
-        .feed-notes {
-            font-size: 14px;
-            font-weight: 700;
-            color: #222;
-            background: #f4f0ea;
-            padding: 8px;
-            border: 2px solid #000;
-        }
-        .timer-badge {
-            background: #000;
-            color: #ffde59;
-            padding: 4px 10px;
             font-weight: 900;
-            display: inline-block;
-            font-size: 13px;
+            white-space: nowrap;
         }
-        .dl-menu {
-            background: #fff;
-            border: 3px solid #000;
-            box-shadow: 4px 4px 0px #000;
-            padding: 10px;
-            margin-top: 10px;
-            display: grid;
+
+        .feed-notes {
+            font-size: 13px;
+            font-weight: 700;
+            color: #27272a;
+            background: var(--surface-alt);
+            padding: 9px 11px;
+            border: 1.5px solid var(--line);
+            border-radius: 8px;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .icon-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             gap: 8px;
         }
-    
-        .icon-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px}
-        .icon-btn svg,.lucide{width:18px;height:18px;stroke-width:2.2;vertical-align:middle}
-        .action-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-        .notice-panel,.comment-panel{margin-top:14px;padding:14px;border:2px solid #111;background:#fff;border-radius:12px}
-        .notice-item,.comment-item{padding:10px 0;border-bottom:1px solid #ddd;text-align:left}
-        .notice-item:last-child,.comment-item:last-child{border-bottom:0}
-        .comment-panel textarea{width:100%;padding:10px;border:2px solid #111;font:inherit;margin:8px 0}
-        @media(max-width:520px){.action-row{grid-template-columns:1fr}}
 
-        :root{color-scheme:light;--paper:#fff8eb;--ink:#252525;--orange:#faae2b;--orange-soft:#ffd36b;--mint:#39cda2;--cream:#fffdf5;--line:#292929;--shadow:#343434}
-        body{font-family:'Space Grotesk',sans-serif;background-color:var(--paper);background-image:radial-gradient(rgba(37,37,37,.13) .8px,transparent .8px);background-size:15px 15px;color:var(--ink);padding-bottom:28px}
-        .marquee{background:var(--orange);color:#171717;border-bottom:2px solid var(--line);padding:9px 0;font-size:12px;letter-spacing:.2px}
-        .marquee span{animation-duration:22s}
-        .container{max-width:720px;margin:16px auto 0;padding:0 12px}
-        .goal-box{background:var(--cream);border:2px solid var(--line);border-radius:12px;box-shadow:3px 3px 0 var(--shadow);padding:15px;margin-bottom:18px}
-        .goal-header{font-size:12px;margin-bottom:9px}
-        .progress-track{height:17px;background:#f0eee6;border:2px solid var(--line);border-radius:5px;overflow:hidden}
-        .progress-fill{background:var(--mint);border-right:0}
-        .progress-text{font-size:10px}
-        .neo-card{background:var(--cream);border:2px solid var(--line);border-radius:12px;box-shadow:3px 3px 0 var(--shadow);padding:18px; margin-bottom:18px}
-        .card-header-flex{margin-top:-29px;margin-bottom:17px;align-items:center}
-        .badge-title{background:var(--orange);color:#171717;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow);padding:7px 11px;font-size:17px;transform:none}
-        .tier-badge{background:#ffe9a7;border:2px solid var(--line);border-radius:6px;box-shadow:2px 2px 0 var(--shadow);padding:4px 8px;font-size:10px;transform:none}
-        .tabs{gap:7px;margin-bottom:17px}
-        .tab-btn{background:#fff;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow);padding:9px 5px;font-size:11px;letter-spacing:.1px}
-        .tab-btn.active{background:var(--orange);transform:none;box-shadow:2px 2px 0 var(--shadow)}
-        .label{font-size:11px;margin:12px 0 6px}
-        .neo-input{background:#fff;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow);padding:11px;font-size:13px;font-weight:600;margin-bottom:13px}
-        .neo-input:focus{background:#fffdf4;transform:none;box-shadow:2px 2px 0 var(--shadow);border-color:#111}
-        .wa-group{gap:8px;margin-bottom:13px}
-        .wa-select{background:#fff;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow);font-size:11px;padding:10px 5px}
-        .preset-grid{gap:7px;margin-bottom:14px}
-        .preset-btn{background:#fff;border:2px solid var(--line);border-radius:7px;box-shadow:2px 2px 0 var(--shadow);padding:8px 3px;font-size:11px}
-        .preset-btn:focus,.preset-btn:active{background:var(--orange);transform:translate(1px,1px);box-shadow:1px 1px 0 var(--shadow)}
-        .payment-picker{gap:9px;margin:8px 0 17px}
-        .payment-option{background:#fff;border:2px solid var(--line);border-radius:9px;box-shadow:2px 2px 0 var(--shadow);padding:10px;gap:9px;min-height:62px}
-        .payment-option.selected{background:#fff1bd;outline:0;transform:none;box-shadow:2px 2px 0 var(--shadow)}
-        .payment-option:disabled{background:#f6f4ec;opacity:.72}
-        .payment-logo,.wallet-folder-icon{border-radius:7px}
-        .wallet-folder-icon{background:var(--orange);color:#171717;border:1px solid #252525}
-        .wallet-toggle{min-height:62px}
-        .wallet-options{gap:8px;padding:10px;background:#fffdf6;border:2px solid var(--line);border-radius:9px;box-shadow:2px 2px 0 var(--shadow)}
-        .wallet-options .payment-option{box-shadow:1px 1px 0 var(--shadow);border-width:2px;border-radius:7px;padding:8px;min-height:58px}
-        .wallet-options .payment-option.selected{box-shadow:1px 1px 0 var(--shadow);background:#fff1bd}
-        .payment-copy strong{font-size:13px}
-        .payment-copy small{font-size:9px;letter-spacing:.2px;color:#5c5b56}
-        .payment-hint{font-size:10px;color:#5c5b56}
-        .payment-instructions{padding:12px;background:#fffdf6;border:2px solid var(--line);border-radius:9px;box-shadow:2px 2px 0 var(--shadow)}
-        .neo-btn{background:var(--orange);color:#171717;border:2px solid var(--line);border-radius:8px;box-shadow:3px 3px 0 var(--shadow);padding:13px;font-size:13px}
-        .neo-btn:hover,.neo-btn:active{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--shadow)}
-        .neo-btn.red{background:#f17c69;color:#171717}.neo-btn.blue{background:#b8e5f1}.neo-btn.orange{background:var(--orange)}
-        .alert-box{background:#ffe3dc;color:#7c2419;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow)}
-        .session-banner{background:#d9f5e8;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow)}
-        .emoji-btn{background:#fff;border:2px solid var(--line);border-radius:8px;box-shadow:2px 2px 0 var(--shadow)}
-        .emoji-btn.selected{background:#ffe6a0;transform:none;box-shadow:2px 2px 0 var(--shadow)}
-        .notice-panel,.comment-panel{border:2px solid var(--line);background:#fffdf6;border-radius:9px;box-shadow:2px 2px 0 var(--shadow)}
-        .comment-panel textarea{border:2px solid var(--line);border-radius:7px}
-        .payment-detail{border-bottom:1px dashed #c9c4b7}
-        @media(max-width:520px){.container{padding:0 11px;margin-top:14px}.neo-card{padding:15px}.card-header-flex{margin-top:-25px}.badge-title{font-size:15px}.tabs{gap:6px}.tab-btn{font-size:10px}.payment-picker{gap:8px}.payment-option{padding:9px;gap:8px}.payment-copy strong{font-size:12px}.wallet-options{padding:8px;gap:7px}}
+        .icon-btn svg, .lucide {
+            width: 17px;
+            height: 17px;
+            stroke-width: 2.3;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
 
-        .site-topbar{min-height:46px;background:var(--orange);border-bottom:2px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px max(14px,calc((100vw - 720px)/2));position:relative;z-index:10}
-        .site-brand{display:flex;align-items:center;gap:8px;font-weight:900;letter-spacing:.2px;font-size:15px}
-        .brand-mark{width:27px;height:27px;display:grid;place-items:center;border:2px solid var(--line);border-radius:8px;background:#fff;font-size:19px;line-height:1;box-shadow:1px 1px 0 var(--shadow)}
-        .brand-tag{font-size:8px;letter-spacing:.5px;padding:3px 5px;background:#fff;border:1px solid var(--line);border-radius:4px}
-        .topbar-status{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:900;border:1.5px solid var(--line);border-radius:20px;padding:5px 9px;background:#d9f5e8;white-space:nowrap}
-        .status-dot{width:7px;height:7px;background:#15976e;border-radius:50%;box-shadow:0 0 0 3px rgba(21,151,110,.15)}
-        .marquee{position:relative;z-index:8;display:flex;align-items:center;gap:8px;min-height:44px;padding:10px 0;background:#fff0c6;color:#242424;border-bottom:1px solid #d9cba9;overflow:hidden;font-size:13px;font-weight:900;letter-spacing:.2px}
-        .marquee>i{flex:0 0 auto;margin-left:12px}
-        .marquee span{padding-left:0;white-space:nowrap;animation:marquee 19s linear infinite}
-        .marquee:hover span{animation-play-state:paused}
-        .live-donation-toast{position:fixed;top:88px;left:50%;transform:translateX(-50%);width:min(92vw,390px);z-index:1000;display:flex;align-items:flex-start;gap:11px;padding:13px 38px 13px 13px;background:#fffdf5;border:2px solid var(--line);border-radius:12px;box-shadow:4px 4px 0 var(--shadow);animation:toast-in .28s ease-out}
-        .live-donation-toast[hidden]{display:none}
-        .toast-icon{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;background:var(--orange);border:2px solid var(--line);border-radius:9px;font-size:22px}
-        .toast-copy{min-width:0}.toast-copy strong{display:block;font-size:12px;line-height:1.4}.toast-copy p{font-size:11px;line-height:1.45;margin-top:3px;overflow-wrap:anywhere}.toast-copy small{display:block;margin-top:5px;color:#6b665d;font-size:9px;font-weight:700}
-        .toast-close{position:absolute;right:7px;top:6px;width:24px;height:24px;border:1.5px solid var(--line);border-radius:6px;background:#fff;font-size:18px;line-height:1;cursor:pointer}
-        @keyframes toast-in{from{opacity:0;transform:translate(-50%,-10px)}to{opacity:1;transform:translate(-50%,0)}}
-        .leaderboard-row{display:flex;justify-content:space-between;align-items:center;gap:10px}.leaderboard-name{display:flex;align-items:center;gap:7px;font-weight:900;min-width:0;overflow-wrap:anywhere}.leaderboard-name small{font-size:10px;font-weight:700;white-space:nowrap}.leader-rank{display:grid;place-items:center;min-width:25px;height:25px;border:1.5px solid var(--line);border-radius:7px;background:#ffe9a7;font-size:13px}.leaderboard-row:first-child .leader-rank{background:var(--orange)}
-        .transaction-row{background:#fffdf6;border:1.5px solid #ded7c7;border-radius:9px;padding:11px;margin-bottom:9px}.transaction-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;font-size:9px;color:#6b665d;overflow-wrap:anywhere}.transaction-status{border:1px solid var(--line);border-radius:5px;padding:3px 6px;font-size:9px;font-weight:900;white-space:nowrap;background:#d9f5e8;color:#175c42}.status-pending{background:#fff0c6;color:#805b00}.status-expired,.status-cancelled,.status-canceled,.status-failed{background:#ffe3dc;color:#8b2b20}.transaction-date{display:block;margin-top:7px;color:#777166;font-size:9px;font-weight:700}.empty-state{text-align:center;font-weight:700;padding:16px}
-        @media(max-width:520px){.site-topbar{padding:8px 12px}.site-brand{font-size:13px}.live-donation-toast{top:78px}.marquee{font-size:12px;min-height:42px}.transaction-meta{align-items:flex-start;flex-direction:column}}
+        .action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .action-row #cancelBtn {
+            grid-column: 1 / -1;
+        }
+
+        .account-gate-card {
+            background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%);
+            border: 2px solid var(--line);
+            border-radius: 14px;
+            box-shadow: 3.5px 3.5px 0 var(--shadow);
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+
+        .account-gate-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .account-gate-icon {
+            width: 44px;
+            height: 44px;
+            flex: 0 0 44px;
+            border-radius: 11px;
+            border: 2px solid var(--line);
+            background: var(--orange);
+            box-shadow: 2px 2px 0 var(--shadow);
+            display: grid;
+            place-items: center;
+        }
+
+        .account-gate-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* Member Dashboard Layout */
+        .account-hero-card {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 55%, #ffffff 100%);
+            border: 2px solid var(--line);
+            border-radius: 14px;
+            box-shadow: 3.5px 3.5px 0 var(--shadow);
+            padding: 18px;
+            margin-bottom: 14px;
+        }
+
+        .account-profile-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding-bottom: 14px;
+            border-bottom: 1.5px dashed #c7c2b8;
+        }
+
+        .account-profile-ident {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .account-avatar {
+            width: 48px;
+            height: 48px;
+            flex: 0 0 48px;
+            border-radius: 12px;
+            background: var(--orange);
+            border: 2px solid var(--line);
+            box-shadow: 2px 2px 0 var(--shadow);
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+            font-size: 20px;
+        }
+
+        .account-profile-text {
+            min-width: 0;
+        }
+
+        .account-profile-text h3 {
+            font-size: 18px;
+            font-weight: 900;
+            line-height: 1.2;
+            overflow-wrap: anywhere;
+            margin: 0 0 3px;
+        }
+
+        .account-profile-text p {
+            font-size: 12px;
+            font-weight: 700;
+            color: #57534e;
+            margin: 0;
+        }
+
+        .member-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .member-stat-card {
+            background: #fff;
+            border: 2px solid var(--line);
+            border-radius: 11px;
+            box-shadow: 2.5px 2.5px 0 var(--shadow);
+            padding: 12px;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 6px;
+        }
+
+        .member-stat-card small {
+            font-size: 10.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #57534e;
+            letter-spacing: 0.2px;
+        }
+
+        .member-stat-value {
+            font-size: 15px;
+            font-weight: 900;
+            color: var(--ink);
+            background: var(--mint-soft);
+            border: 1.5px solid var(--line);
+            border-radius: 7px;
+            padding: 4px 8px;
+            width: fit-content;
+            max-width: 100%;
+            overflow-wrap: anywhere;
+        }
+
+        .member-stat-card.level-card .member-stat-value {
+            background: #fde68a;
+        }
+
+        .member-level-box {
+            background: #fff;
+            border: 2px solid var(--line);
+            border-radius: 11px;
+            padding: 12px 14px;
+            margin-top: 14px;
+            box-shadow: 2px 2px 0 var(--shadow);
+        }
+
+        .member-level-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 12.5px;
+            font-weight: 900;
+            margin-bottom: 7px;
+        }
+
+        .member-progress-track {
+            height: 14px;
+            border: 2px solid var(--line);
+            border-radius: 999px;
+            background: #f1ede4;
+            overflow: hidden;
+        }
+
+        .member-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--orange) 0%, #10b981 100%);
+            transition: width 0.4s ease;
+        }
+
+        .privacy-toggle-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+            padding: 10px 12px;
+            background: #fff;
+            border: 2px solid var(--line);
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .privacy-toggle-box input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--ink);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .account-section-card {
+            background: #fff;
+            border: 2px solid var(--line);
+            border-radius: 14px;
+            box-shadow: 3.5px 3.5px 0 var(--shadow);
+            padding: 18px;
+            margin-bottom: 14px;
+        }
+
+        .account-section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin: 0 0 12px;
+            padding-bottom: 9px;
+            border-bottom: 2px solid var(--line);
+        }
+
+        .badges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .badge-item-card {
+            background: var(--surface-alt);
+            border: 2px solid var(--line);
+            border-radius: 10px;
+            box-shadow: 2px 2px 0 var(--shadow);
+            padding: 11px 12px;
+        }
+
+        .badge-item-card strong {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 3px;
+        }
+
+        .badge-item-card p {
+            font-size: 11.5px;
+            color: #57534e;
+            margin: 0;
+        }
+
+        /* Member Transaction History Cards - Overflow Fixed */
+        .member-tx-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .member-tx-card {
+            background: var(--surface-alt);
+            border: 2px solid var(--line);
+            border-radius: 12px;
+            box-shadow: 2.5px 2.5px 0 var(--shadow);
+            padding: 14px;
+            min-width: 0;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .member-tx-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .member-tx-id-group {
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        .member-tx-id-label {
+            display: block;
+            font-size: 9.5px;
+            font-weight: 900;
+            text-transform: uppercase;
+            color: #57534e;
+            letter-spacing: 0.4px;
+            margin-bottom: 3px;
+        }
+
+        .member-tx-id-pill {
+            display: inline-block;
+            max-width: 100%;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+            font-weight: 800;
+            background: #fff;
+            border: 1.5px solid var(--line);
+            border-radius: 7px;
+            padding: 4px 8px;
+            line-height: 1.35;
+            word-break: break-all;
+            overflow-wrap: anywhere;
+        }
+
+        .member-tx-amount {
+            flex-shrink: 0;
+            background: var(--mint-soft);
+            color: #065f46;
+            border: 1.5px solid var(--line);
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-weight: 900;
+            font-size: 13.5px;
+            white-space: nowrap;
+        }
+
+        .member-tx-meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 8px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #c7c2b8;
+        }
+
+        .member-tx-badges {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .member-tx-method {
+            font-size: 10px;
+            font-weight: 900;
+            padding: 3px 7px;
+            border-radius: 5px;
+            border: 1.5px solid var(--line);
+            background: #fff;
+            text-transform: uppercase;
+        }
+
+        .member-tx-date {
+            font-size: 11px;
+            font-weight: 700;
+            color: #57534e;
+        }
+
+        .member-tx-fee-summary {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+            font-size: 11.5px;
+            font-weight: 800;
+            color: #3f3f46;
+            background: #fff;
+            border: 1.5px solid #e4e0d5;
+            border-radius: 8px;
+            padding: 7px 10px;
+        }
+
+        .member-tx-details {
+            margin-top: 9px;
+            background: #fff;
+            border: 1.5px solid var(--line);
+            border-radius: 8px;
+            padding: 8px 11px;
+            font-size: 12px;
+        }
+
+        .member-tx-details summary {
+            font-weight: 900;
+            font-size: 11px;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            user-select: none;
+            color: var(--ink);
+        }
+
+        .member-tx-details-body {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #d6d3cd;
+            display: grid;
+            gap: 6px;
+        }
+
+        .member-tx-detail-line {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .member-tx-detail-line span {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #71717a;
+        }
+
+        .member-tx-detail-line strong {
+            font-size: 11.5px;
+            font-family: 'JetBrains Mono', monospace;
+            word-break: break-all;
+            overflow-wrap: anywhere;
+            color: var(--ink);
+        }
+
+        .member-tx-detail-line p {
+            font-size: 12px;
+            font-weight: 700;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            margin: 0;
+        }
+
+        .member-tx-footer {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        /* Public Feed & Leaderboard */
+        .leaderboard-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .leaderboard-name {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-weight: 900;
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .leaderboard-name small {
+            font-size: 11px;
+            font-weight: 700;
+            color: #57534e;
+            white-space: nowrap;
+        }
+
+        .leader-rank {
+            display: grid;
+            place-items: center;
+            min-width: 28px;
+            height: 28px;
+            border: 2px solid var(--line);
+            border-radius: 8px;
+            background: #fde68a;
+            font-size: 13px;
+            font-weight: 900;
+            box-shadow: 1.5px 1.5px 0 var(--shadow);
+        }
+
+        .leaderboard-row:first-child .leader-rank {
+            background: var(--orange);
+        }
+
+        .transaction-row {
+            background: #fffdf8;
+            border: 2px solid var(--line);
+            border-radius: 12px;
+            padding: 13px;
+            margin-bottom: 10px;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .transaction-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 7px 0;
+            font-size: 10.5px;
+            color: #57534e;
+            flex-wrap: wrap;
+        }
+
+        .transaction-id-chip {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            font-weight: 700;
+            background: var(--surface-alt);
+            border: 1px solid #d6d3cd;
+            padding: 2px 7px;
+            border-radius: 5px;
+            max-width: 100%;
+            word-break: break-all;
+            overflow-wrap: anywhere;
+        }
+
+        .transaction-status {
+            border: 1.5px solid var(--line);
+            border-radius: 6px;
+            padding: 3px 7px;
+            font-size: 9.5px;
+            font-weight: 900;
+            white-space: nowrap;
+            background: var(--mint-soft);
+            color: #065f46;
+            text-transform: uppercase;
+        }
+
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-expired, .status-cancelled, .status-canceled, .status-failed { background: var(--coral-soft); color: #9f1239; }
+
+        .transaction-date {
+            display: block;
+            margin-top: 8px;
+            color: #71717a;
+            font-size: 10.5px;
+            font-weight: 700;
+        }
+
+        .empty-state {
+            text-align: center;
+            font-weight: 800;
+            padding: 20px 14px;
+            color: #57534e;
+        }
+
+        /* Notices & Chat */
+        .notice-panel, .comment-panel {
+            margin-top: 12px;
+            padding: 16px;
+            border: 2px solid var(--line);
+            background: #fffdf8;
+            border-radius: 12px;
+            box-shadow: 3px 3px 0 var(--shadow);
+        }
+
+        .notice-item, .comment-item {
+            padding: 10px 12px;
+            margin: 8px 0;
+            border: 1.5px solid var(--line);
+            background: #fff;
+            border-radius: 9px;
+            text-align: left;
+            overflow-wrap: anywhere;
+        }
+
+        .comment-item .comment-item {
+            background: var(--surface-alt);
+            margin-top: 8px;
+            margin-left: 10px;
+        }
+
+        .comment-panel textarea {
+            width: 100%;
+            padding: 11px 12px;
+            border: 2px solid var(--line);
+            border-radius: 9px;
+            box-shadow: 2px 2px 0 var(--shadow);
+            font: inherit;
+            font-weight: 600;
+            margin: 10px 0;
+            background: #fff;
+        }
+
+        /* Live Donation Toast */
+        .live-donation-toast {
+            position: fixed;
+            top: 88px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(92vw, 400px);
+            z-index: 1000;
+            display: flex;
+            align-items: flex-start;
+            gap: 11px;
+            padding: 13px 38px 13px 13px;
+            background: #fffdf5;
+            border: 2.5px solid var(--line);
+            border-radius: 14px;
+            box-shadow: 4px 4px 0 var(--shadow);
+            animation: toast-in 0.28s ease-out;
+        }
+
+        .live-donation-toast[hidden] { display: none; }
+
+        .toast-icon {
+            width: 38px;
+            height: 38px;
+            flex: 0 0 38px;
+            display: grid;
+            place-items: center;
+            background: var(--orange);
+            border: 2px solid var(--line);
+            border-radius: 10px;
+            font-size: 20px;
+        }
+
+        .toast-copy { min-width: 0; }
+        .toast-copy strong { display: block; font-size: 12.5px; line-height: 1.35; }
+        .toast-copy p { font-size: 11.5px; line-height: 1.45; margin-top: 3px; overflow-wrap: anywhere; }
+        .toast-copy small { display: block; margin-top: 5px; color: #6b665d; font-size: 9.5px; font-weight: 700; }
+
+        .toast-close {
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            width: 24px;
+            height: 24px;
+            border: 1.5px solid var(--line);
+            border-radius: 6px;
+            background: #fff;
+            font-size: 16px;
+            font-weight: 900;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        @keyframes toast-in {
+            from { opacity: 0; transform: translate(-50%, -10px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        /* Responsive Mobile Tweaks */
+        @media (max-width: 600px) {
+            .tabs {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+            .member-stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .account-gate-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 0 11px; margin-top: 16px; }
+            .neo-card { padding: 16px 14px; }
+            .card-header-flex { margin-top: -28px; }
+            .badge-title { font-size: 15px; padding: 6px 11px; }
+            .tab-btn { font-size: 10.5px; padding: 9px 4px; gap: 4px; }
+            .payment-picker { gap: 8px; }
+            .payment-option { padding: 9px; gap: 8px; min-height: 58px; }
+            .payment-logo, .wallet-folder-icon { width: 34px; height: 34px; flex-basis: 34px; }
+            .wallet-options { grid-template-columns: 1fr; padding: 9px; }
+            .action-row { grid-template-columns: 1fr; }
+            .member-tx-top { flex-direction: column; align-items: stretch; }
+            .member-tx-amount { align-self: flex-start; }
+        }
     </style>
 </head>
 <body>
     <header class="site-topbar">
-        <div class="site-brand"><span class="brand-mark">♡</span><span>KAXEL SUPPORT</span><span class="brand-tag">DONATE</span></div>
+        <div class="site-brand">
+            <span class="brand-mark">♡</span>
+            <span>KAXEL SUPPORT</span>
+            <span class="brand-tag">DONATE</span>
+        </div>
         <span class="topbar-status"><span class="status-dot"></span> LIVE</span>
     </header>
-    <div class="marquee" aria-label="Info donasi terbaru"><i data-lucide="radio-tower" aria-hidden="true"></i><span id="marqueeText">LIVE FEED: Terima kasih sudah mendukung Kaxel Support!</span></div>
+
+    <div class="marquee" aria-label="Info donasi terbaru">
+        <i data-lucide="radio-tower" aria-hidden="true"></i>
+        <span id="marqueeText">LIVE FEED: Terima kasih sudah mendukung Kaxel Support!</span>
+    </div>
+
     <div id="liveDonationToast" class="live-donation-toast" role="status" aria-live="polite" aria-atomic="true" hidden>
         <button type="button" class="toast-close" onclick="hideLiveDonationToast()" aria-label="Tutup notifikasi">×</button>
-        <div class="toast-icon">♥</div><div class="toast-copy"><strong id="toastTitle">Donasi baru diterima!</strong><p id="toastDescription"></p><small id="toastTime">Terima kasih atas dukungannya</small></div>
+        <div class="toast-icon">♥</div>
+        <div class="toast-copy">
+            <strong id="toastTitle">Donasi baru diterima!</strong>
+            <p id="toastDescription"></p>
+            <small id="toastTime">Terima kasih atas dukungannya</small>
+        </div>
     </div>
+
     <div class="container">
         <div class="goal-box">
             <div class="goal-header">
-                <span id="goalTitle"> TARGET DONASI</span>
+                <span id="goalTitle">TARGET DONASI</span>
                 <span id="goalNumbers">Rp0 / Rp1.000.000</span>
             </div>
             <div class="progress-track">
@@ -508,26 +1543,56 @@
             <div id="alertBox" class="alert-box hidden"></div>
 
             <div id="tab-donate">
-                <div id="accountGate" class="feed-item" style="margin-bottom:18px;padding:20px">
-                    <h3 style="margin:0 0 8px">Sebelum berdonasi</h3>
-                    <p style="margin:0 0 14px">Daftar atau login dengan OTP WhatsApp untuk dashboard, riwayat, level, badge, dan notifikasi transaksi. Kamu juga bisa langsung berdonasi tanpa akun.</p>
-                    <div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="neo-btn" onclick="showRegister()">DAFTAR / LOGIN WA</button><button type="button" class="neo-btn" onclick="continueAnonymous()">LANJUT ANONIM</button></div>
-                    <div id="registerPanel" class="hidden" style="margin-top:18px">
-                        <label class="label"><span>Nama</span></label><input id="registerName" class="neo-input" maxlength="60" placeholder="Nama kamu">
-                        <label class="label"><span>Nomor WhatsApp</span></label><div class="wa-group"><select id="registerCountry" class="wa-select"><option value="62">Indonesia +62</option><option value="60">Malaysia +60</option><option value="1">Amerika/Kanada +1</option><option value="92">Pakistan +92</option><option value="65">Singapura +65</option><option value="44">Inggris +44</option><option value="91">India +91</option><option value="61">Australia +61</option><option value="81">Jepang +81</option><option value="63">Filipina +63</option><option value="966">Arab Saudi +966</option></select><input id="registerPhone" class="neo-input wa-input" type="tel" placeholder="8123456789" autocomplete="tel-national"></div>
-                        <button type="button" id="requestOtpBtn" class="neo-btn" onclick="requestOtp()">KIRIM OTP WHATSAPP</button>
-                        <div id="otpPanel" class="hidden" style="margin-top:12px"><label class="label"><span>Kode OTP 6 digit</span></label><input id="registerOtp" class="neo-input" inputmode="numeric" maxlength="6" placeholder="123456"><button type="button" class="neo-btn" onclick="verifyOtp()">VERIFIKASI & MASUK</button></div>
-                        <p id="registerMessage" role="status"></p>
+                <div id="accountGate" class="account-gate-card">
+                    <div class="account-gate-header">
+                        <div class="account-gate-icon"><i data-lucide="shield-check"></i></div>
+                        <div>
+                            <h3 style="margin:0 0 4px; font-size:16px; font-weight:900;">Sebelum Berdonasi</h3>
+                            <p style="margin:0; font-size:12.5px; color:#57534e; font-weight:600;">Daftar atau login dengan OTP WhatsApp untuk membuka dashboard member, riwayat transaksi lengkap, level, dan badge. Atau langsung lanjut anonim.</p>
+                        </div>
                     </div>
-                    <p id="accountStatus" style="margin:12px 0 0"></p>
+                    <div class="account-gate-actions">
+                        <button type="button" class="neo-btn" onclick="showRegister()"><i data-lucide="smartphone"></i> DAFTAR / LOGIN WA</button>
+                        <button type="button" class="neo-btn ghost" onclick="continueAnonymous()"><i data-lucide="user-x"></i> LANJUT ANONIM</button>
+                    </div>
+                    <div id="registerPanel" class="hidden" style="margin-top:16px; padding-top:14px; border-top:2px dashed #d6d3cd;">
+                        <label class="label"><span>Nama Lengkap / Panggilan</span></label>
+                        <input id="registerName" class="neo-input" maxlength="60" placeholder="Nama kamu">
+                        <label class="label"><span>Nomor WhatsApp Aktif</span></label>
+                        <div class="wa-group">
+                            <select id="registerCountry" class="wa-select">
+                                <option value="62">Indonesia +62</option>
+                                <option value="60">Malaysia +60</option>
+                                <option value="1">Amerika/Kanada +1</option>
+                                <option value="92">Pakistan +92</option>
+                                <option value="65">Singapura +65</option>
+                                <option value="44">Inggris +44</option>
+                                <option value="91">India +91</option>
+                                <option value="61">Australia +61</option>
+                                <option value="81">Jepang +81</option>
+                                <option value="63">Filipina +63</option>
+                                <option value="966">Arab Saudi +966</option>
+                            </select>
+                            <input id="registerPhone" class="neo-input wa-input" type="tel" placeholder="8123456789" autocomplete="tel-national">
+                        </div>
+                        <button type="button" id="requestOtpBtn" class="neo-btn mint" onclick="requestOtp()"><i data-lucide="send"></i> KIRIM OTP WHATSAPP</button>
+                        <div id="otpPanel" class="hidden" style="margin-top:12px">
+                            <label class="label"><span>Kode OTP 6 Digit</span></label>
+                            <input id="registerOtp" class="neo-input" inputmode="numeric" maxlength="6" placeholder="123456">
+                            <button type="button" class="neo-btn" onclick="verifyOtp()"><i data-lucide="check-circle-2"></i> VERIFIKASI & MASUK</button>
+                        </div>
+                        <p id="registerMessage" role="status" style="margin-top:10px; font-size:12.5px; font-weight:800; color:#b45309;"></p>
+                    </div>
+                    <p id="accountStatus" style="margin:12px 0 0; font-size:12px; font-weight:700; color:#047857;"></p>
                 </div>
+
                 <form id="donateForm" class="hidden">
                     <label class="label"><span>Nama / Alias</span></label>
                     <input type="text" id="name" placeholder="Anonim / Nama Samaran" maxlength="60" class="neo-input">
 
                     <label class="label">
                         <span>Nomor WhatsApp</span>
-                        <span style="font-size:11px; background:#fff; padding:0 6px; border:2px solid #000;">OPSIONAL (PRIVASI AMAN)</span>
+                        <span style="font-size:10px; background:#fff; padding:2px 7px; border:1.5px solid var(--line); border-radius:5px;">OPSIONAL (PRIVASI AMAN)</span>
                     </label>
                     <div class="wa-group">
                         <select id="countryCode" class="wa-select">
@@ -559,7 +1624,7 @@
                         <input type="tel" id="waNumber" placeholder="8123456789" class="neo-input wa-input">
                     </div>
 
-                    <label class="label"><span>Metode Pembayaran</span><span style="font-size:11px">PILIH SATU</span></label>
+                    <label class="label"><span>Metode Pembayaran</span><span style="font-size:10.5px">PILIH SATU</span></label>
                     <div class="payment-picker" role="group" aria-label="Pilih metode pembayaran">
                         <button type="button" class="payment-option wallet-toggle selected" id="qrisToggle" aria-expanded="true" aria-controls="qrisOptions" onclick="toggleQrisFolder()">
                             <span class="wallet-toggle-main">
@@ -608,14 +1673,14 @@
 
                     <label class="label"><span>Nominal Donasi (Rp)</span></label>
                     <input type="number" id="amount" placeholder="10000" required min="100" class="neo-input" oninput="updateTierBadge(this.value)">
-                    <p id="feeNotice" class="feed-notes" style="margin:8px 0 14px">Fee layanan tambahan sedang nonaktif sampai mekanisme pembayaran dikonfirmasi.</p>
+                    <p id="feeNotice" class="feed-notes" style="margin:4px 0 14px">Fee layanan tambahan sedang nonaktif sampai mekanisme pembayaran dikonfirmasi.</p>
                     <div class="preset-grid">
-                        <button type="button" class="preset-btn" onclick="setNominal(5000)">5K</button>
-                        <button type="button" class="preset-btn" onclick="setNominal(10000)">10K</button>
-                        <button type="button" class="preset-btn" onclick="setNominal(25000)">25K</button>
-                        <button type="button" class="preset-btn" onclick="setNominal(50000)">50K</button>
-                        <button type="button" class="preset-btn" onclick="setNominal(100000)">100K</button>
-                        <button type="button" class="preset-btn" onclick="setNominal(250000)">250K</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(5000)">Rp 5.000</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(10000)">Rp 10.000</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(25000)">Rp 25.000</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(50000)">Rp 50.000</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(100000)">Rp 100.000</button>
+                        <button type="button" class="preset-btn" onclick="setNominal(250000)">Rp 250.000</button>
                     </div>
 
                     <label class="label"><span>Pilih Stiker Reaksi</span></label>
@@ -641,31 +1706,31 @@
                     <div class="qr-frame" id="qrFrame">
                         <img id="qrImage" src="" alt="QRIS">
                     </div>
-                    <div class="timer-badge" id="countdown" style="margin-bottom:14px">SISA WAKTU: 20:00</div>
+                    <div style="text-align:center; margin-bottom:14px;">
+                        <div class="timer-badge" id="countdown">SISA WAKTU: 20:00</div>
+                    </div>
                     <div id="paymentInstructions" class="payment-instructions hidden"></div>
 
                     <div class="info-list">
                         <p>
                             <span>ID TRX</span>
-                            <span>
+                            <span class="trx-id-inline">
                                 <span id="trxId"></span>
-                                <button type="button" onclick="copyTrxId()" style="background:#ffde59; border:2px solid #000; padding:1px 6px; font-weight:900; font-size:11px; cursor:pointer;">SALIN</button>
+                                <button type="button" onclick="copyTrxId()" style="background:var(--orange); border:1.5px solid var(--line); border-radius:6px; padding:3px 8px; font-weight:900; font-size:10.5px; cursor:pointer;">SALIN</button>
                             </span>
                         </p>
                         <p><span>NOMINAL</span> <span id="trxAmount"></span></p>
                         <p><span>BIAYA ADMIN</span> <span id="trxFee"></span></p>
-                        <p style="font-size: 16px; background: #c1ff72; padding: 6px; border: 2px solid #000; margin-top: 4px;">
-                            <span>TOTAL BAYAR</span> <span id="trxTotal"></span>
+                        <p style="font-size: 15px; background: var(--mint-soft); padding: 8px 10px; border: 2px solid var(--line); border-radius: 8px; margin-top: 6px;">
+                            <span>TOTAL BAYAR</span> <span id="trxTotal" style="font-weight:900;"></span>
                         </p>
                     </div>
 
                     <div class="action-row">
                         <button type="button" id="qrDownloadBtn" onclick="downloadQrOnly()" class="neo-btn blue icon-btn"><i data-lucide="download"></i> UNDUH QR CODE</button>
                         <button type="button" onclick="downloadInvoice()" class="neo-btn icon-btn"><i data-lucide="file-text"></i> UNDUH INVOICE</button>
-                        <button type="button" id="cancelBtn" class="neo-btn red icon-btn"><i data-lucide="x-circle"></i> BATALKAN</button>
+                        <button type="button" id="cancelBtn" class="neo-btn red icon-btn"><i data-lucide="x-circle"></i> BATALKAN TRANSAKSI</button>
                     </div>
-                    
-                    
                 </div>
 
                 <div id="resultSection" class="hidden" style="text-align: center; padding: 16px 0;">
@@ -685,37 +1750,84 @@
             </div>
 
             <div id="tab-account" class="hidden">
-                <div id="accountTabGuest" class="feed-item" style="padding:20px">
-                    <h3 style="margin-top:0">Akun donatur</h3>
-                    <p>Daftar atau login menggunakan OTP WhatsApp untuk melihat dashboard, riwayat transaksi, level, dan badge.</p>
-                    <button type="button" class="neo-btn" onclick="switchTab('donate', document.querySelector('.tab-btn')); showRegister()">DAFTAR / LOGIN WA</button>
+                <div id="accountTabGuest" class="account-gate-card" style="text-align:center; padding:26px 18px;">
+                    <div class="account-gate-icon" style="margin:0 auto 12px;"><i data-lucide="user-Check"></i></div>
+                    <h3 style="margin:0 0 6px; font-size:18px; font-weight:900;">Akun Donatur Kaxel</h3>
+                    <p style="margin:0 auto 16px; max-width:440px; font-size:13px; color:#57534e; font-weight:600;">Daftar atau login menggunakan OTP WhatsApp untuk memantau dashboard donasi, riwayat transaksi dan invoice resmi, progres level, serta koleksi badge eksklusif.</p>
+                    <button type="button" class="neo-btn" style="max-width:280px;" onclick="switchTab('donate', document.querySelector('.tab-btn')); showRegister()"><i data-lucide="log-in"></i> DAFTAR / LOGIN WA</button>
                 </div>
+
                 <div id="memberDashboard" class="hidden">
-                    <div class="feed-item" style="padding:20px;margin-bottom:14px">
-                        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><h3 id="memberName" style="margin:0 0 5px">Dashboard Member</h3><p id="memberSince" style="margin:0">Member terverifikasi</p></div><button type="button" class="neo-btn" onclick="logoutMember()">KELUAR</button></div>
-                        <div class="preset-grid" style="margin-top:16px">
-                            <div class="feed-item"><small>Total donasi berhasil</small><div id="memberTotal" class="feed-amount">Rp0</div></div>
-                            <div class="feed-item"><small>Transaksi berhasil</small><div id="memberCount" class="feed-amount">0</div></div>
-                            <div class="feed-item"><small>Level saat ini</small><div id="memberLevel" class="feed-amount">New Supporter</div></div>
+                    <div class="account-hero-card">
+                        <div class="account-profile-top">
+                            <div class="account-profile-ident">
+                                <div class="account-avatar"><i data-lucide="user-round"></i></div>
+                                <div class="account-profile-text">
+                                    <h3 id="memberName">Dashboard Member</h3>
+                                    <p id="memberSince">Member terverifikasi</p>
+                                </div>
+                            </div>
+                            <button type="button" class="neo-btn red sm" onclick="logoutMember()"><i data-lucide="log-out"></i> KELUAR</button>
                         </div>
-                        <div style="margin-top:14px"><div style="display:flex;justify-content:space-between;gap:10px"><strong id="memberNextLevel">Progres level</strong><span id="memberProgressText">0%</span></div><div style="height:12px;border:2px solid #000;background:#fff;margin-top:7px"><div id="memberProgress" style="height:100%;width:0%;background:#ffde59"></div></div></div>
-                        <p id="memberFeeText" style="margin:12px 0 8px"></p>
-                        <label style="display:flex;align-items:center;gap:8px;margin-top:12px"><input type="checkbox" id="publicIdentityToggle" onchange="savePublicIdentity()"> Tampilkan nama saya di donasi publik</label>
+
+                        <div class="member-stats-grid">
+                            <div class="member-stat-card">
+                                <small>Total Donasi Berhasil</small>
+                                <div id="memberTotal" class="member-stat-value">Rp0</div>
+                            </div>
+                            <div class="member-stat-card">
+                                <small>Transaksi Berhasil</small>
+                                <div id="memberCount" class="member-stat-value">0</div>
+                            </div>
+                            <div class="member-stat-card level-card">
+                                <small>Level Saat Ini</small>
+                                <div id="memberLevel" class="member-stat-value">New Supporter</div>
+                            </div>
+                        </div>
+
+                        <div class="member-level-box">
+                            <div class="member-level-head">
+                                <strong id="memberNextLevel">Progres Level</strong>
+                                <span id="memberProgressText">0%</span>
+                            </div>
+                            <div class="member-progress-track">
+                                <div id="memberProgress" class="member-progress-bar"></div>
+                            </div>
+                        </div>
+
+                        <p id="memberFeeText" style="margin:12px 0 0; font-size:12px; font-weight:700; color:#57534e;"></p>
+
+                        <label class="privacy-toggle-box">
+                            <input type="checkbox" id="publicIdentityToggle" onchange="savePublicIdentity()">
+                            <span>Tampilkan nama saya di daftar donasi publik</span>
+                        </label>
                     </div>
-                    <div class="feed-item" style="padding:20px;margin-bottom:14px"><h3 style="margin-top:0">Badge pencapaian</h3><div id="memberBadges">Belum ada badge.</div></div>
-                    <div class="feed-item" style="padding:20px"><h3 style="margin-top:0">Riwayat transaksi saya</h3><div id="memberTransactions">Memuat transaksi...</div></div>
+
+                    <div class="account-section-card">
+                        <h3 class="account-section-title"><i data-lucide="award"></i> Badge Pencapaian</h3>
+                        <div id="memberBadges" class="badges-grid">Belum ada badge.</div>
+                    </div>
+
+                    <div class="account-section-card" style="margin-bottom:0;">
+                        <h3 class="account-section-title"><i data-lucide="receipt"></i> Riwayat Transaksi Saya</h3>
+                        <div id="memberTransactions" class="member-tx-list">Memuat transaksi...</div>
+                    </div>
                 </div>
             </div>
 
             <div id="tab-chat" class="hidden">
-                <div class="comment-panel">
-                    <div class="icon-btn"><i data-lucide="messages-square"></i><strong>LIVE CHAT ADMIN</strong></div>
-                    <p style="margin:8px 0 12px">Kirim pesan ke admin dan lihat balasannya di sini. Percakapan terhubung ke transaksi terakhir di perangkat ini.</p>
+                <div class="comment-panel" style="margin-top:0;">
+                    <div class="icon-btn" style="margin-bottom:4px;"><i data-lucide="messages-square"></i><strong>LIVE CHAT ADMIN</strong></div>
+                    <p style="margin:4px 0 12px; font-size:12.5px; color:#57534e; font-weight:600;">Kirim pesan ke admin dan lihat balasannya di sini. Percakapan terhubung ke akun atau transaksi terakhir di perangkat ini.</p>
                     <div id="chatUnavailable" class="empty-state">Buat transaksi donasi terlebih dahulu agar chat dapat terhubung.</div>
                     <div id="commentList">Memuat percakapan...</div>
                     <textarea id="donorMessage" rows="3" maxlength="1000" placeholder="Tulis pesan untuk admin..."></textarea>
-                    <button type="button" class="neo-btn" onclick="sendDonorMessage()">KIRIM PESAN</button>
-                    <div class="notice-panel" style="margin-top:14px"><div class="icon-btn"><i data-lucide="bell-ring"></i><strong>NOTIFIKASI</strong></div><button type="button" class="neo-btn" onclick="enableNotifications()">IZINKAN NOTIFIKASI HP</button><div id="notificationList">Belum ada notifikasi.</div></div>
+                    <button type="button" class="neo-btn" onclick="sendDonorMessage()"><i data-lucide="send"></i> KIRIM PESAN</button>
+                    <div class="notice-panel" style="margin-top:16px">
+                        <div class="icon-btn" style="margin-bottom:8px;"><i data-lucide="bell-ring"></i><strong>NOTIFIKASI</strong></div>
+                        <button type="button" class="neo-btn blue" style="margin-bottom:10px;" onclick="enableNotifications()"><i data-lucide="bell"></i> IZINKAN NOTIFIKASI HP</button>
+                        <div id="notificationList">Belum ada notifikasi.</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -737,48 +1849,160 @@
 
         const formatRp = (num) => 'Rp' + Number(num).toLocaleString('id-ID')
 
-        const showRegister = () => { document.getElementById('registerPanel').classList.remove('hidden'); document.getElementById('registerName').focus() }
-        const continueAnonymous = () => { anonymousMode = true; authToken = ''; authUser = null; localStorage.removeItem(AUTH_KEY); document.getElementById('accountGate').classList.add('hidden'); document.getElementById('donateForm').classList.remove('hidden'); document.getElementById('name').value = 'Anonim'; document.getElementById('name').readOnly = false; document.getElementById('waNumber').value = ''; document.getElementById('accountStatus').textContent = 'Kamu berdonasi tanpa akun. Nama bisa diganti menjadi nama samaran; nomor WhatsApp tidak diperlukan.'; updateFeeNotice() }
+        const showRegister = () => {
+            document.getElementById('registerPanel').classList.remove('hidden')
+            document.getElementById('registerName').focus()
+        }
+
+        const continueAnonymous = () => {
+            anonymousMode = true
+            authToken = ''
+            authUser = null
+            localStorage.removeItem(AUTH_KEY)
+            document.getElementById('accountGate').classList.add('hidden')
+            document.getElementById('donateForm').classList.remove('hidden')
+            document.getElementById('name').value = 'Anonim'
+            document.getElementById('name').readOnly = false
+            document.getElementById('waNumber').value = ''
+            document.getElementById('accountStatus').textContent = 'Kamu berdonasi tanpa akun. Nama bisa diganti menjadi nama samaran; nomor WhatsApp tidak diperlukan.'
+            updateFeeNotice()
+        }
+
         const requestOtp = async () => {
             const name = document.getElementById('registerName').value.trim()
             let phone = document.getElementById('registerPhone').value.replace(/\D/g, '')
             if (phone.startsWith('0')) phone = phone.slice(1)
             phone = document.getElementById('registerCountry').value + phone
-            if (!name || phone.length < 8) { document.getElementById('registerMessage').textContent = 'Isi nama dan nomor WhatsApp yang valid.'; return }
-            const btn = document.getElementById('requestOtpBtn'); btn.disabled = true; btn.textContent = 'MENGIRIM OTP...'
-            try { const res = await fetch('/api/auth/request-otp', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name, phone}) }); const json = await res.json(); document.getElementById('registerMessage').textContent = json.message || 'Gagal meminta OTP.'; if (json.success) { otpChallengeId = json.challengeId; otpPhone = phone; document.getElementById('otpPanel').classList.remove('hidden') } }
-            catch (e) { document.getElementById('registerMessage').textContent = 'Server tidak dapat dihubungi.' }
-            finally { btn.disabled = false; btn.textContent = 'KIRIM OTP WHATSAPP' }
+            if (!name || phone.length < 8) {
+                document.getElementById('registerMessage').textContent = 'Isi nama dan nomor WhatsApp yang valid.'
+                return
+            }
+            const btn = document.getElementById('requestOtpBtn')
+            btn.disabled = true
+            btn.textContent = 'MENGIRIM OTP...'
+            try {
+                const res = await fetch('/api/auth/request-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, phone })
+                })
+                const json = await res.json()
+                document.getElementById('registerMessage').textContent = json.message || 'Gagal meminta OTP.'
+                if (json.success) {
+                    otpChallengeId = json.challengeId
+                    otpPhone = phone
+                    document.getElementById('otpPanel').classList.remove('hidden')
+                }
+            } catch (e) {
+                document.getElementById('registerMessage').textContent = 'Server tidak dapat dihubungi.'
+            } finally {
+                btn.disabled = false
+                btn.innerHTML = '<i data-lucide="send"></i> KIRIM OTP WHATSAPP'
+                if (window.lucide) lucide.createIcons()
+            }
         }
+
         const verifyOtp = async () => {
             const otp = document.getElementById('registerOtp').value.trim()
-            try { const res = await fetch('/api/auth/verify-otp', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({phone:otpPhone, challengeId:otpChallengeId, otp}) }); const json = await res.json(); if (!json.success) { document.getElementById('registerMessage').textContent = json.message || 'OTP salah.'; return } authToken = json.token; authUser = json.user; localStorage.setItem(AUTH_KEY, authToken); anonymousMode = false; document.getElementById('accountGate').classList.add('hidden'); document.getElementById('donateForm').classList.remove('hidden'); document.getElementById('name').value = authUser.name; document.getElementById('name').readOnly = true; document.getElementById('waNumber').value = ''; document.getElementById('accountStatus').textContent = `Login sebagai ${authUser.name} (${authUser.phone}). Nomor WhatsApp terverifikasi.`; loadMemberDashboard(); updateFeeNotice(); showAlert('Pendaftaran berhasil!') }
-            catch (e) { document.getElementById('registerMessage').textContent = 'Verifikasi gagal terhubung ke server.' }
+            try {
+                const res = await fetch('/api/auth/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: otpPhone, challengeId: otpChallengeId, otp })
+                })
+                const json = await res.json()
+                if (!json.success) {
+                    document.getElementById('registerMessage').textContent = json.message || 'OTP salah.'
+                    return
+                }
+                authToken = json.token
+                authUser = json.user
+                localStorage.setItem(AUTH_KEY, authToken)
+                anonymousMode = false
+                document.getElementById('accountGate').classList.add('hidden')
+                document.getElementById('donateForm').classList.remove('hidden')
+                document.getElementById('name').value = authUser.name
+                document.getElementById('name').readOnly = true
+                document.getElementById('waNumber').value = ''
+                document.getElementById('accountStatus').textContent = `Login sebagai ${authUser.name} (${authUser.phone}). Nomor WhatsApp terverifikasi.`
+                loadMemberDashboard()
+                updateFeeNotice()
+                showAlert('Pendaftaran berhasil!')
+            } catch (e) {
+                document.getElementById('registerMessage').textContent = 'Verifikasi gagal terhubung ke server.'
+            }
         }
-        const loadAuthUser = async () => { if (!authToken) return; try { const res = await fetch('/api/auth/me', {headers:{Authorization:`Bearer ${authToken}`}}); const json = await res.json(); if (!json.success) { localStorage.removeItem(AUTH_KEY); authToken=''; return } authUser=json.user; document.getElementById('accountGate').classList.add('hidden'); document.getElementById('donateForm').classList.remove('hidden'); document.getElementById('name').value=authUser.name; document.getElementById('name').readOnly=true; document.getElementById('accountStatus').textContent=`Login sebagai ${authUser.name} (${authUser.phone}). Nomor WhatsApp terverifikasi.`; loadMemberDashboard(); updateFeeNotice() } catch(e) {} }
 
+        const loadAuthUser = async () => {
+            if (!authToken) return
+            try {
+                const res = await fetch('/api/auth/me', { headers: { Authorization: `Bearer ${authToken}` } })
+                const json = await res.json()
+                if (!json.success) {
+                    localStorage.removeItem(AUTH_KEY)
+                    authToken = ''
+                    return
+                }
+                authUser = json.user
+                document.getElementById('accountGate').classList.add('hidden')
+                document.getElementById('donateForm').classList.remove('hidden')
+                document.getElementById('name').value = authUser.name
+                document.getElementById('name').readOnly = true
+                document.getElementById('accountStatus').textContent = `Login sebagai ${authUser.name} (${authUser.phone}). Nomor WhatsApp terverifikasi.`
+                loadMemberDashboard()
+                updateFeeNotice()
+            } catch (e) {}
+        }
 
         let publicFeeConfig = { enabled: false, memberPercent: 0.3, anonymousPercent: 0.7 }
         const updateFeeNotice = () => {
             const el = document.getElementById('feeNotice')
             if (!el) return
-            if (!publicFeeConfig.enabled) { el.textContent = 'Fee layanan tambahan sedang nonaktif sampai mekanisme pembayaran dikonfirmasi. Total mengikuti nominal dan respons gateway.'; return }
+            if (!publicFeeConfig.enabled) {
+                el.textContent = 'Fee layanan tambahan sedang nonaktif sampai mekanisme pembayaran dikonfirmasi. Total mengikuti nominal dan respons gateway.'
+                return
+            }
             const amount = Math.max(0, Number(document.getElementById('amount')?.value || 0))
             const percent = authUser ? publicFeeConfig.memberPercent : publicFeeConfig.anonymousPercent
             el.textContent = `Estimasi fee layanan ${percent}%: ${formatRp(Math.round(amount * percent / 100))}. Nominal final mengikuti konfirmasi backend dan gateway.`
         }
+
         const loadPublicConfig = async () => {
-            try { const res = await fetch('/api/public-config', { cache: 'no-store' }); const json = await res.json(); if (json.success && json.fees) { publicFeeConfig = json.fees; updateFeeNotice() } } catch (e) {}
+            try {
+                const res = await fetch('/api/public-config', { cache: 'no-store' })
+                const json = await res.json()
+                if (json.success && json.fees) {
+                    publicFeeConfig = json.fees
+                    updateFeeNotice()
+                }
+            } catch (e) {}
         }
+
+        const formatStatusBadgeClass = (rawStatus) => {
+            const st = String(rawStatus || '').toLowerCase().replace(/[^a-z]/g, '')
+            if (['success', 'sukses', 'paid'].includes(st)) return 'status-success'
+            if (st === 'pending') return 'status-pending'
+            return 'status-expired'
+        }
+
         const loadMemberDashboard = async () => {
             const guest = document.getElementById('accountTabGuest')
             const panel = document.getElementById('memberDashboard')
-            if (!authToken || !authUser) { guest?.classList.remove('hidden'); panel?.classList.add('hidden'); return }
+            if (!authToken || !authUser) {
+                guest?.classList.remove('hidden')
+                panel?.classList.add('hidden')
+                return
+            }
             try {
-                const res = await fetch('/api/member/dashboard', { headers: { Authorization: `Bearer ${authToken}` }, cache: 'no-store' })
+                const res = await fetch('/api/member/dashboard', {
+                    headers: { Authorization: `Bearer ${authToken}` },
+                    cache: 'no-store'
+                })
                 const json = await res.json()
                 if (!json.success) throw new Error(json.message || 'Dashboard gagal dimuat')
-                guest?.classList.add('hidden'); panel?.classList.remove('hidden')
+                guest?.classList.add('hidden')
+                panel?.classList.remove('hidden')
+
                 document.getElementById('memberName').textContent = json.user.name
                 document.getElementById('memberSince').textContent = `Bergabung ${new Date(json.user.createdAt).toLocaleDateString('id-ID')} · WhatsApp terverifikasi`
                 document.getElementById('memberTotal').textContent = formatRp(json.stats.total)
@@ -787,29 +2011,141 @@
                 document.getElementById('memberNextLevel').textContent = json.stats.nextLevel ? `Menuju ${json.stats.nextLevel}` : 'Level tertinggi tercapai'
                 document.getElementById('memberProgressText').textContent = `${json.stats.progress}%`
                 document.getElementById('memberProgress').style.width = `${json.stats.progress}%`
-                document.getElementById('memberFeeText').textContent = json.stats.feeEnabled ? `Tarif fee member: ${json.stats.feePercent}% sesuai konfigurasi yang disetujui.` : 'Fee layanan member sedang nonaktif sampai mekanisme pembayaran dikonfirmasi.'
+                document.getElementById('memberFeeText').textContent = json.stats.feeEnabled
+                    ? `Tarif fee member: ${json.stats.feePercent}% sesuai konfigurasi yang disetujui.`
+                    : 'Fee layanan member sedang nonaktif sampai mekanisme pembayaran dikonfirmasi.'
                 document.getElementById('publicIdentityToggle').checked = json.user.showPublicIdentity !== false
-                document.getElementById('memberBadges').innerHTML = json.stats.badges.length ? json.stats.badges.map(b => `<div class="feed-item" style="margin:8px 0;padding:12px"><strong>${escapeHtml(b.name)}</strong><p style="margin:5px 0 0">${escapeHtml(b.description)}</p></div>`).join('') : 'Belum ada badge. Selesaikan donasi untuk mulai mendapatkan pencapaian.'
+
+                const badgesEl = document.getElementById('memberBadges')
+                badgesEl.innerHTML = json.stats.badges.length
+                    ? json.stats.badges.map(b => `
+                        <div class="badge-item-card">
+                            <strong>🏅 ${escapeHtml(b.name)}</strong>
+                            <p>${escapeHtml(b.description)}</p>
+                        </div>
+                    `).join('')
+                    : '<div class="empty-state" style="grid-column:1/-1;">Belum ada badge. Selesaikan donasi untuk mulai mendapatkan pencapaian.</div>'
+
                 const tx = json.transactions || []
-                document.getElementById('memberTransactions').innerHTML = tx.length ? tx.map(t => `<div class="feed-item" style="padding:12px;margin:8px 0"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><strong>${escapeHtml(t.invoiceNumber || t.transactionId)}</strong><strong>${formatRp(t.amount)}</strong></div><p style="margin:5px 0">${new Date(t.createdAt).toLocaleString('id-ID')} · ${escapeHtml(String(t.paymentMethod).toUpperCase())} · ${escapeHtml(t.status)}</p><small>Fee ${formatRp(t.fee)} · Total ${formatRp(t.totalAmount)}</small><details style="margin-top:8px"><summary>DETAIL TRANSAKSI</summary><p>Referensi gateway: ${escapeHtml(t.gatewayReference || t.transactionId)}</p><p>Waktu pembayaran: ${t.paidAt ? new Date(t.paidAt).toLocaleString('id-ID') : 'Belum dibayar'}</p><p>Pesan: ${escapeHtml(t.notes || '-')}</p></details><div style="margin-top:9px">${t.invoiceAvailable ? `<button class="neo-btn" type="button" data-invoice-id="${escapeHtml(t.transactionId)}">UNDUH INVOICE</button>` : '<small>Invoice final tersedia setelah pembayaran terverifikasi.</small>'}</div></div>`).join('') : 'Belum ada transaksi member.'
-                document.querySelectorAll('[data-invoice-id]').forEach(button => button.addEventListener('click', () => openMemberInvoice(button.dataset.invoiceId)))
+                const txEl = document.getElementById('memberTransactions')
+                txEl.innerHTML = tx.length
+                    ? tx.map(t => {
+                        const statusClass = formatStatusBadgeClass(t.status)
+                        const displayId = t.invoiceNumber || t.transactionId || '-'
+                        return `
+                        <div class="member-tx-card">
+                            <div class="member-tx-top">
+                                <div class="member-tx-id-group">
+                                    <span class="member-tx-id-label">ID Transaksi / Invoice</span>
+                                    <code class="member-tx-id-pill">${escapeHtml(displayId)}</code>
+                                </div>
+                                <div class="member-tx-amount">${formatRp(t.amount)}</div>
+                            </div>
+                            <div class="member-tx-meta-row">
+                                <div class="member-tx-badges">
+                                    <span class="transaction-status ${statusClass}">${escapeHtml(String(t.status || '').toUpperCase())}</span>
+                                    <span class="member-tx-method">${escapeHtml(String(t.paymentMethod || 'QRIS').toUpperCase())}</span>
+                                </div>
+                                <span class="member-tx-date">${new Date(t.createdAt).toLocaleString('id-ID')}</span>
+                            </div>
+                            <div class="member-tx-fee-summary">
+                                <span>Biaya Admin: ${formatRp(t.fee)}</span>
+                                <span>Total Bayar: ${formatRp(t.totalAmount)}</span>
+                            </div>
+                            <details class="member-tx-details">
+                                <summary>LIHAT DETAIL TRANSAKSI</summary>
+                                <div class="member-tx-details-body">
+                                    <div class="member-tx-detail-line">
+                                        <span>Referensi Gateway / ID</span>
+                                        <strong>${escapeHtml(t.gatewayReference || t.transactionId || '-')}</strong>
+                                    </div>
+                                    <div class="member-tx-detail-line">
+                                        <span>Waktu Pembayaran</span>
+                                        <p>${t.paidAt ? new Date(t.paidAt).toLocaleString('id-ID') : 'Belum dibayar'}</p>
+                                    </div>
+                                    <div class="member-tx-detail-line">
+                                        <span>Pesan Dukungan</span>
+                                        <p>${escapeHtml(t.notes || '-')}</p>
+                                    </div>
+                                </div>
+                            </details>
+                            <div class="member-tx-footer">
+                                ${t.invoiceAvailable
+                                    ? `<button class="neo-btn blue sm" type="button" data-invoice-id="${escapeHtml(t.transactionId)}"><i data-lucide="file-down"></i> UNDUH INVOICE</button>`
+                                    : '<small style="font-size:11px; font-weight:700; color:#71717a;">Invoice final tersedia setelah pembayaran terverifikasi.</small>'
+                                }
+                            </div>
+                        </div>`
+                    }).join('')
+                    : '<div class="empty-state">Belum ada transaksi member.</div>'
+
+                document.querySelectorAll('[data-invoice-id]').forEach(button => {
+                    button.addEventListener('click', () => openMemberInvoice(button.dataset.invoiceId))
+                })
+                if (window.lucide) lucide.createIcons()
             } catch (e) {
-                guest?.classList.remove('hidden'); panel?.classList.add('hidden')
-                if (guest) guest.innerHTML = `<h3>Akun member</h3><p>${escapeHtml(e.message || 'Sesi login tidak valid.')}</p><button class="neo-btn" onclick="logoutMember()">LOGIN ULANG</button>`
+                guest?.classList.remove('hidden')
+                panel?.classList.add('hidden')
+                if (guest) {
+                    guest.innerHTML = `
+                        <h3 style="margin:0 0 6px; font-weight:900;">Akun Member</h3>
+                        <p style="margin:0 0 14px; font-size:13px; color:#57534e;">${escapeHtml(e.message || 'Sesi login tidak valid.')}</p>
+                        <button class="neo-btn sm" onclick="logoutMember()">LOGIN ULANG</button>
+                    `
+                }
             }
         }
+
         const savePublicIdentity = async () => {
             if (!authToken) return
-            try { const res = await fetch('/api/member/profile', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` }, body: JSON.stringify({ showPublicIdentity: document.getElementById('publicIdentityToggle').checked }) }); const json = await res.json(); if (!json.success) throw new Error(json.message); showAlert('Pengaturan privasi disimpan.') } catch (e) { showAlert('Pengaturan privasi gagal disimpan.') }
+            try {
+                const res = await fetch('/api/member/profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ showPublicIdentity: document.getElementById('publicIdentityToggle').checked })
+                })
+                const json = await res.json()
+                if (!json.success) throw new Error(json.message)
+                showAlert('Pengaturan privasi disimpan.')
+            } catch (e) {
+                showAlert('Pengaturan privasi gagal disimpan.')
+            }
         }
+
         const openMemberInvoice = async id => {
-            try { const res = await fetch(`/api/member/invoice/${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${authToken}` } }); if (!res.ok) throw new Error(await res.text()); const blob = await res.blob(); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = `Invoice-${id}.html`; document.body.appendChild(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000) } catch (e) { showAlert(e.message || 'Invoice gagal dibuka.') }
+            try {
+                const res = await fetch(`/api/member/invoice/${encodeURIComponent(id)}`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                })
+                if (!res.ok) throw new Error(await res.text())
+                const blob = await res.blob()
+                const url = URL.createObjectURL(blob)
+                const link = document.createElement('a')
+                link.href = url
+                link.download = `Invoice-${id}.html`
+                document.body.appendChild(link)
+                link.click()
+                link.remove()
+                setTimeout(() => URL.revokeObjectURL(url), 60000)
+            } catch (e) {
+                showAlert(e.message || 'Invoice gagal dibuka.')
+            }
         }
+
         const logoutMember = () => {
-            authToken = ''; authUser = null; localStorage.removeItem(AUTH_KEY)
-            document.getElementById('memberDashboard').classList.add('hidden'); document.getElementById('accountTabGuest').classList.remove('hidden')
-            document.getElementById('accountGate').classList.remove('hidden'); document.getElementById('donateForm').classList.add('hidden')
-            document.getElementById('name').readOnly = false; anonymousMode = false; showAlert('Kamu sudah keluar dari akun.')
+            authToken = ''
+            authUser = null
+            localStorage.removeItem(AUTH_KEY)
+            document.getElementById('memberDashboard').classList.add('hidden')
+            document.getElementById('accountTabGuest').classList.remove('hidden')
+            document.getElementById('accountGate').classList.remove('hidden')
+            document.getElementById('donateForm').classList.add('hidden')
+            document.getElementById('name').readOnly = false
+            anonymousMode = false
+            showAlert('Kamu sudah keluar dari akun.')
         }
 
         const playSuccessSound = () => {
@@ -836,13 +2172,13 @@
             const badge = document.getElementById('tierBadge')
             if (num >= 100000) {
                 badge.textContent = 'VIP SUPPORTER'
-                badge.style.background = '#ff914d'
+                badge.style.background = '#fb923c'
             } else if (num >= 25000) {
                 badge.textContent = 'PRO SUPPORTER'
-                badge.style.background = '#5ce1e6'
+                badge.style.background = '#7dd3fc'
             } else {
                 badge.textContent = 'TRAKTIR KOPI'
-                badge.style.background = '#c1ff72'
+                badge.style.background = '#fde68a'
             }
         }
 
@@ -1005,7 +2341,20 @@
                         const dateValue = r.paidAt || r.createdAt
                         const dateLabel = dateValue ? new Date(dateValue).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : 'Waktu tidak tersedia'
                         const reactionIcons = { support: '🤝', heart: '❤️', rocket: '🚀', coffee: '☕', crown: '👑' }
-                        return `<div class="feed-item transaction-row"><div class="feed-header"><span class="transaction-name">${reactionIcons[r.emoji] || '🤝'} ${escapePublicText(r.name || 'Anonim')}</span><span class="feed-amount">${formatRp(r.amount)}</span></div><div class="transaction-meta"><span class="transaction-status status-${status.replace(/[^a-z]/g, '')}">${statusLabel}</span><span>${escapePublicText(r.transactionId || '')}</span></div><div class="feed-notes">${escapePublicText(r.notes || 'Dukungan untuk kreator')}</div>${Array.isArray(r.badges) && r.badges.includes('Anonymous Hero') ? '<small class="coming-badge">ANONYMOUS HERO</small>' : ''}<small class="transaction-date">${dateLabel}</small></div>`
+                        return `
+                        <div class="feed-item transaction-row">
+                            <div class="feed-header">
+                                <span class="transaction-name">${reactionIcons[r.emoji] || '🤝'} ${escapePublicText(r.name || 'Anonim')}</span>
+                                <span class="feed-amount">${formatRp(r.amount)}</span>
+                            </div>
+                            <div class="transaction-meta">
+                                <span class="transaction-status status-${status.replace(/[^a-z]/g, '')}">${statusLabel}</span>
+                                ${r.transactionId ? `<span class="transaction-id-chip">${escapePublicText(r.transactionId)}</span>` : ''}
+                            </div>
+                            <div class="feed-notes">${escapePublicText(r.notes || 'Dukungan untuk kreator')}</div>
+                            ${Array.isArray(r.badges) && r.badges.includes('Anonymous Hero') ? '<small class="coming-badge" style="margin-top:6px;">ANONYMOUS HERO</small>' : ''}
+                            <small class="transaction-date">${dateLabel}</small>
+                        </div>`
                     }).join('')
                 }
                 if (window.lucide) lucide.createIcons()
@@ -1062,12 +2411,22 @@
             if (rawPhone.startsWith('0')) rawPhone = rawPhone.slice(1)
             const fullWhatsapp = rawPhone ? `${code}${rawPhone}` : ''
 
-            const payload = { name: authUser ? authUser.name : (document.getElementById('name').value.trim() || 'Anonim'), whatsapp: authUser ? authUser.phone : '', amount: document.getElementById('amount').value, notes: document.getElementById('notes').value, emoji: selectedEmoji, paymentMethod: selectedPaymentMethod }
+            const payload = {
+                name: authUser ? authUser.name : (document.getElementById('name').value.trim() || 'Anonim'),
+                whatsapp: authUser ? authUser.phone : '',
+                amount: document.getElementById('amount').value,
+                notes: document.getElementById('notes').value,
+                emoji: selectedEmoji,
+                paymentMethod: selectedPaymentMethod
+            }
 
             try {
                 const res = await fetch('/api/donate', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}) },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
+                    },
                     body: JSON.stringify(payload)
                 })
                 const json = await res.json()
@@ -1076,6 +2435,7 @@
                     showAlert(json.message)
                     btn.disabled = false
                     btn.innerHTML = isQrMethod(selectedPaymentMethod) ? '<i data-lucide="qr-code"></i> BUAT QRIS SEKARANG' : '<i data-lucide="wallet"></i> LANJUT KE SHOPEEPAY'
+                    if (window.lucide) lucide.createIcons()
                     return
                 }
 
@@ -1087,6 +2447,7 @@
                 showAlert('Gagal menghubungi server.')
                 btn.disabled = false
                 btn.innerHTML = isQrMethod(selectedPaymentMethod) ? '<i data-lucide="qr-code"></i> BUAT QRIS SEKARANG' : '<i data-lucide="wallet"></i> LANJUT KE SHOPEEPAY'
+                if (window.lucide) lucide.createIcons()
             }
         })
 
@@ -1094,7 +2455,6 @@
             document.getElementById('donateForm').classList.add('hidden')
             document.getElementById('resultSection').classList.add('hidden')
             document.getElementById('qrSection').classList.remove('hidden')
-            
 
             const isQr = isQrMethod(trx.paymentMethod || 'qris') && Boolean(trx.qrImage)
             document.getElementById('qrFrame').classList.toggle('hidden', !isQr)
@@ -1103,7 +2463,7 @@
             document.getElementById('qrImage').src = trx.qrImage || ''
             if (!isQr) {
                 const details = trx.accountDetails || {}
-                document.getElementById('paymentInstructions').innerHTML = `<div class="icon-btn"><i data-lucide="wallet"></i><strong>PEMBAYARAN SHOPEEPAY</strong></div><p>Transaksi berhasil dibuat. Lanjutkan melalui halaman pembayaran Betabotz Paygate untuk mengikuti instruksi resmi.</p>${details.accountNumber ? `<div class="payment-detail"><strong>Nomor tujuan</strong><span>${escapeHtml(details.accountNumber)}</span></div>` : ''}${details.accountName ? `<div class="payment-detail"><strong>Nama tujuan</strong><span>${escapeHtml(details.accountName)}</span></div>` : ''}${details.additionalInfo ? `<div class="payment-detail"><strong>Informasi</strong><span>${escapeHtml(details.additionalInfo)}</span></div>` : ''}${trx.paymentUrl ? `<a class="neo-btn blue icon-btn" href="${escapeHtml(trx.paymentUrl)}" target="_blank" rel="noopener noreferrer" style="display:flex;text-decoration:none;color:#000;justify-content:center"><i data-lucide="external-link"></i> BUKA HALAMAN PEMBAYARAN</a>` : '<p>Halaman pembayaran tidak tersedia. Hubungi admin.</p>'}`
+                document.getElementById('paymentInstructions').innerHTML = `<div class="icon-btn"><i data-lucide="wallet"></i><strong>PEMBAYARAN SHOPEEPAY</strong></div><p>Transaksi berhasil dibuat. Lanjutkan melalui halaman pembayaran Betabotz Paygate untuk mengikuti instruksi resmi.</p>${details.accountNumber ? `<div class="payment-detail"><strong>Nomor tujuan</strong><span>${escapeHtml(details.accountNumber)}</span></div>` : ''}${details.accountName ? `<div class="payment-detail"><strong>Nama tujuan</strong><span>${escapeHtml(details.accountName)}</span></div>` : ''}${details.additionalInfo ? `<div class="payment-detail"><strong>Informasi</strong><span>${escapeHtml(details.additionalInfo)}</span></div>` : ''}${trx.paymentUrl ? `<a class="neo-btn blue icon-btn" href="${escapeHtml(trx.paymentUrl)}" target="_blank" rel="noopener noreferrer" style="display:flex;text-decoration:none;color:#000;justify-content:center;margin-top:10px;"><i data-lucide="external-link"></i> BUKA HALAMAN PEMBAYARAN</a>` : '<p>Halaman pembayaran tidak tersedia. Hubungi admin.</p>'}`
                 if (window.lucide) lucide.createIcons()
             }
             document.getElementById('trxId').textContent = trx.transactionId
@@ -1131,7 +2491,6 @@
             showAlert('ID Transaksi berhasil disalin!')
         }
 
-
         const downloadQrOnly = () => {
             if (!currentTrx) return
             const a = document.createElement('a')
@@ -1151,26 +2510,86 @@
             const unavailable = document.getElementById('chatUnavailable')
             if (authToken && authUser) {
                 if (unavailable) unavailable.hidden = true
-                try { const res = await fetch('/api/user/chat', { headers: { Authorization: `Bearer ${authToken}` } }); const json = await res.json(); if (!json.success) throw new Error(json.message); const messages = json.messages || []; document.getElementById('commentList').innerHTML = messages.map(c => `<div class="comment-item"><strong>${escapeHtml(c.sender === 'admin' ? 'Admin Kaxel' : authUser.name)}</strong><p>${escapeHtml(c.message)}</p><small>${new Date(c.createdAt).toLocaleString('id-ID')}</small></div>`).join('') || 'Belum ada pesan. Mulai percakapan dengan admin.'; document.getElementById('notificationList').innerHTML = 'Status transaksi dan informasi donasi akan tampil di sini setelah transaksi dibuat.'; return } catch (e) { if (unavailable) { unavailable.hidden = false; unavailable.textContent = 'Login menggunakan WhatsApp untuk menggunakan live chat admin.' } return }
+                try {
+                    const res = await fetch('/api/user/chat', { headers: { Authorization: `Bearer ${authToken}` } })
+                    const json = await res.json()
+                    if (!json.success) throw new Error(json.message)
+                    const messages = json.messages || []
+                    document.getElementById('commentList').innerHTML = messages.map(c => `<div class="comment-item"><strong>${escapeHtml(c.sender === 'admin' ? 'Admin Kaxel' : authUser.name)}</strong><p>${escapeHtml(c.message)}</p><small>${new Date(c.createdAt).toLocaleString('id-ID')}</small></div>`).join('') || '<div class="empty-state">Belum ada pesan. Mulai percakapan dengan admin.</div>'
+                    document.getElementById('notificationList').innerHTML = '<div class="empty-state" style="padding:10px;">Status transaksi dan informasi donasi akan tampil di sini setelah transaksi dibuat.</div>'
+                    return
+                } catch (e) {
+                    if (unavailable) {
+                        unavailable.hidden = false
+                        unavailable.textContent = 'Login menggunakan WhatsApp untuk menggunakan live chat admin.'
+                    }
+                    return
+                }
             }
-            if (!currentTrx) { if (unavailable) { unavailable.hidden = false; unavailable.textContent = 'Login menggunakan WhatsApp untuk live chat, atau buat transaksi untuk chat terkait transaksi.' } return }
+            if (!currentTrx) {
+                if (unavailable) {
+                    unavailable.hidden = false
+                    unavailable.textContent = 'Login menggunakan WhatsApp untuk live chat, atau buat transaksi untuk chat terkait transaksi.'
+                }
+                return
+            }
             if (unavailable) unavailable.hidden = true
-            try { const [commentsRes, notificationsRes] = await Promise.all([fetch(`/api/comments/${currentTrx.transactionId}?key=${encodeURIComponent(currentTrx.accessKey)}`), fetch(`/api/notifications/${currentTrx.transactionId}?key=${encodeURIComponent(currentTrx.accessKey)}`)]); const commentsJson = await commentsRes.json(); const notificationsJson = await notificationsRes.json(); const comments = commentsJson.comments || []; document.getElementById('commentList').innerHTML = comments.length ? comments.map(c => `<div class="comment-item"><strong>${escapeHtml(c.senderName || 'Donatur')}</strong><p>${escapeHtml(c.message)}</p><small>${new Date(c.createdAt).toLocaleString('id-ID')}</small>${(c.replies || []).map(r => `<div class="comment-item"><strong>${escapeHtml(r.senderName || 'Admin Kaxel')}</strong><p>${escapeHtml(r.message)}</p><small>${new Date(r.createdAt).toLocaleString('id-ID')}</small></div>`).join('')}</div>`).join('') : 'Belum ada pesan.'; const notices = notificationsJson.notifications || []; document.getElementById('notificationList').innerHTML = notices.length ? notices.slice(0,8).map(n => `<div class="notice-item"><strong>${escapeHtml(n.title)}</strong><p>${escapeHtml(n.message)}</p><small>${new Date(n.createdAt).toLocaleString('id-ID')}</small></div>`).join('') : 'Belum ada notifikasi.' } catch(e) {}
+            try {
+                const [commentsRes, notificationsRes] = await Promise.all([
+                    fetch(`/api/comments/${currentTrx.transactionId}?key=${encodeURIComponent(currentTrx.accessKey)}`),
+                    fetch(`/api/notifications/${currentTrx.transactionId}?key=${encodeURIComponent(currentTrx.accessKey)}`)
+                ])
+                const commentsJson = await commentsRes.json()
+                const notificationsJson = await notificationsRes.json()
+                const comments = commentsJson.comments || []
+                document.getElementById('commentList').innerHTML = comments.length
+                    ? comments.map(c => `<div class="comment-item"><strong>${escapeHtml(c.senderName || 'Donatur')}</strong><p>${escapeHtml(c.message)}</p><small>${new Date(c.createdAt).toLocaleString('id-ID')}</small>${(c.replies || []).map(r => `<div class="comment-item"><strong>${escapeHtml(r.senderName || 'Admin Kaxel')}</strong><p>${escapeHtml(r.message)}</p><small>${new Date(r.createdAt).toLocaleString('id-ID')}</small></div>`).join('')}</div>`).join('')
+                    : '<div class="empty-state">Belum ada pesan.</div>'
+                const notices = notificationsJson.notifications || []
+                document.getElementById('notificationList').innerHTML = notices.length
+                    ? notices.slice(0, 8).map(n => `<div class="notice-item"><strong>${escapeHtml(n.title)}</strong><p>${escapeHtml(n.message)}</p><small>${new Date(n.createdAt).toLocaleString('id-ID')}</small></div>`).join('')
+                    : '<div class="empty-state">Belum ada notifikasi.</div>'
+            } catch (e) {}
         }
 
         const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))
 
         const sendDonorMessage = async () => {
-            if (authToken && authUser) { const field = document.getElementById('donorMessage'); const message = field.value.trim(); if (!message) return showAlert('Tulis pesan terlebih dahulu.'); try { const res = await fetch('/api/user/chat', { method:'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${authToken}`}, body:JSON.stringify({message}) }); const json = await res.json(); if (!json.success) return showAlert(json.message || 'Pesan gagal dikirim.'); field.value=''; await refreshConversation(); showAlert('Pesan berhasil dikirim ke admin.'); return } catch(e) { return showAlert('Chat gagal terhubung ke server.') } }
+            if (authToken && authUser) {
+                const field = document.getElementById('donorMessage')
+                const message = field.value.trim()
+                if (!message) return showAlert('Tulis pesan terlebih dahulu.')
+                try {
+                    const res = await fetch('/api/user/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+                        body: JSON.stringify({ message })
+                    })
+                    const json = await res.json()
+                    if (!json.success) return showAlert(json.message || 'Pesan gagal dikirim.')
+                    field.value = ''
+                    await refreshConversation()
+                    showAlert('Pesan berhasil dikirim ke admin.')
+                    return
+                } catch (e) {
+                    return showAlert('Chat gagal terhubung ke server.')
+                }
+            }
             if (!currentTrx) return showAlert('Login WhatsApp untuk live chat admin.')
             const field = document.getElementById('donorMessage')
             const message = field.value.trim()
             if (!message) return showAlert('Tulis pesan terlebih dahulu.')
             let res, json
             try {
-                res = await fetch('/api/comments', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ transactionId: currentTrx.transactionId, key: currentTrx.accessKey, message }) })
+                res = await fetch('/api/comments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ transactionId: currentTrx.transactionId, key: currentTrx.accessKey, message })
+                })
                 json = await res.json()
-            } catch (e) { return showAlert('Pesan gagal terhubung ke server. Coba lagi.') }
+            } catch (e) {
+                return showAlert('Pesan gagal terhubung ke server. Coba lagi.')
+            }
             if (!json.success) return showAlert(json.message || 'Pesan gagal dikirim.')
             field.value = ''
             refreshConversation()
@@ -1189,7 +2608,9 @@
                 a.download = `Invoice-${currentTrx.transactionId}.html`
                 a.click()
                 URL.revokeObjectURL(url)
-            } catch (e) { showAlert('Gagal mengunduh invoice.') }
+            } catch (e) {
+                showAlert('Gagal mengunduh invoice.')
+            }
         }
 
         const downloadQrCard = () => {
@@ -1288,12 +2709,17 @@
             btn.textContent = 'MEMBATALKAN...'
 
             try {
-                await fetch(`/api/cancel/${currentTrx.transactionId}`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ key: currentTrx.accessKey }) })
+                await fetch(`/api/cancel/${currentTrx.transactionId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key: currentTrx.accessKey })
+                })
                 showResult('x-circle', 'DIBATALKAN', 'Transaksi berhasil dibatalkan.')
             } catch (e) {
                 showAlert('Gagal membatalkan transaksi.')
                 btn.disabled = false
-                btn.textContent = 'BATALKAN'
+                btn.innerHTML = '<i data-lucide="x-circle"></i> BATALKAN TRANSAKSI'
+                if (window.lucide) lucide.createIcons()
             }
         })
 
@@ -1315,14 +2741,21 @@
             document.getElementById('resultSection').classList.add('hidden')
             document.getElementById('donateForm').classList.remove('hidden')
             document.getElementById('donateForm').reset()
-            if (authUser) { document.getElementById('name').value = authUser.name; document.getElementById('name').readOnly = true } else { document.getElementById('name').value = 'Anonim'; document.getElementById('name').readOnly = true }
+            if (authUser) {
+                document.getElementById('name').value = authUser.name
+                document.getElementById('name').readOnly = true
+            } else {
+                document.getElementById('name').value = 'Anonim'
+                document.getElementById('name').readOnly = true
+            }
             updateTierBadge(0)
             const btn = document.getElementById('submitBtn')
             btn.disabled = false
             btn.innerHTML = isQrMethod(selectedPaymentMethod) ? '<i data-lucide="qr-code"></i> BUAT QRIS SEKARANG' : '<i data-lucide="wallet"></i> LANJUT KE SHOPEEPAY'
             const cBtn = document.getElementById('cancelBtn')
             cBtn.disabled = false
-            cBtn.textContent = 'BATALKAN'
+            cBtn.innerHTML = '<i data-lucide="x-circle"></i> BATALKAN TRANSAKSI'
+            if (window.lucide) lucide.createIcons()
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1330,10 +2763,13 @@
             loadPublicStats()
             loadPublicConfig()
             checkSavedSession()
-        loadAuthUser()
+            loadAuthUser()
             setInterval(loadPublicStats, 15000)
-            const amountInput = document.getElementById('amount'); if (amountInput) amountInput.addEventListener('input', updateFeeNotice)
-            setInterval(() => { if (currentTrx || (authUser && !document.getElementById('tab-chat').classList.contains('hidden'))) refreshConversation() }, 5000)
+            const amountInput = document.getElementById('amount')
+            if (amountInput) amountInput.addEventListener('input', updateFeeNotice)
+            setInterval(() => {
+                if (currentTrx || (authUser && !document.getElementById('tab-chat').classList.contains('hidden'))) refreshConversation()
+            }, 5000)
         })
     </script>
 </body>
