@@ -1,4 +1,4 @@
-.<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -14,7 +14,7 @@
             background-color: #f4f0ea;
             background-image: radial-gradient(#000 1.25px, transparent 1.25px);
             background-size: 20px 20px;
-            color: #000;
+ proce      color: #000;
             min-height: 100vh;
             padding-bottom: 40px;
         }
@@ -509,7 +509,7 @@
             <div id="tab-donate">
                 <div id="accountGate" class="feed-item" style="margin-bottom:18px;padding:20px">
                     <h3 style="margin:0 0 8px">Sebelum berdonasi</h3>
-                    <p style="margin:0 0 14px">Daftar dengan WhatsApp untuk biaya layanan 0,3%, notifikasi status transaksi, dan live chat admin. atau bisa lanjut anonim dengan biaya layanan 0.7%.</p>
+                    <p style="margin:0 0 14px">Daftar dengan WhatsApp untuk biaya layanan 0,3%, notifikasi status transaksi, dan live chat admin. Kamu juga bisa lanjut anonim.</p>
                     <div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="neo-btn" onclick="showRegister()">DAFTAR / LOGIN WA</button><button type="button" class="neo-btn" onclick="continueAnonymous()">LANJUT ANONIM</button></div>
                     <div id="registerPanel" class="hidden" style="margin-top:18px">
                         <label class="label"><span>Nama</span></label><input id="registerName" class="neo-input" maxlength="60" placeholder="Nama kamu">
@@ -882,7 +882,11 @@
                     document.getElementById('goalPercent').textContent = `${pct}% TERCAPAI`
                 }
 
-                const recent = Array.isArray(json.recent) ? json.recent : []
+                const now = Date.now()
+                const recent = (Array.isArray(json.recent) ? json.recent : []).filter(r => {
+                    const paidAt = new Date(r.paidAt || r.createdAt || 0).getTime()
+                    return Number.isFinite(paidAt) && paidAt > 0 && paidAt <= now && now - paidAt < 24 * 60 * 60 * 1000
+                })
                 const ticker = document.getElementById('marqueeText')
                 if (ticker) {
                     const tickerItems = recent.slice(0, 5).map(r => `${r.name || 'Anonim'} baru saja berdonasi ${formatRp(r.amount)}${r.notes ? ` (“${r.notes}”)` : ''}`).join('  •  ')
