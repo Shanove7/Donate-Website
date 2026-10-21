@@ -1641,13 +1641,17 @@
                             <i class="wallet-chevron" data-lucide="chevron-down" aria-hidden="true"></i>
                         </button>
                         <div class="wallet-options" id="qrisOptions" role="group" aria-label="Penyedia QRIS MUA">
-                            <button type="button" class="payment-option selected" data-payment="qrisdana" onclick="selectPaymentMethod('qrisdana', this)" aria-pressed="true">
-                                <span class="payment-logo"><img src="/assets/payment-qris.png" alt="Logo QRISDANA"></span>
-                                <span class="payment-copy"><strong>QRIS DANA</strong><small>UTAMA</small></span>
+                            <button type="button" class="payment-option selected" data-payment="qrisgopay" onclick="selectPaymentMethod('qrisgopay', this)" aria-pressed="true">
+                                <span class="payment-logo"><img src="/assets/payment-gopay.jpg" alt="Logo QRIS GoPay"></span>
+                                <span class="payment-copy"><strong>QRIS GOPAY</strong><small>UTAMA</small></span>
+                            </button>
+                            <button type="button" class="payment-option" data-payment="qrisdana" onclick="selectPaymentMethod('qrisdana', this)" aria-pressed="false">
+                                <span class="payment-logo"><img src="/assets/payment-qris.png" alt="Logo QRIS DANA"></span>
+                                <span class="payment-copy"><strong>QRIS DANA</strong><small>KEDUA</small></span>
                             </button>
                             <button type="button" class="payment-option" data-payment="qris" onclick="selectPaymentMethod('qris', this)" aria-pressed="false">
-                                <span class="payment-logo"><img src="/assets/payment-qris.png" alt="Logo QRIS"></span>
-                                <span class="payment-copy"><strong>QRIS SHOPEE</strong><small>ALTERNATIF KEDUA</small></span>
+                                <span class="payment-logo"><img src="/assets/payment-qris.png" alt="Logo QRIS Shopee"></span>
+                                <span class="payment-copy"><strong>QRIS SHOPEE</strong><small>KETIGA</small></span>
                             </button>
                         </div>
                         <div class="wallet-options" id="walletOptions" hidden role="group" aria-label="Penyedia E-Wallet">
@@ -1672,7 +1676,7 @@
                     </div>
 
                     <label class="label"><span>Nominal Donasi (Rp)</span></label>
-                    <input type="number" id="amount" placeholder="10000" required min="100" class="neo-input" oninput="updateTierBadge(this.value)">
+                    <input type="number" id="amount" placeholder="2000" required min="2000" class="neo-input" oninput="updateTierBadge(this.value)">
                     <p id="feeNotice" class="feed-notes" style="margin:4px 0 14px">Fee layanan tambahan sedang nonaktif sampai mekanisme pembayaran dikonfirmasi.</p>
                     <div class="preset-grid">
                         <button type="button" class="preset-btn" onclick="setNominal(5000)">Rp 5.000</button>
@@ -1839,7 +1843,7 @@
         let countdownTimer = null
         let currentTrx = null
         let selectedEmoji = 'support'
-        let selectedPaymentMethod = 'qrisdana'
+        let selectedPaymentMethod = 'qrisgopay'
         const AUTH_KEY = 'kaxel_user_token_v1'
         let authToken = localStorage.getItem(AUTH_KEY) || ''
         let authUser = null
@@ -2195,7 +2199,7 @@
             updateFeeNotice()
         }
 
-        const isQrMethod = method => ['qrisdana', 'qris'].includes(String(method || '').toLowerCase())
+        const isQrMethod = method => ['qrisgopay', 'qrisdana', 'qris'].includes(String(method || '').toLowerCase())
 
         const toggleQrisFolder = () => {
             const toggle = document.getElementById('qrisToggle')
