@@ -8,6 +8,7 @@ dotenv.config()
 const app = express()
 const BTZ_BASE_URL = new URL('https://web.btzpay.my.id').origin
 const API_KEY = process.env.BTZ_API_KEY
+const QRISGOPAY_API_KEY = process.env.BTZ_QRISGOPAY_API_KEY || process.env.QRISGOPAY_API_KEY || ''
 const QRISDANA_API_KEY = process.env.BTZ_QRISDANA_API_KEY || process.env.QRISDANA_API_KEY || ''
 const SHOPEEPAY_API_KEY = process.env.BTZ_SHOPEEPAY_API_KEY || process.env.SHOPEEPAY_API_KEY || ''
 const SHOPEEPAY_ACCOUNT_NUMBER = process.env.BTZ_SHOPEEPAY_ACCOUNT_NUMBER || ''
@@ -16,7 +17,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || ''
 const parsePercent = (value, fallback) => { const parsed = Number(value); return Number.isFinite(parsed) && parsed >= 0 && parsed <= 100 ? parsed : fallback }
 const ANONYMOUS_FEE_PERCENT = parsePercent(process.env.ANONYMOUS_FEE_PERCENT ?? process.env.FEE_PERCENT ?? '0.7', 0.7)
 const MEMBER_FEE_PERCENT = parsePercent(process.env.MEMBER_FEE_PERCENT ?? '0.3', 0.3)
-const DONATION_FEE_ENABLED = String(process.env.DONATION_FEE_ENABLED || 'false').toLowerCase() === 'true'
+const DONATION_FEE_ENABLED = String(process.env.DONATION_FEE_ENABLED ?? 'true').toLowerCase() === 'true'
 const EARLY_SUPPORTER_CUTOFF = process.env.EARLY_SUPPORTER_CUTOFF || ''
 const OTP_HASH_SECRET = process.env.OTP_HASH_SECRET || process.env.WASENDER_API_KEY || crypto.randomBytes(32).toString('hex')
 const JSONBIN_ID = process.env.JSONBIN_ID || ''
@@ -315,12 +316,14 @@ app.post('/api/donate', async (req, res) => {
     try {
         const { name, amount, notes, emoji, whatsapp, paymentMethod = 'qris' } = req.body
         const selectedMethod = String(paymentMethod).toLowerCase()
-        if (!['qrisdana', 'qris', 'shopeepay'].includes(selectedMethod)) return res.status(400).json({ success: false, message: 'Metode pembayaran tidak tersedia.' })
-        const selectedApiKey = selectedMethod === 'shopeepay' ? SHOPEEPAY_API_KEY : selectedMethod === 'qrisdana' ? QRISDANA_API_KEY : API_KEY
+        if (!['qrisgopay', 'qrisdana', 'qris', 'shopeepay'].includes(selectedMethod)) return res.status(400).json({ success: false, message: 'Metode pembayaran tidak tersedia.' })
+        const selectedApiKey = selectedMethod === 'shopeepay' ? SHOPEEPAY_API_KEY : selectedMethod === 'qrisgopay' ? QRISGOPAY_API_KEY : selectedMethod === 'qrisdana' ? QRISDANA_API_KEY : API_KEY
         if (!selectedApiKey) {
             const message = selectedMethod === 'shopeepay'
                 ? 'API key ShopeePay belum dipasang. Tambahkan BTZ_SHOPEEPAY_API_KEY di Environment Variables.'
-                : selectedMethod === 'qrisdana'
+                : selectedMethod === 'qrisgopay'
+                    ? 'API key QRIS GoPay belum dipasang. Tambahkan BTZ_QRISGOPAY_API_KEY di Environment Variables.'
+                    : selectedMethod === 'qrisdana'
                     ? 'API key QRISDANA belum dipasang. Tambahkan BTZ_QRISDANA_API_KEY atau QRISDANA_API_KEY di Environment Variables.'
                     : 'API Key QRIS belum dipasang di Environment Variables.'
             return res.status(500).json({ success: false, message })
@@ -328,8 +331,8 @@ app.post('/api/donate', async (req, res) => {
         if (selectedMethod === 'shopeepay' && (!SHOPEEPAY_ACCOUNT_NUMBER || !SHOPEEPAY_ACCOUNT_NAME)) return res.status(500).json({ success: false, message: 'Tujuan ShopeePay belum dikonfigurasi. Tambahkan BTZ_SHOPEEPAY_ACCOUNT_NUMBER dan BTZ_SHOPEEPAY_ACCOUNT_NAME di Environment Variables.' })
         const parsedAmount = parseInt(amount)
 
-        if (!parsedAmount || isNaN(parsedAmount) || parsedAmount < 100) {
-            return res.status(400).json({ success: false, message: 'Nominal minimal Rp100.' })
+        if (!parsedAmount || isNaN(parsedAmount) || parsedAmount < 2000) {
+            return res.status(400).json({ success: false, message: 'Nominal minimal Rp2.000.' })
         }
 
         const db = await loadDb()
@@ -376,7 +379,7 @@ app.post('/api/donate', async (req, res) => {
         const trx = createJson.data
         let qrBase64 = ''
 
-        if (selectedMethod === 'qris' || selectedMethod === 'qrisdana') {
+        if (['qris', 'qrisdana', 'qrisgopay'].includes(selectedMethod)) {
             if (!trx.qrisString) return res.status(400).json({ success: false, message: 'Gateway tidak mengembalikan data QRIS untuk transaksi ini.' })
             const qrRes = await fetch(`${BTZ_BASE_URL}/api/qris/create-qr-code`, {
                 method: 'POST',
@@ -421,9 +424,6 @@ app.post('/api/donate', async (req, res) => {
         })
         await saveDb(db)
         const savedTrx = db.history[0]
-        if (isVerifiedMember(db, savedTrx)) {
-            await deliverMemberWhatsAppOnce(db, savedTrx, `status:${savedTrx.transactionId}:pending`, `KAXEL SUPPORT - Transaksi donasi dibuat\nInvoice: ${savedTrx.invoiceNumber}\nID transaksi: ${savedTrx.transactionId}\nNominal donasi: Rp${Number(savedTrx.amount).toLocaleString('id-ID')}\nFee layanan: Rp${Number(savedTrx.fee || 0).toLocaleString('id-ID')}\nTotal pembayaran: Rp${Number(savedTrx.totalAmount).toLocaleString('id-ID')}\nMetode: ${String(savedTrx.paymentMethod).toUpperCase()}\nStatus: Menunggu pembayaran`)
-        }
 
         res.json({
             success: true,
@@ -487,7 +487,7 @@ app.get('/api/status/:id', async (req, res) => {
                 const savedTrx = db.history[idx]
                 if (isVerifiedMember(db, savedTrx)) {
                     const statusBody = `KAXEL SUPPORT - Status transaksi donasi diperbarui\nInvoice: ${savedTrx.invoiceNumber || `INV-${id}`}\nID transaksi: ${id}\nStatus: ${statusText}\nNominal donasi: Rp${Number(savedTrx.amount || 0).toLocaleString('id-ID')}\nFee layanan: Rp${Number(savedTrx.fee || 0).toLocaleString('id-ID')}\nTotal pembayaran: Rp${Number(savedTrx.totalAmount || savedTrx.amount || 0).toLocaleString('id-ID')}\nMetode: ${String(savedTrx.paymentMethod || '').toUpperCase()}`
-                    await deliverMemberWhatsAppOnce(db, savedTrx, `status:${id}:${statusText.toLowerCase()}`, statusBody)
+                    if (isPaid(statusText) || ['cancelled', 'canceled', 'cancel', 'expired'].includes(statusText.toLowerCase())) await deliverMemberWhatsAppOnce(db, savedTrx, `status:${id}:${statusText.toLowerCase()}`, statusBody)
                     if (isPaid(statusText)) {
                         const invoiceBody = `KAXEL SUPPORT - INVOICE DONASI\nNomor invoice: ${savedTrx.invoiceNumber || `INV-${id}`}\nReferensi transaksi: ${savedTrx.gatewayReference || id}\nTanggal: ${new Date(savedTrx.paidAt || savedTrx.createdAt).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}\nNominal donasi: Rp${Number(savedTrx.amount || 0).toLocaleString('id-ID')}\nFee layanan: Rp${Number(savedTrx.fee || 0).toLocaleString('id-ID')}\nTotal pembayaran: Rp${Number(savedTrx.totalAmount || savedTrx.amount || 0).toLocaleString('id-ID')}\nMetode: ${String(savedTrx.paymentMethod || '').toUpperCase()}\nStatus: BERHASIL TERKONFIRMASI`
                         await deliverMemberWhatsAppOnce(db, savedTrx, `invoice:${id}:success`, invoiceBody)
@@ -519,7 +519,7 @@ app.post('/api/cancel/:id', async (req, res) => {
         const db = await loadDb()
         const existingTrx = db.history.find(item => item.transactionId === id && item.accessKey === suppliedKey)
         if (!existingTrx) return res.status(404).json({ success: false, message: 'Transaksi tidak ditemukan.' })
-        const cancelApiKey = existingTrx.paymentMethod === 'shopeepay' ? SHOPEEPAY_API_KEY : existingTrx.paymentMethod === 'qrisdana' ? QRISDANA_API_KEY : API_KEY
+        const cancelApiKey = existingTrx.paymentMethod === 'shopeepay' ? SHOPEEPAY_API_KEY : existingTrx.paymentMethod === 'qrisgopay' ? QRISGOPAY_API_KEY : existingTrx.paymentMethod === 'qrisdana' ? QRISDANA_API_KEY : API_KEY
         if (!cancelApiKey) return res.status(500).json({ success: false, message: 'API key untuk metode pembayaran ini belum dipasang.' })
         const cancelRes = await fetch(`${BTZ_BASE_URL}/api/qris/cancel/${id}`, {
             method: 'POST',
@@ -626,7 +626,7 @@ app.get('/api/invoice/:id', async (req, res) => {
 })
 
 app.get('/api/public-config', (req, res) => {
-    res.json({ success: true, fees: { enabled: DONATION_FEE_ENABLED, memberPercent: MEMBER_FEE_PERCENT, anonymousPercent: ANONYMOUS_FEE_PERCENT }, paymentMethods: ['qrisdana', 'qris', 'shopeepay'] })
+    res.json({ success: true, fees: { enabled: DONATION_FEE_ENABLED, memberPercent: MEMBER_FEE_PERCENT, anonymousPercent: ANONYMOUS_FEE_PERCENT }, paymentMethods: ['qrisgopay', 'qrisdana', 'qris', 'shopeepay'] })
 })
 
 app.get('/api/public-stats', async (req, res) => {
@@ -666,7 +666,7 @@ app.get('/api/public-stats', async (req, res) => {
 
         const leaderboard = Object.values(mapTop)
             .sort((a, b) => b.total - a.total)
-            .slice(0, 5)
+            
 
         const transactions = [...db.history]
             .sort((a, b) => new Date(b.createdAt || b.paidAt || 0).getTime() - new Date(a.createdAt || a.paidAt || 0).getTime())
