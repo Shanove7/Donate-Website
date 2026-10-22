@@ -152,14 +152,16 @@ const retryFailedMemberWhatsApp = async (db, transactionId) => {
     }
 }
 const processExpiredStatusMessages = async db => {
-    const expired = (db.history || []).filter(trx => trx.pendingWhatsAppStatus)
-    for (const trx of expired) {
-        const status = String(trx.pendingWhatsAppStatus)
-        await deliverMemberWhatsAppOnce(db, trx, `status:${trx.transactionId}:${status}`, `KAXEL SUPPORT - Informasi transaksi donasi\nInvoice: ${trx.invoiceNumber || `INV-${trx.transactionId}`}\nID transaksi: ${trx.transactionId}\nStatus: ${status}\nAlasan: batas pembayaran telah habis.`)
-        delete trx.pendingWhatsAppStatus
+    let changed = false
+    for (const trx of (db.history || [])) {
+        if (trx.pendingWhatsAppStatus) {
+            delete trx.pendingWhatsAppStatus
+            changed = true
+        }
     }
-    if (expired.length) await saveDb(db)
+    if (changed) await saveDb(db)
 }
+
 
 const normalizeExpiredTransactions = (db) => {
     let changed = false
@@ -486,14 +488,14 @@ app.get('/api/status/:id', async (req, res) => {
                 await saveDb(db)
                 const savedTrx = db.history[idx]
                 if (isVerifiedMember(db, savedTrx)) {
-                    const statusBody = `KAXEL SUPPORT\nStatus donasi: BERHASIL\nInvoice: ${savedTrx.invoiceNumber || `INV-${id}`}\nID transaksi: ${id}\nStatus: ${statusText}\nNominal donasi: Rp${Number(savedTrx.amount || 0).toLocaleString('id-ID')}\nFee layanan: Rp${Number(savedTrx.fee || 0).toLocaleString('id-ID')}\nTotal pembayaran: Rp${Number(savedTrx.totalAmount || savedTrx.amount || 0).toLocaleString('id-ID')}\nMetode: ${String(savedTrx.paymentMethod || '').toUpperCase()}`
+                    const statusBody = `KAXEL SUPPORT - Status transaksi donasi diperbarui\nInvoice: ${savedTrx.invoiceNumber || `INV-${id}`}\nID transaksi: ${id}\nStatus: ${statusText}\nNominal donasi: Rp${Number(savedTrx.amount || 0).toLocaleString('id-ID')}\nFee layanan: Rp${Number(savedTrx.fee || 0).toLocaleString('id-ID')}\nTotal pembayaran: Rp${Number(savedTrx.totalAmount || savedTrx.amount || 0).toLocaleString('id-ID')}\nMetode: ${String(savedTrx.paymentMethod || '').toUpperCase()}`
                     if (isPaid(statusText) || ['cancelled', 'canceled', 'cancel', 'expired'].includes(statusText.toLowerCase())) await deliverMemberWhatsAppOnce(db, savedTrx, `status:${id}:${statusText.toLowerCase()}`, statusBody)
                 }
             }
             const settledTrx = db.history.find(item => item.transactionId === id && item.accessKey === String(key || ''))
             if (settledTrx && isPaid(settledTrx.status) && isVerifiedMember(db, settledTrx)) {
                 const paidStatus = String(settledTrx.status).toLowerCase()
-                const statusBody = `KAXEL SUPPORT\nStatus donasi: BERHASIL\nInvoice: ${settledTrx.invoiceNumber || `INV-${id}`}\nID transaksi: ${id}\nStatus: ${paidStatus}\nNominal donasi: Rp${Number(settledTrx.amount || 0).toLocaleString('id-ID')}\nFee layanan: Rp${Number(settledTrx.fee || 0).toLocaleString('id-ID')}\nTotal pembayaran: Rp${Number(settledTrx.totalAmount || settledTrx.amount || 0).toLocaleString('id-ID')}`
+                const statusBody = `KAXEL SUPPORT - Status transaksi donasi diperbarui\nInvoice: ${settledTrx.invoiceNumber || `INV-${id}`}\nID transaksi: ${id}\nStatus: ${paidStatus}\nNominal donasi: Rp${Number(settledTrx.amount || 0).toLocaleString('id-ID')}\nFee layanan: Rp${Number(settledTrx.fee || 0).toLocaleString('id-ID')}\nTotal pembayaran: Rp${Number(settledTrx.totalAmount || settledTrx.amount || 0).toLocaleString('id-ID')}`
                 await deliverMemberWhatsAppOnce(db, settledTrx, `status:${id}:${paidStatus}`, statusBody)
             }
         }
@@ -532,7 +534,7 @@ app.post('/api/cancel/:id', async (req, res) => {
             await saveDb(db)
             const cancelledTrx = db.history[idx]
             if (isVerifiedMember(db, cancelledTrx)) {
-                const statusBody = `KAXEL SUPPORT\nStatus donasi: BERHASIL\nInvoice: ${cancelledTrx.invoiceNumber || `INV-${id}`}\nID transaksi: ${id}\nStatus: ${cancelledStatus}\nNominal donasi: Rp${Number(cancelledTrx.amount || 0).toLocaleString('id-ID')}`
+                const statusBody = `KAXEL SUPPORT - Status transaksi donasi diperbarui\nInvoice: ${cancelledTrx.invoiceNumber || `INV-${id}`}\nID transaksi: ${id}\nStatus: ${cancelledStatus}\nNominal donasi: Rp${Number(cancelledTrx.amount || 0).toLocaleString('id-ID')}`
                 await deliverMemberWhatsAppOnce(db, cancelledTrx, `status:${id}:${cancelledStatus.toLowerCase()}`, statusBody)
             }
         }
