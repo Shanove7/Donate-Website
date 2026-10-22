@@ -17,7 +17,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || ''
 const parsePercent = (value, fallback) => { const parsed = Number(value); return Number.isFinite(parsed) && parsed >= 0 && parsed <= 100 ? parsed : fallback }
 const ANONYMOUS_FEE_PERCENT = parsePercent(process.env.ANONYMOUS_FEE_PERCENT ?? process.env.FEE_PERCENT ?? '0.7', 0.7)
 const MEMBER_FEE_PERCENT = parsePercent(process.env.MEMBER_FEE_PERCENT ?? '0.3', 0.3)
-const DONATION_FEE_ENABLED = String(process.env.DONATION_FEE_ENABLED || 'true').toLowerCase() === 'true'
+const DONATION_FEE_ENABLED = String(process.env.DONATION_FEE_ENABLED ?? 'true').toLowerCase() === 'true'
 const EARLY_SUPPORTER_CUTOFF = process.env.EARLY_SUPPORTER_CUTOFF || ''
 const OTP_HASH_SECRET = process.env.OTP_HASH_SECRET || process.env.WASENDER_API_KEY || crypto.randomBytes(32).toString('hex')
 const JSONBIN_ID = process.env.JSONBIN_ID || ''
@@ -117,7 +117,7 @@ const getMemberStats = (db, user) => {
 const hashOtp = (otp, salt) => crypto.scryptSync(`${OTP_HASH_SECRET}:${otp}`, salt, 32).toString('hex')
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]))
 const formatCurrency = value => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(value) || 0)
-const renderInvoiceHtml = trx => `<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Invoice ${escapeHtml(trx.invoiceNumber || trx.transactionId)}</title><style>body{font:16px Arial,sans-serif;background:#f1f5f9;color:#0f172a;margin:0;padding:24px}.invoice{max-width:700px;margin:auto;background:white;padding:32px;border:1px solid #cbd5e1;border-radius:18px;box-sizing:border-box}.brand{font-size:24px;font-weight:800;color:#2563eb}.line{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid #e2e8f0;padding:13px 0;min-width:0}.line>*{min-width:0;overflow-wrap:anywhere;word-break:break-word}.line span{text-align:right}.amount{font-size:26px;font-weight:800;overflow-wrap:anywhere}.status{display:inline-block;background:#dbeafe;border-radius:8px;padding:6px 10px;overflow-wrap:anywhere}@media(max-width:520px){body{padding:10px}.invoice{padding:18px}.line{font-size:14px;align-items:flex-start;gap:10px}.line b{max-width:42%}.line span{flex:1}}@media print{body{background:white;padding:0}.invoice{border:0}}</style></head><body><main class="invoice"><div class="brand">KAXEL DONASI</div><p>Bukti transaksi donasi berdasarkan data website</p><div class="line"><b>Nomor invoice</b><span>${escapeHtml(trx.invoiceNumber || `INV-${trx.transactionId}`)}</span></div><div class="line"><b>ID transaksi</b><span>${escapeHtml(trx.transactionId)}</span></div><div class="line"><b>Referensi gateway</b><span>${escapeHtml(trx.gatewayReference || trx.transactionId)}</span></div><div class="line"><b>Donatur</b><span>${escapeHtml(trx.name || 'Anonim')}</span></div><div class="line"><b>Tanggal transaksi</b><span>${escapeHtml(new Date(trx.paidAt || trx.createdAt).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }))}</span></div><div class="line"><b>Metode pembayaran</b><span>${escapeHtml(String(trx.paymentMethod || '').toUpperCase())}</span></div><div class="line"><b>Status pembayaran</b><span class="status">${escapeHtml(trx.status || 'pending')}</span></div><div class="line"><b>Nominal donasi</b><span>${escapeHtml(formatCurrency(trx.amount))}</span></div><div class="line"><b>Fee layanan</b><span>${escapeHtml(formatCurrency(trx.fee || 0))}</span></div><div class="line"><b>Total pembayaran</b><span class="amount">${escapeHtml(formatCurrency(trx.totalAmount ?? trx.amount))}</span></div><div class="line"><b>Pesan</b><span>${escapeHtml(trx.notes || '-')}</span></div><p style="color:#64748b;font-size:12px;margin-top:24px">Invoice ini dibuat dari data transaksi yang tersimpan di website. Gunakan fitur cetak browser untuk menyimpan sebagai PDF.</p><button onclick="window.print()">Cetak / Simpan PDF</button></main></body></html>`
+const renderInvoiceHtml = trx => `<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Invoice ${escapeHtml(trx.invoiceNumber || trx.transactionId)}</title><style>body{font:16px Arial,sans-serif;background:#f1f5f9;color:#0f172a;margin:0;padding:24px}.invoice{max-width:700px;margin:auto;background:white;padding:32px;border:1px solid #cbd5e1;border-radius:18px}.brand{font-size:24px;font-weight:800;color:#2563eb}.line{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid #e2e8f0;padding:13px 0}.amount{font-size:26px;font-weight:800}.status{display:inline-block;background:#dbeafe;border-radius:8px;padding:6px 10px;overflow-wrap:anywhere}@media(max-width:520px){body{padding:10px}.invoice{padding:18px}.line{font-size:14px}}@media print{body{background:white;padding:0}.invoice{border:0}}</style></head><body><main class="invoice"><div class="brand">KAXEL DONASI</div><p>Bukti transaksi donasi berdasarkan data website</p><div class="line"><b>Nomor invoice</b><span>${escapeHtml(trx.invoiceNumber || `INV-${trx.transactionId}`)}</span></div><div class="line"><b>ID transaksi</b><span>${escapeHtml(trx.transactionId)}</span></div><div class="line"><b>Referensi gateway</b><span>${escapeHtml(trx.gatewayReference || trx.transactionId)}</span></div><div class="line"><b>Donatur</b><span>${escapeHtml(trx.name || 'Anonim')}</span></div><div class="line"><b>Tanggal transaksi</b><span>${escapeHtml(new Date(trx.paidAt || trx.createdAt).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }))}</span></div><div class="line"><b>Metode pembayaran</b><span>${escapeHtml(String(trx.paymentMethod || '').toUpperCase())}</span></div><div class="line"><b>Status pembayaran</b><span class="status">${escapeHtml(trx.status || 'pending')}</span></div><div class="line"><b>Nominal donasi</b><span>${escapeHtml(formatCurrency(trx.amount))}</span></div><div class="line"><b>Fee layanan</b><span>${escapeHtml(formatCurrency(trx.fee || 0))}</span></div><div class="line"><b>Total pembayaran</b><span class="amount">${escapeHtml(formatCurrency(trx.totalAmount ?? trx.amount))}</span></div><div class="line"><b>Pesan</b><span>${escapeHtml(trx.notes || '-')}</span></div><p style="color:#64748b;font-size:12px;margin-top:24px">Invoice ini dibuat dari data transaksi yang tersimpan di website. Gunakan fitur cetak browser untuk menyimpan sebagai PDF.</p><button onclick="window.print()">Cetak / Simpan PDF</button></main></body></html>`
 const sendWhatsApp = async (to, body) => {
     if (!WASENDER_API_KEY || !to) throw new Error('WASENDER_API_KEY atau nomor WhatsApp belum dikonfigurasi.')
     const response = await fetch(WASENDER_API_URL, { method: 'POST', headers: { Authorization: `Bearer ${WASENDER_API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ to: String(to).replace(/\D/g, ''), body }) })
@@ -337,7 +337,7 @@ app.post('/api/donate', async (req, res) => {
 
         const db = await loadDb()
         const registeredUser = getUserFromToken(req, db)
-        const senderName = registeredUser ? (registeredUser.name || 'Donatur') : 'Anonim'
+        const senderName = registeredUser ? (registeredUser.name || 'Donatur') : String(name || 'Anonim').trim().replace(/[<>]/g, '').slice(0, 60) || 'Anonim'
         const trxNotes = notes?.trim() || 'Semangat terus Kaxel!'
         const chosenEmoji = emoji || 'support'
         const cleanWa = registeredUser ? registeredUser.phone : ''
@@ -379,7 +379,7 @@ app.post('/api/donate', async (req, res) => {
         const trx = createJson.data
         let qrBase64 = ''
 
-        if (selectedMethod === 'qris' || selectedMethod === 'qrisdana' || selectedMethod === 'qrisgopay') {
+        if (['qris', 'qrisdana', 'qrisgopay'].includes(selectedMethod)) {
             if (!trx.qrisString) return res.status(400).json({ success: false, message: 'Gateway tidak mengembalikan data QRIS untuk transaksi ini.' })
             const qrRes = await fetch(`${BTZ_BASE_URL}/api/qris/create-qr-code`, {
                 method: 'POST',
@@ -485,25 +485,17 @@ app.get('/api/status/:id', async (req, res) => {
                 db.history[idx].lastNotifiedStatus = statusText
                 await saveDb(db)
                 const savedTrx = db.history[idx]
-                if (isVerifiedMember(db, savedTrx) && (isPaid(statusText) || ['cancel', 'cancelled', 'canceled', 'expired'].includes(statusText.toLowerCase()))) {
-                    const method = String(savedTrx.paymentMethod || '').toUpperCase()
-                    const amount = formatCurrency(savedTrx.amount)
-                    const fee = formatCurrency(savedTrx.fee || 0)
-                    const total = formatCurrency(savedTrx.totalAmount || savedTrx.amount || 0)
-                    let message
-                    let eventKey
-                    if (isPaid(statusText)) {
-                        eventKey = `receipt:${id}:success`
-                        message = `*KAXEL SUPPORT · DONASI BERHASIL*\n\nPembayaran kamu sudah terverifikasi. Terima kasih sudah mendukung Kaxel!\n\n*DETAIL TRANSAKSI*\nInvoice: ${savedTrx.invoiceNumber || `INV-${id}`}\nID transaksi: ${id}\nTanggal: ${new Date(savedTrx.paidAt || savedTrx.createdAt).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB\nMetode: ${method}\n\n*RINCIAN PEMBAYARAN*\nDonasi: ${amount}\nFee layanan: ${fee}\n*Total dibayar: ${total}*\nStatus: BERHASIL TERKONFIRMASI\n\nSimpan pesan ini sebagai bukti transaksi. Terima kasih!`
-                    } else {
-                        eventKey = `status:${id}:${statusText.toLowerCase()}`
-                        const friendly = ['expired'].includes(statusText.toLowerCase()) ? 'KEDALUWARSA' : 'DIBATALKAN'
-                        message = `*KAXEL SUPPORT · TRANSAKSI ${friendly}*\n\nInvoice: ${savedTrx.invoiceNumber || `INV-${id}`}\nID transaksi: ${id}\nMetode: ${method}\nNominal donasi: ${amount}\nTotal pembayaran: ${total}\nStatus: ${friendly}\n\nTransaksi ini tidak tercatat sebagai donasi berhasil.`
-                    }
-                    await deliverMemberWhatsAppOnce(db, savedTrx, eventKey, message)
+                if (isVerifiedMember(db, savedTrx)) {
+                    const statusBody = `KAXEL SUPPORT\nStatus donasi: BERHASIL\nInvoice: ${savedTrx.invoiceNumber || `INV-${id}`}\nID transaksi: ${id}\nStatus: ${statusText}\nNominal donasi: Rp${Number(savedTrx.amount || 0).toLocaleString('id-ID')}\nFee layanan: Rp${Number(savedTrx.fee || 0).toLocaleString('id-ID')}\nTotal pembayaran: Rp${Number(savedTrx.totalAmount || savedTrx.amount || 0).toLocaleString('id-ID')}\nMetode: ${String(savedTrx.paymentMethod || '').toUpperCase()}`
+                    if (isPaid(statusText) || ['cancelled', 'canceled', 'cancel', 'expired'].includes(statusText.toLowerCase())) await deliverMemberWhatsAppOnce(db, savedTrx, `status:${id}:${statusText.toLowerCase()}`, statusBody)
                 }
             }
-
+            const settledTrx = db.history.find(item => item.transactionId === id && item.accessKey === String(key || ''))
+            if (settledTrx && isPaid(settledTrx.status) && isVerifiedMember(db, settledTrx)) {
+                const paidStatus = String(settledTrx.status).toLowerCase()
+                const statusBody = `KAXEL SUPPORT\nStatus donasi: BERHASIL\nInvoice: ${settledTrx.invoiceNumber || `INV-${id}`}\nID transaksi: ${id}\nStatus: ${paidStatus}\nNominal donasi: Rp${Number(settledTrx.amount || 0).toLocaleString('id-ID')}\nFee layanan: Rp${Number(settledTrx.fee || 0).toLocaleString('id-ID')}\nTotal pembayaran: Rp${Number(settledTrx.totalAmount || settledTrx.amount || 0).toLocaleString('id-ID')}`
+                await deliverMemberWhatsAppOnce(db, settledTrx, `status:${id}:${paidStatus}`, statusBody)
+            }
         }
 
         const latestDb = await loadDb()
@@ -539,9 +531,8 @@ app.post('/api/cancel/:id', async (req, res) => {
             if (!db.notifications.some(n => n.eventKey === eventKey)) db.notifications.unshift({ id: `NTF-${Date.now()}`, eventKey, transactionId: id, accessKey: db.history[idx].accessKey, type: 'payment', title: 'Transaksi dibatalkan', message: `Transaksi ${id} dibatalkan.`, createdAt: new Date().toISOString(), read: false })
             await saveDb(db)
             const cancelledTrx = db.history[idx]
-            if (isVerifiedMember(db, cancelledTrx) && ['cancel', 'cancelled', 'canceled', 'expired'].includes(cancelledStatus.toLowerCase())) {
-                const expired = cancelledStatus.toLowerCase() === 'expired'
-                const statusBody = `*KAXEL SUPPORT · TRANSAKSI ${expired ? 'KEDALUWARSA' : 'DIBATALKAN'}*\n\nInvoice: ${cancelledTrx.invoiceNumber || `INV-${id}`}\nID transaksi: ${id}\nMetode: ${String(cancelledTrx.paymentMethod || '').toUpperCase()}\nNominal donasi: ${formatCurrency(cancelledTrx.amount)}\nTotal pembayaran: ${formatCurrency(cancelledTrx.totalAmount || cancelledTrx.amount)}\nStatus: ${expired ? 'KEDALUWARSA' : 'DIBATALKAN'}\n\nTransaksi ini tidak tercatat sebagai donasi berhasil.`
+            if (isVerifiedMember(db, cancelledTrx)) {
+                const statusBody = `KAXEL SUPPORT\nStatus donasi: BERHASIL\nInvoice: ${cancelledTrx.invoiceNumber || `INV-${id}`}\nID transaksi: ${id}\nStatus: ${cancelledStatus}\nNominal donasi: Rp${Number(cancelledTrx.amount || 0).toLocaleString('id-ID')}`
                 await deliverMemberWhatsAppOnce(db, cancelledTrx, `status:${id}:${cancelledStatus.toLowerCase()}`, statusBody)
             }
         }
@@ -669,6 +660,7 @@ app.get('/api/public-stats', async (req, res) => {
 
         const leaderboard = Object.values(mapTop)
             .sort((a, b) => b.total - a.total)
+            
 
         const transactions = [...db.history]
             .sort((a, b) => new Date(b.createdAt || b.paidAt || 0).getTime() - new Date(a.createdAt || a.paidAt || 0).getTime())
