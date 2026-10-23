@@ -117,6 +117,11 @@ const getMemberStats = (db, user) => {
 const hashOtp = (otp, salt) => crypto.scryptSync(`${OTP_HASH_SECRET}:${otp}`, salt, 32).toString('hex')
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]))
 const formatCurrency = value => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(value) || 0)
+const recordAudit = (db, action, detail = '') => {
+    db.auditLogs = Array.isArray(db.auditLogs) ? db.auditLogs : []
+    db.auditLogs.unshift({ id: crypto.randomUUID(), action: String(action).slice(0, 80), detail: String(detail).slice(0, 240), createdAt: new Date().toISOString() })
+    db.auditLogs = db.auditLogs.slice(0, 500)
+}
 const renderInvoiceHtml = trx => `<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Invoice ${escapeHtml(trx.invoiceNumber || trx.transactionId)}</title><style>body{font:16px Arial,sans-serif;background:#f1f5f9;color:#0f172a;margin:0;padding:24px}.invoice{max-width:700px;margin:auto;background:white;padding:32px;border:1px solid #cbd5e1;border-radius:18px}.brand{font-size:24px;font-weight:800;color:#2563eb}.line{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid #e2e8f0;padding:13px 0}.amount{font-size:26px;font-weight:800}.status{display:inline-block;background:#dbeafe;border-radius:8px;padding:6px 10px;overflow-wrap:anywhere}@media(max-width:520px){body{padding:10px}.invoice{padding:18px}.line{font-size:14px}}@media print{body{background:white;padding:0}.invoice{border:0}}</style></head><body><main class="invoice"><div class="brand">KAXEL DONASI</div><p>Bukti transaksi donasi berdasarkan data website</p><div class="line"><b>Nomor invoice</b><span>${escapeHtml(trx.invoiceNumber || `INV-${trx.transactionId}`)}</span></div><div class="line"><b>ID transaksi</b><span>${escapeHtml(trx.transactionId)}</span></div><div class="line"><b>Referensi gateway</b><span>${escapeHtml(trx.gatewayReference || trx.transactionId)}</span></div><div class="line"><b>Donatur</b><span>${escapeHtml(trx.name || 'Anonim')}</span></div><div class="line"><b>Tanggal transaksi</b><span>${escapeHtml(new Date(trx.paidAt || trx.createdAt).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }))}</span></div><div class="line"><b>Metode pembayaran</b><span>${escapeHtml(String(trx.paymentMethod || '').toUpperCase())}</span></div><div class="line"><b>Status pembayaran</b><span class="status">${escapeHtml(trx.status || 'pending')}</span></div><div class="line"><b>Nominal donasi</b><span>${escapeHtml(formatCurrency(trx.amount))}</span></div><div class="line"><b>Fee layanan</b><span>${escapeHtml(formatCurrency(trx.fee || 0))}</span></div><div class="line"><b>Total pembayaran</b><span class="amount">${escapeHtml(formatCurrency(trx.totalAmount ?? trx.amount))}</span></div><div class="line"><b>Pesan</b><span>${escapeHtml(trx.notes || '-')}</span></div><p style="color:#64748b;font-size:12px;margin-top:24px">Invoice ini dibuat dari data transaksi yang tersimpan di website. Gunakan fitur cetak browser untuk menyimpan sebagai PDF.</p><button onclick="window.print()">Cetak / Simpan PDF</button></main></body></html>`
 const sendWhatsApp = async (to, body) => {
     if (!WASENDER_API_KEY || !to) throw new Error('WASENDER_API_KEY atau nomor WhatsApp belum dikonfigurasi.')
@@ -286,7 +291,7 @@ app.post('/api/user/chat', async (req, res) => {
     const message = String(req.body?.message || '').trim()
     if (!message || message.length > 1000) return res.status(400).json({ success: false, message: 'Pesan wajib diisi dan maksimal 1000 karakter.' })
     const item = { id: crypto.randomUUID(), userId: user.id, phone: user.phone, name: user.name, sender: 'user', message, createdAt: new Date().toISOString(), read: false }
-    db.chatMessages = db.chatMessages || []; db.chatMessages.push(item); await saveDb(db)
+    db.chatMessages = db.chatMessages || []; db.chatMessages.push(item); recordAudit(db, 'admin.chat_reply', `Balasan chat pengguna ${userId}`); await saveDb(db)
     res.json({ success: true, message: item })
 })
 
@@ -604,6 +609,7 @@ app.post('/api/admin/reply', async (req, res) => {
     db.notifications = db.notifications || []
     const eventKey = `reply:${comment.id}:${reply.id}`
     db.notifications.unshift({ id: `NTF-${Date.now()}`, eventKey, transactionId: comment.transactionId, accessKey: (db.history.find(h => h.transactionId === comment.transactionId) || {}).accessKey, type: 'reply', title: 'Admin membalas pesan Anda', message: text, createdAt: reply.createdAt, read: false })
+    recordAudit(db, 'admin.comment_reply', `Balasan komentar ${commentId}`)
     await saveDb(db)
     res.json({ success: true, reply })
 })
@@ -739,6 +745,7 @@ app.post('/api/admin/goal', async (req, res) => {
             title: title?.trim() || 'Target Donasi Kaxel',
             target: Math.max(10000, parseInt(target) || 1000000)
         }
+        recordAudit(db, 'admin.goal_update', `Target donasi diubah menjadi ${db.goal.target}`)
         await saveDb(db)
 
         res.json({ success: true, goal: db.goal })
@@ -747,18 +754,138 @@ app.post('/api/admin/goal', async (req, res) => {
     }
 })
 
+app.post('/api/admin/reconcile', async (req, res) => {
+    try {
+        const { password } = req.body || {}
+        if (!ADMIN_PASSWORD || password !== ADMIN_PASSWORD) return res.status(401).json({ success: false, message: 'Password Admin salah!' })
+        const db = await loadDb()
+        const pending = (db.history || []).filter(item => String(item.status || '').toLowerCase() === 'pending').slice(0, 25)
+        const results = await Promise.all(pending.map(async trx => {
+            if (!trx.transactionId || !trx.accessKey) return { transactionId: trx.transactionId || 'unknown', invoiceNumber: trx.invoiceNumber || '', localStatus: trx.status, verdict: 'unknown', detail: 'Data referensi transaksi tidak lengkap.' }
+            const controller = new AbortController()
+            const timer = setTimeout(() => controller.abort(), 5000)
+            try {
+                const response = await fetch(`${BTZ_BASE_URL}/api/qris/transaction/${encodeURIComponent(trx.transactionId)}?key=${encodeURIComponent(String(trx.accessKey))}`, { signal: controller.signal })
+                const payload = await response.json().catch(() => ({}))
+                if (!response.ok || !payload.success || !payload.data) return { transactionId: trx.transactionId, invoiceNumber: trx.invoiceNumber || '', localStatus: trx.status, verdict: 'unknown', detail: `Gateway tidak memberikan status yang dapat diverifikasi (HTTP ${response.status}).` }
+                const gatewayId = String(payload.data.transactionId || payload.data.id || trx.transactionId)
+                if (gatewayId !== String(trx.transactionId)) return { transactionId: trx.transactionId, invoiceNumber: trx.invoiceNumber || '', localStatus: trx.status, gatewayStatus: String(payload.data.status || 'unknown'), verdict: 'mismatch', detail: 'ID transaksi gateway tidak cocok.' }
+                const gatewayAmount = Number(payload.data.amount)
+                if (Number.isFinite(gatewayAmount) && gatewayAmount > 0 && ![Number(trx.amount), Number(trx.totalAmount)].includes(gatewayAmount)) return { transactionId: trx.transactionId, invoiceNumber: trx.invoiceNumber || '', localStatus: trx.status, gatewayStatus: String(payload.data.status || 'unknown'), verdict: 'mismatch', detail: 'Nominal gateway tidak cocok dengan catatan website.' }
+                const gatewayStatus = String(payload.data.status || 'unknown')
+                const verdict = isPaid(gatewayStatus) ? 'paid-at-gateway' : ['pending','waiting','unpaid','processing'].includes(gatewayStatus.toLowerCase()) ? 'pending' : ['cancelled','canceled','cancel','expired','failed','failure'].includes(gatewayStatus.toLowerCase()) ? 'closed-at-gateway' : 'unknown'
+                return { transactionId: trx.transactionId, invoiceNumber: trx.invoiceNumber || '', localStatus: trx.status, gatewayStatus, verdict, detail: verdict === 'paid-at-gateway' ? 'Gateway melaporkan sukses, tetapi data lokal tidak diubah oleh rekonsiliasi.' : verdict === 'pending' ? 'Gateway masih melaporkan transaksi menunggu.' : verdict === 'closed-at-gateway' ? 'Gateway melaporkan transaksi ditutup/gagal; tinjau sebelum tindakan manual.' : 'Status gateway belum dikenali; perlu pemeriksaan manual.' }
+            } catch (error) {
+                return { transactionId: trx.transactionId, invoiceNumber: trx.invoiceNumber || '', localStatus: trx.status, verdict: 'unknown', detail: error.name === 'AbortError' ? 'Pemeriksaan gateway timeout setelah 5 detik.' : 'Gateway tidak dapat diperiksa saat ini.' }
+            } finally { clearTimeout(timer) }
+        }))
+        const summary = { checked: results.length, paidAtGateway: results.filter(x => x.verdict === 'paid-at-gateway').length, mismatch: results.filter(x => x.verdict === 'mismatch').length, unknown: results.filter(x => x.verdict === 'unknown').length }
+        recordAudit(db, 'admin.reconcile', `Rekonsiliasi baca-saja: ${summary.checked} transaksi pending diperiksa`)
+        await saveDb(db)
+        res.setHeader('Cache-Control', 'no-store')
+        res.json({ success: true, summary, results, note: 'Pemeriksaan ini bersifat baca-saja. Status transaksi, invoice, notifikasi, dan metode pembayaran tidak diubah.' })
+    } catch (error) { res.status(500).json({ success: false, message: 'Rekonsiliasi gagal dijalankan.' }) }
+})
+
+app.post('/api/admin/audit', async (req, res) => {
+    try {
+        const { password } = req.body || {}
+        if (!ADMIN_PASSWORD || password !== ADMIN_PASSWORD) return res.status(401).json({ success: false, message: 'Password Admin salah!' })
+        const db = await loadDb()
+        const failedNotifications = (db.notificationLogs || []).filter(x => x.status === 'failed').slice(0, 50).map(x => ({ type: x.type, transactionId: x.transactionId, status: x.status, attempts: x.attempts, lastError: String(x.lastError || '').slice(0, 160), updatedAt: x.updatedAt || x.createdAt }))
+        const auditLogs = (db.auditLogs || []).slice(0, 100).map(x => ({ id: x.id, action: x.action, detail: x.detail, createdAt: x.createdAt }))
+        const security = { pendingOtpChallenges: (db.otpChallenges || []).filter(x => Number(x.expiresAtMs || 0) > Date.now()).length, failedNotifications: failedNotifications.length, auditEvents: (db.auditLogs || []).length, notificationLogFailures: failedNotifications }
+        res.setHeader('Cache-Control', 'no-store')
+        res.json({ success: true, auditLogs, security })
+    } catch (error) { res.status(500).json({ success: false, message: 'Log admin tidak dapat dimuat.' }) }
+})
+
 app.get('/api/health', async (req, res) => {
     const startedAt = Date.now()
+    const timeoutFetch = async (url, options = {}, timeoutMs = 5000) => {
+        const controller = new AbortController()
+        const timer = setTimeout(() => controller.abort(), timeoutMs)
+        try {
+            const response = await fetch(url, { ...options, signal: controller.signal })
+            return { response, ms: Date.now() - startedAt }
+        } finally {
+            clearTimeout(timer)
+        }
+    }
     const checks = []
-    checks.push({ id: 'api', label: 'API server', status: 'ok', detail: 'Endpoint kesehatan merespons.' })
-    checks.push({ id: 'qrisdana', label: 'QRIS DANA', status: QRISDANA_API_KEY ? 'configured' : 'warning', detail: QRISDANA_API_KEY ? 'Kredensial tersedia di environment.' : 'API key QRIS DANA belum terdeteksi.' })
-    checks.push({ id: 'qrisgopay', label: 'QRIS GoPay', status: 'maintenance', detail: 'Metode ditandai maintenance sesuai konfigurasi produk.' })
-    checks.push({ id: 'whatsapp', label: 'WhatsApp OTP / notifikasi', status: WASENDER_API_KEY ? 'configured' : 'warning', detail: WASENDER_API_KEY ? 'Token gateway terkonfigurasi; pengiriman nyata tidak diuji.' : 'Token gateway belum terdeteksi.' })
-    checks.push({ id: 'storage', label: 'JSONBin storage', status: JSONBIN_ID && JSONBIN_KEY ? 'configured' : 'warning', detail: JSONBIN_ID && JSONBIN_KEY ? 'Konfigurasi penyimpanan tersedia; koneksi tidak diuji pada pemeriksaan ringan.' : 'Konfigurasi JSONBin belum lengkap; aplikasi dapat memakai fallback memori.' })
-    checks.push({ id: 'admin', label: 'Admin password', status: ADMIN_PASSWORD ? 'configured' : 'warning', detail: ADMIN_PASSWORD ? 'Password admin terkonfigurasi.' : 'ADMIN_PASSWORD belum disetel.' })
+    checks.push({ id: 'api', label: 'API website', status: 'ok', detail: 'Endpoint health aktif dan merespons.' })
+
+    let gatewayStatus = 'error'
+    let gatewayDetail = 'Gateway pembayaran tidak dapat dijangkau.'
+    let gatewayMs = null
+    try {
+        const result = await timeoutFetch(BTZ_BASE_URL, { method: 'GET' })
+        gatewayMs = result.ms
+        if (result.response.status < 500) {
+            gatewayStatus = API_KEY || QRISDANA_API_KEY ? 'reachable' : 'warning'
+            gatewayDetail = `Host gateway merespons HTTP ${result.response.status} dalam ${gatewayMs} ms. Ini menguji konektivitas host, bukan membuat transaksi.`
+        } else {
+            gatewayDetail = `Gateway merespons HTTP ${result.response.status}.`
+        }
+    } catch (error) {
+        gatewayDetail = error.name === 'AbortError' ? 'Gateway melewati batas waktu 5 detik.' : 'Koneksi ke gateway gagal.'
+    }
+    checks.push({ id: 'gateway', label: 'Gateway pembayaran BTZ', status: gatewayStatus, detail: gatewayDetail, responseMs: gatewayMs })
+
+    let danaStatus = 'warning'
+    let danaDetail = 'API key QRIS DANA belum terdeteksi.'
+    if (QRISDANA_API_KEY) {
+        danaStatus = gatewayStatus === 'error' ? 'error' : gatewayStatus === 'warning' ? 'warning' : 'configured'
+        danaDetail = gatewayStatus === 'error' ? 'API key tersedia, tetapi host gateway tidak terjangkau.' : 'API key tersedia. Ketersediaan transaksi nyata tetap perlu dikonfirmasi oleh gateway.'
+    }
+    checks.push({ id: 'qrisdana', label: 'QRIS DANA', status: danaStatus, detail: danaDetail })
+    checks.push({ id: 'qrisgopay', label: 'QRIS GoPay', status: 'maintenance', detail: 'Metode tetap dalam maintenance; tidak diaktifkan atau diubah oleh health check.' })
+
+    let whatsappStatus = 'warning'
+    let whatsappDetail = 'Token gateway WhatsApp belum terdeteksi.'
+    if (WASENDER_API_KEY) {
+        try {
+            const result = await timeoutFetch(WASENDER_API_URL, { method: 'OPTIONS' })
+            const code = result.response.status
+            whatsappStatus = code < 500 ? 'reachable' : 'error'
+            whatsappDetail = code < 500 ? `Endpoint Wasender merespons HTTP ${code}. Tidak mengirim OTP/pesan uji otomatis.` : `Endpoint Wasender merespons HTTP ${code}.`
+        } catch (error) {
+            whatsappStatus = 'error'
+            whatsappDetail = error.name === 'AbortError' ? 'Endpoint Wasender melewati batas waktu 5 detik.' : 'Endpoint Wasender tidak dapat dijangkau.'
+        }
+    }
+    checks.push({ id: 'whatsapp', label: 'WhatsApp OTP / notifikasi', status: whatsappStatus, detail: whatsappDetail })
+
+    let storageStatus = 'warning'
+    let storageDetail = 'JSONBin belum dikonfigurasi; aplikasi dapat memakai penyimpanan memori yang tidak persisten.'
+    if (JSONBIN_ID && JSONBIN_KEY) {
+        try {
+            const result = await timeoutFetch(`https://api.jsonbin.io/v3/b/${encodeURIComponent(JSONBIN_ID)}/latest`, { headers: { 'X-Master-Key': JSONBIN_KEY } })
+            const body = await result.response.json().catch(() => ({}))
+            if (result.response.ok && body.record !== undefined) {
+                storageStatus = 'ok'
+                storageDetail = `JSONBin berhasil dibaca langsung (HTTP ${result.response.status}) dalam ${result.ms} ms.`
+            } else {
+                storageStatus = 'error'
+                storageDetail = `JSONBin gagal dibaca (HTTP ${result.response.status}); periksa akses dan konfigurasi JSONBin.`
+            }
+        } catch (error) {
+            storageStatus = 'error'
+            storageDetail = error.name === 'AbortError' ? 'JSONBin melewati batas waktu 5 detik.' : 'JSONBin tidak dapat dijangkau.'
+        }
+    }
+    checks.push({ id: 'storage', label: 'JSONBin database', status: storageStatus, detail: storageDetail })
+    checks.push({ id: 'admin', label: 'Autentikasi admin', status: ADMIN_PASSWORD ? 'configured' : 'warning', detail: ADMIN_PASSWORD ? 'Password admin tersedia di environment server.' : 'ADMIN_PASSWORD belum disetel.' })
+    checks.push({ id: 'payment-polling', label: 'Pengecekan status transaksi', status: 'ok', detail: 'Rute status transaksi tersedia. Status pembayaran dicek dari gateway saat halaman transaksi melakukan polling.' })
+    checks.push({ id: 'qris-create-route', label: 'Endpoint pembuatan transaksi', status: 'ok', detail: 'Rute pembuatan transaksi tersedia; pemeriksaan health tidak membuat transaksi uji.' })
+    checks.push({ id: 'invoice-route', label: 'Endpoint invoice', status: 'ok', detail: 'Endpoint invoice terpasang di aplikasi. Pemeriksaan ini tidak mengakses invoice pribadi.' })
+    checks.push({ id: 'otp-config', label: 'Konfigurasi OTP', status: WASENDER_API_KEY ? 'configured' : 'warning', detail: WASENDER_API_KEY ? 'Kredensial WhatsApp terkonfigurasi; pengiriman OTP tidak diuji otomatis.' : 'Gateway WhatsApp belum memiliki API key.' })
+    checks.push({ id: 'admin-audit', label: 'Audit/security monitor', status: ADMIN_PASSWORD ? 'configured' : 'warning', detail: 'Endpoint admin tersedia; indikator keamanan hanya berdasarkan log yang tersimpan.' })
+
     const warnings = checks.filter(item => ['warning', 'error'].includes(item.status)).length
+    const errors = checks.filter(item => item.status === 'error').length
     res.setHeader('Cache-Control', 'no-store')
-    res.status(200).json({ success: true, service: 'Kaxel Donate', timestamp: new Date().toISOString(), timezone: 'Asia/Jakarta', uptimeSeconds: Math.floor(process.uptime()), responseMs: Date.now() - startedAt, overall: warnings ? 'degraded' : 'operational', checks })
+    res.status(200).json({ success: true, service: 'Kaxel Donate', timestamp: new Date().toISOString(), timezone: 'Asia/Jakarta', uptimeSeconds: Math.floor(process.uptime()), responseMs: Date.now() - startedAt, overall: errors ? 'degraded' : warnings ? 'degraded' : 'operational', checks })
 })
 
 export default app
