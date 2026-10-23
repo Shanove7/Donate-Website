@@ -23,6 +23,5 @@ const config = {
 }
 
 for (const [key, value] of Object.entries(config)) {
-    if (value !== '') process.env[key] = String(value)
-    else if (process.env[key] === undefined) process.env[key] = ''
+    if (process.env[key] === undefined || process.env[key] === '') process.env[key] = value
 }
