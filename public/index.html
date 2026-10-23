@@ -1619,8 +1619,8 @@
                 </div>
 
                 <form id="donateForm" class="hidden">
-                    <label class="label"><span>Nama / Alias</span></label>
-                    <input type="text" id="name" placeholder="Anonim / Nama Samaran" maxlength="60" class="neo-input">
+                    <label class="label"><span>Nama donatur</span></label>
+                    <input type="text" id="name" value="Anonim" readonly aria-readonly="true" title="Donasi tanpa login selalu ditampilkan sebagai Anonim" class="neo-input">
 
                     <label class="label">
                         <span>Nomor WhatsApp</span>
@@ -1673,13 +1673,13 @@
                             <i class="wallet-chevron" data-lucide="chevron-down" aria-hidden="true"></i>
                         </button>
                         <div class="wallet-options" id="qrisOptions" role="group" aria-label="Penyedia QRIS MUA">
-                            <button type="button" class="payment-option selected" data-payment="qrisgopay" onclick="selectPaymentMethod('qrisgopay', this)" aria-pressed="true">
+                            <button type="button" class="payment-option" data-payment="qrisgopay" disabled aria-disabled="true" title="Sedang dalam pemeliharaan">
                                 <span class="payment-logo"><img src="/assets/payment-gopay.jpg" alt="Logo QRIS GoPay"></span>
-                                <span class="payment-copy"><strong>QRIS GOPAY</strong><small>UTAMA</small></span>
+                                <span class="payment-copy"><strong>QRIS GOPAY</strong><small>MAINTENANCE</small></span>
                             </button>
-                            <button type="button" class="payment-option" data-payment="qrisdana" onclick="selectPaymentMethod('qrisdana', this)" aria-pressed="false">
-                                <span class="payment-logo"><img src="/assets/payment-qris.png" alt="Logo QRIS DANA"></span>
-                                <span class="payment-copy"><strong>QRIS DANA</strong><small>KEDUA</small></span>
+                            <button type="button" class="payment-option selected" data-payment="qrisdana" onclick="selectPaymentMethod('qrisdana', this)" aria-pressed="true">
+                                <span class="payment-logo"><img src="/assets/payment-dana.webp" alt="Logo QRIS DANA"></span>
+                                <span class="payment-copy"><strong>QRIS DANA</strong><small>UTAMA</small></span>
                             </button>
                             <button type="button" class="payment-option" data-payment="qris" onclick="selectPaymentMethod('qris', this)" aria-pressed="false">
                                 <span class="payment-logo"><img src="/assets/payment-qris.png" alt="Logo QRIS Shopee"></span>
@@ -1882,7 +1882,7 @@
         let countdownTimer = null
         let currentTrx = null
         let selectedEmoji = 'support'
-        let selectedPaymentMethod = 'qrisgopay'
+        let selectedPaymentMethod = 'qrisdana'
         const AUTH_KEY = 'kaxel_user_token_v1'
         let authToken = localStorage.getItem(AUTH_KEY) || ''
         let authUser = null
