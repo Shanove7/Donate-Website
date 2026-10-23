@@ -1515,6 +1515,70 @@
             .member-tx-top { flex-direction: column; align-items: stretch; }
             .member-tx-amount { align-self: flex-start; }
         }
+
+        :root {
+            --paper: #f2f5ff;
+            --ink: #17172d;
+            --orange: #6658e8;
+            --orange-soft: #e6e4ff;
+            --mint: #18b8a6;
+            --mint-soft: #d7faf3;
+            --sky: #8aabff;
+            --sky-soft: #e1eaff;
+            --coral: #f06c88;
+            --coral-soft: #ffe2e9;
+            --cream: #ffffff;
+            --surface-alt: #f5f4ff;
+            --line: #17172d;
+            --shadow: #17172d;
+        }
+        body {
+            background-color: var(--paper);
+            background-image: radial-gradient(rgba(102, 88, 232, .18) 1.2px, transparent 1.2px), linear-gradient(135deg, rgba(24,184,166,.06), transparent 42%);
+            background-size: 22px 22px, auto;
+        }
+        .site-topbar {
+            background: #17172d !important;
+            color: #fff !important;
+            border-bottom: 4px solid #6658e8 !important;
+            padding: 12px clamp(14px, 3vw, 32px) !important;
+            min-height: 76px !important;
+        }
+        .site-topbar a, .site-topbar button { color: inherit; }
+        .site-topbar .brand, .site-topbar .brand-name { color: #fff !important; }
+        .neo-box, .panel, .section-card, .goal-card, .donation-card, .account-hero-card, .account-gate-card {
+            border-color: var(--line) !important;
+            border-radius: 24px !important;
+            box-shadow: 7px 7px 0 var(--shadow) !important;
+        }
+        .neo-btn, button.neo-btn, .tab-btn.active, .payment-option.active, .preset-btn.active {
+            background: var(--orange) !important;
+            color: #fff !important;
+            border-radius: 15px !important;
+        }
+        .owner-intro { background: linear-gradient(135deg, #e6e4ff, #d7faf3) !important; border-radius: 22px !important; }
+        .goal-card, .donation-card { padding: clamp(18px, 3vw, 28px) !important; }
+        .tab-btn, .payment-option, .preset-btn { border-radius: 15px !important; }
+        .live-badge, .status-live { background: #d7faf3 !important; color: #086d62 !important; border-color: #17172d !important; }
+        @media (min-width: 800px) {
+            main, .main-container, .container { max-width: 1180px; }
+        }
+        .quick-directory { width:min(1180px,calc(100% - 28px)); margin:18px auto 22px; }
+        .quick-directory-head { display:flex; align-items:end; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+        .quick-directory-head h2 { margin:0; font-size:clamp(18px,3vw,23px); letter-spacing:-.035em; }
+        .quick-directory-head p { margin:4px 0 0; color:var(--muted,#57534e); font-size:12px; font-weight:650; }
+        .quick-directory-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+        .directory-link { display:flex; align-items:center; gap:12px; min-width:0; padding:14px; color:var(--ink,#171717); text-decoration:none; background:var(--card,#fff); border:2px solid var(--line,#171717); border-radius:16px; box-shadow:4px 4px 0 var(--shadow,#171717); transition:transform .15s ease,box-shadow .15s ease; }
+        .directory-link:active { transform:translate(2px,2px); box-shadow:2px 2px 0 var(--shadow,#171717); }
+        .directory-icon { flex:0 0 42px; width:42px; height:42px; display:grid; place-items:center; border:2px solid var(--line,#171717); border-radius:12px; background:#f3e8ff; font-size:22px; }
+        .directory-link:nth-child(2) .directory-icon { background:#d7faf3; }
+        .directory-link:nth-child(3) .directory-icon { background:#ffe7a3; }
+        .directory-copy { min-width:0; }
+        .directory-copy strong { display:block; font-size:13px; line-height:1.3; }
+        .directory-copy small { display:block; margin-top:4px; color:var(--muted,#57534e); font-size:11px; line-height:1.35; overflow-wrap:anywhere; }
+        .directory-arrow { margin-left:auto; font-size:20px; font-weight:900; }
+        @media(max-width:620px) { .quick-directory-grid { grid-template-columns:1fr; gap:10px; } .directory-link { padding:12px; } }
+
     </style>
 </head>
 <body>
@@ -1531,6 +1595,30 @@
         <i data-lucide="radio-tower" aria-hidden="true"></i>
         <span id="marqueeText">LIVE FEED: Terima kasih sudah mendukung Kaxel Support!</span>
     </div>
+
+    <nav class="quick-directory" aria-label="Menu halaman Kaxel Donate">
+        <div class="quick-directory-head">
+            <div><h2>Menu Cepat</h2><p>Buka halaman layanan tanpa mengetik URL manual.</p></div>
+            <span class="brand-tag">SHORTCUTS</span>
+        </div>
+        <div class="quick-directory-grid">
+            <a class="directory-link" href="/health.html">
+                <span class="directory-icon" aria-hidden="true">♥</span>
+                <span class="directory-copy"><strong>System Health</strong><small>Pemeriksaan teknis API dan database</small></span>
+                <span class="directory-arrow" aria-hidden="true">›</span>
+            </a>
+            <a class="directory-link" href="/status.html">
+                <span class="directory-icon" aria-hidden="true">◉</span>
+                <span class="directory-copy"><strong>Status Layanan</strong><small>Pantau status layanan publik</small></span>
+                <span class="directory-arrow" aria-hidden="true">›</span>
+            </a>
+            <a class="directory-link" href="/admin.html">
+                <span class="directory-icon" aria-hidden="true">⚙</span>
+                <span class="directory-copy"><strong>Admin Panel</strong><small>Kelola sistem donasi</small></span>
+                <span class="directory-arrow" aria-hidden="true">›</span>
+            </a>
+        </div>
+    </nav>
 
     <div id="liveDonationToast" class="live-donation-toast" role="status" aria-live="polite" aria-atomic="true" hidden>
         <button type="button" class="toast-close" onclick="hideLiveDonationToast()" aria-label="Tutup notifikasi">×</button>

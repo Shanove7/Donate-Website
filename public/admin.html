@@ -92,6 +92,14 @@
         .bg-cancel { background: #ff5757; color: #fff; }
         .hidden { display: none !important; }
     .icon-btn{display:inline-flex;align-items:center;gap:8px}.icon-btn svg,.lucide{width:18px;height:18px;vertical-align:middle}.reply-box{min-width:230px}.reply-box textarea{width:100%;padding:8px;border:2px solid #111;font:inherit;margin:6px 0}.reply-list{font-size:12px;margin-top:6px;white-space:normal}.notice{padding:10px;background:#dbeafe;border:2px solid #111;margin:12px 0}
+
+        :root { --admin-accent: #6658e8; --admin-paper: #f2f5ff; --admin-ink: #17172d; }
+        body { background-color: var(--admin-paper) !important; background-image: radial-gradient(rgba(102,88,232,.18) 1.2px, transparent 1.2px) !important; background-size: 22px 22px !important; color: var(--admin-ink) !important; }
+        .neo-box { border-radius: 22px !important; border-color: var(--admin-ink) !important; box-shadow: 7px 7px 0 var(--admin-ink) !important; }
+        .title { background: #6658e8 !important; color: white !important; border-radius: 12px !important; }
+        .neo-btn { background: #18b8a6 !important; color: #10152b !important; border-radius: 12px !important; }
+        .neo-input { border-radius: 10px !important; border-color: var(--admin-ink) !important; }
+
     </style>
 </head>
 <body>
@@ -271,7 +279,7 @@
                 await loadRegisteredChats()
                 await loadAuditMonitor()
             } catch (e) {
-                alert('Gagal mengambil data dari server.')
+                alert(e?.message || 'Gagal mengambil data dari server. Periksa koneksi API dan konfigurasi JSONBin di config.js.')
             }
         }
 
