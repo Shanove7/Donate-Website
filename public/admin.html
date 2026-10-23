@@ -111,6 +111,7 @@
                 <div style="display: flex; gap: 8px;">
                     <button onclick="fetchAdminData()" class="neo-btn icon-btn" style="background: #ffde59;"><i data-lucide="refresh-cw"></i> REFRESH</button>
                     <a href="/" class="neo-btn icon-btn" style="background: #fff; text-decoration: none; color: #000;"><i data-lucide="house"></i> KE WEB</a>
+                    <a href="/status" class="neo-btn icon-btn" style="background:#c1ff72;text-decoration:none;color:#000;">STATUS WEB</a>
                 </div>
             </div>
 
@@ -162,6 +163,20 @@
                 <h3 style="font-weight:900;margin-bottom:12px;text-transform:uppercase">Live Chat Pengguna Terdaftar</h3>
                 <p>Pesan dari akun WhatsApp terverifikasi akan muncul di sini. Pilih percakapan untuk membalas.</p>
                 <div id="registeredChats" style="display:grid;gap:12px">Memuat percakapan...</div>
+            </div>
+            <div class="neo-box" style="background:#eaf7ff">
+                <h3 style="font-weight:900;margin-bottom:8px;text-transform:uppercase">Payment Reconciliation · Read Only</h3>
+                <p>Bandingkan transaksi pending lokal dengan status gateway. Fitur ini tidak mengubah status pembayaran atau mengirim invoice.</p>
+                <button type="button" class="neo-btn" onclick="runReconciliation()">CEK TRANSAKSI PENDING</button>
+                <div id="reconcileSummary" class="notice" aria-live="polite">Belum dijalankan.</div>
+                <div class="table-wrap"><table><thead><tr><th>Invoice / ID</th><th>Status Lokal</th><th>Status Gateway</th><th>Hasil</th><th>Catatan</th></tr></thead><tbody id="reconcileRows"><tr><td colspan="5">Belum ada hasil rekonsiliasi.</td></tr></tbody></table></div>
+            </div>
+            <div class="neo-box" style="background:#fff4e5">
+                <h3 style="font-weight:900;margin-bottom:8px;text-transform:uppercase">Security & Audit Monitor</h3>
+                <p>Indikator operasional dari log aplikasi yang tersimpan. Bukan pemindai keamanan menyeluruh.</p>
+                <div id="securitySummary" class="notice">Memuat indikator…</div>
+                <div id="auditRows" style="display:grid;gap:8px">Belum ada audit log.</div>
+                <h4 style="margin:16px 0 8px">Notifikasi WhatsApp gagal</h4><div id="failedNotificationRows" style="display:grid;gap:8px">Belum ada data.</div>
             </div>
         </div>
     </div>
@@ -254,9 +269,35 @@
                 if (window.lucide) lucide.createIcons()
                 await loadAdminComments()
                 await loadRegisteredChats()
+                await loadAuditMonitor()
             } catch (e) {
                 alert('Gagal mengambil data dari server.')
             }
+        }
+
+        const runReconciliation = async () => {
+            const summary = document.getElementById('reconcileSummary')
+            const rows = document.getElementById('reconcileRows')
+            summary.textContent = 'Memeriksa status transaksi pending langsung ke gateway…'
+            try {
+                const res = await fetch('/api/admin/reconcile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: savedPassword }) })
+                const json = await res.json()
+                if (!json.success) { summary.textContent = json.message || 'Rekonsiliasi gagal.'; return }
+                summary.textContent = `Diperiksa ${json.summary.checked}; sukses di gateway ${json.summary.paidAtGateway}; mismatch ${json.summary.mismatch}; belum dapat diverifikasi ${json.summary.unknown}. ${json.note}`
+                rows.innerHTML = (json.results || []).map(item => `<tr><td>${esc(item.invoiceNumber || item.transactionId)}<br><small>${esc(item.transactionId)}</small></td><td>${esc(item.localStatus)}</td><td>${esc(item.gatewayStatus || '—')}</td><td><span class="badge ${item.verdict === 'paid-at-gateway' ? 'bg-success' : item.verdict === 'mismatch' || item.verdict === 'unknown' ? 'bg-cancel' : 'bg-pending'}">${esc(item.verdict)}</span></td><td style="white-space:normal;min-width:220px">${esc(item.detail)}</td></tr>`).join('') || '<tr><td colspan="5">Tidak ada transaksi pending yang perlu diperiksa.</td></tr>'
+            } catch (error) { summary.textContent = 'Rekonsiliasi gagal terhubung ke API.' }
+        }
+
+        const loadAuditMonitor = async () => {
+            try {
+                const res = await fetch('/api/admin/audit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: savedPassword }) })
+                const json = await res.json()
+                if (!json.success) return
+                const sec = json.security || {}
+                document.getElementById('securitySummary').textContent = `OTP aktif: ${sec.pendingOtpChallenges || 0} · Notifikasi gagal: ${sec.failedNotifications || 0} · Event audit tersimpan: ${sec.auditEvents || 0}. Indikator ini terbatas pada data yang tersimpan di aplikasi.`
+                document.getElementById('auditRows').innerHTML = (json.auditLogs || []).map(item => `<div style="padding:9px;border:2px solid #111;background:#fff"><b>${esc(item.action)}</b><div>${esc(item.detail)}</div><small>${esc(new Date(item.createdAt).toLocaleString('id-ID'))}</small></div>`).join('') || 'Belum ada event audit yang tercatat.'
+                document.getElementById('failedNotificationRows').innerHTML = (sec.notificationLogFailures || []).map(item => `<div style="padding:9px;border:2px solid #111;background:#fff"><b>${esc(item.type || 'notifikasi')} · ${esc(item.status)}</b><div>Transaksi: ${esc(item.transactionId || '—')} · Percobaan: ${esc(item.attempts || 0)}</div><small>${esc(item.lastError || 'Tidak ada detail error')}</small></div>`).join('') || 'Tidak ada notifikasi gagal yang tercatat.'
+            } catch (error) { document.getElementById('securitySummary').textContent = 'Indikator keamanan tidak dapat dimuat.' }
         }
 
         const loadAdminComments = async () => {
@@ -302,7 +343,7 @@
             try { const res = await fetch('/api/admin/chats/reply', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:savedPassword,userId,message}) }); const json = await res.json(); if (!json.success) return alert(json.message || 'Balasan gagal dikirim.'); await loadRegisteredChats() } catch(e) { alert('Gagal mengirim balasan.') }
         }
 
-        window.addEventListener('DOMContentLoaded', async () => { if (window.lucide) lucide.createIcons(); if (savedPassword) await fetchAdminData(); setInterval(() => { if (savedPassword) { fetchAdminData(); loadRegisteredChats() } }, 10000) })
+        window.addEventListener('DOMContentLoaded', async () => { if (window.lucide) lucide.createIcons(); if (savedPassword) { await fetchAdminData(); await runReconciliation() } setInterval(() => { if (savedPassword) { fetchAdminData(); loadRegisteredChats() } }, 10000); setInterval(() => { if (savedPassword && !document.hidden) runReconciliation() }, 60000) })
     </script>
 </body>
 </html>

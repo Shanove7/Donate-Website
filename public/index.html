@@ -1905,9 +1905,10 @@
             document.getElementById('accountGate').classList.add('hidden')
             document.getElementById('donateForm').classList.remove('hidden')
             document.getElementById('name').value = 'Anonim'
-            document.getElementById('name').readOnly = false
+            document.getElementById('name').value = 'Anonim'
+            document.getElementById('name').readOnly = true
             document.getElementById('waNumber').value = ''
-            document.getElementById('accountStatus').textContent = 'Kamu berdonasi tanpa akun. Nama bisa diganti menjadi nama samaran; nomor WhatsApp tidak diperlukan.'
+            document.getElementById('accountStatus').textContent = 'Kamu berdonasi tanpa akun. Identitas donatur akan selalu ditampilkan sebagai Anonim.'
             updateFeeNotice()
         }
 
@@ -2455,7 +2456,7 @@
             const fullWhatsapp = rawPhone ? `${code}${rawPhone}` : ''
 
             const payload = {
-                name: authUser ? authUser.name : (document.getElementById('name').value.trim() || 'Anonim'),
+                name: authUser ? authUser.name : 'Anonim',
                 whatsapp: authUser ? authUser.phone : '',
                 amount: document.getElementById('amount').value,
                 notes: document.getElementById('notes').value,
