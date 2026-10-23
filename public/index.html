@@ -54,7 +54,8 @@
             .account-hero-card, .account-gate-card { min-width: 0; }
             .account-profile-top, .member-stat-grid { min-width: 0; }
             .feed-item, .leaderboard-row { padding-left: 10px; padding-right: 10px; }
-            .payment-option { min-height: 62px; }
+            .payment-option:disabled { opacity: .55; cursor: not-allowed; filter: grayscale(.25); }
+        .payment-option { min-height: 62px; }
         }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
@@ -447,6 +448,7 @@
             align-items: start;
         }
 
+        .payment-option:disabled { opacity: .55; cursor: not-allowed; filter: grayscale(.25); }
         .payment-option {
             position: relative;
             display: flex;
@@ -1508,7 +1510,8 @@
             .badge-title { font-size: 15px; padding: 6px 11px; }
             .tab-btn { font-size: 10.5px; padding: 9px 4px; gap: 4px; }
             .payment-picker { gap: 8px; }
-            .payment-option { padding: 9px; gap: 8px; min-height: 58px; }
+            .payment-option:disabled { opacity: .55; cursor: not-allowed; filter: grayscale(.25); }
+        .payment-option { padding: 9px; gap: 8px; min-height: 58px; }
             .payment-logo, .wallet-folder-icon { width: 34px; height: 34px; flex-basis: 34px; }
             .wallet-options { grid-template-columns: 1fr; padding: 9px; }
             .action-row { grid-template-columns: 1fr; }
@@ -1580,7 +1583,7 @@
                         <div class="account-gate-icon"><i data-lucide="shield-check"></i></div>
                         <div>
                             <h3 style="margin:0 0 4px; font-size:16px; font-weight:900;">Sebelum Berdonasi</h3>
-                            <p style="margin:0; font-size:12.5px; color:#57534e; font-weight:600;">Daftar atau login dengan OTP WhatsApp untuk membuka dashboard member, riwayat transaksi lengkap, level, dan badge. Atau langsung lanjut anonim.</p>
+                            <p style="margin:0; font-size:12.5px; color:#57534e; font-weight:600;">Daftar atau login dengan OTP WhatsApp untuk membuka dashboard member, riwayat transaksi lengkap, level, dan badge. Kamu juga bisa berdonasi sebagai Anonim tanpa nama alias.</p>
                         </div>
                     </div>
                     <div class="account-gate-actions">
@@ -1619,8 +1622,8 @@
                 </div>
 
                 <form id="donateForm" class="hidden">
-                    <label class="label"><span>Nama / Alias</span></label>
-                    <input type="text" id="name" placeholder="Anonim / Nama Samaran" maxlength="60" class="neo-input">
+                    <label class="label"><span>Nama publik</span></label>
+                    <input type="text" id="name" value="Anonim" placeholder="Anonim" maxlength="60" class="neo-input" readonly>
 
                     <label class="label">
                         <span>Nomor WhatsApp</span>
@@ -1661,7 +1664,7 @@
                         <button type="button" class="payment-option wallet-toggle selected" id="qrisToggle" aria-expanded="true" aria-controls="qrisOptions" onclick="toggleQrisFolder()">
                             <span class="wallet-toggle-main">
                                 <span class="wallet-folder-icon"><i data-lucide="qr-code"></i></span>
-                                <span class="payment-copy"><strong>QRIS MUA</strong><small>PILIH PENYEDIA QRIS</small></span>
+                                <span class="payment-copy"><strong>QRIS MUA</strong><small>DANA UTAMA · GOPAY MAINTENANCE</small></span>
                             </span>
                             <i class="wallet-chevron" data-lucide="chevron-down" aria-hidden="true"></i>
                         </button>
@@ -1673,17 +1676,17 @@
                             <i class="wallet-chevron" data-lucide="chevron-down" aria-hidden="true"></i>
                         </button>
                         <div class="wallet-options" id="qrisOptions" role="group" aria-label="Penyedia QRIS MUA">
-                            <button type="button" class="payment-option selected" data-payment="qrisgopay" onclick="selectPaymentMethod('qrisgopay', this)" aria-pressed="true">
+                            <button type="button" class="payment-option" data-payment="qrisgopay" disabled aria-label="QRIS GoPay sedang maintenance" aria-pressed="false">
                                 <span class="payment-logo"><img src="/assets/payment-gopay.jpg" alt="Logo QRIS GoPay"></span>
-                                <span class="payment-copy"><strong>QRIS GOPAY</strong><small>UTAMA</small></span>
+                                <span class="payment-copy"><strong>QRIS GOPAY</strong><small class="coming-badge">MAINTENANCE</small></span>
                             </button>
-                            <button type="button" class="payment-option" data-payment="qrisdana" onclick="selectPaymentMethod('qrisdana', this)" aria-pressed="false">
+                            <button type="button" class="payment-option selected" data-payment="qrisdana" onclick="selectPaymentMethod('qrisdana', this)" aria-pressed="true">
                                 <span class="payment-logo"><img src="/assets/payment-qris.png" alt="Logo QRIS DANA"></span>
-                                <span class="payment-copy"><strong>QRIS DANA</strong><small>KEDUA</small></span>
+                                <span class="payment-copy"><strong>QRIS DANA</strong><small>UTAMA</small></span>
                             </button>
                             <button type="button" class="payment-option" data-payment="qris" onclick="selectPaymentMethod('qris', this)" aria-pressed="false">
                                 <span class="payment-logo"><img src="/assets/payment-qris.png" alt="Logo QRIS Shopee"></span>
-                                <span class="payment-copy"><strong>QRIS SHOPEE</strong><small>KETIGA</small></span>
+                                <span class="payment-copy"><strong>QRIS ALTERNATIF</strong><small>ALTERNATIF</small></span>
                             </button>
                         </div>
                         <div class="wallet-options" id="walletOptions" hidden role="group" aria-label="Penyedia E-Wallet">
@@ -1882,7 +1885,7 @@
         let countdownTimer = null
         let currentTrx = null
         let selectedEmoji = 'support'
-        let selectedPaymentMethod = 'qrisgopay'
+        let selectedPaymentMethod = 'qrisdana'
         const AUTH_KEY = 'kaxel_user_token_v1'
         let authToken = localStorage.getItem(AUTH_KEY) || ''
         let authUser = null
@@ -1905,9 +1908,10 @@
             document.getElementById('accountGate').classList.add('hidden')
             document.getElementById('donateForm').classList.remove('hidden')
             document.getElementById('name').value = 'Anonim'
-            document.getElementById('name').readOnly = false
+            document.getElementById('name').value = 'Anonim'
+            document.getElementById('name').readOnly = true
             document.getElementById('waNumber').value = ''
-            document.getElementById('accountStatus').textContent = 'Kamu berdonasi tanpa akun. Nama bisa diganti menjadi nama samaran; nomor WhatsApp tidak diperlukan.'
+            document.getElementById('accountStatus').textContent = 'Mode anonim aktif. Nama publik selalu Anonim dan nomor WhatsApp tidak diperlukan.'
             updateFeeNotice()
         }
 
@@ -2017,6 +2021,31 @@
                 if (json.success && json.fees) {
                     publicFeeConfig = json.fees
                     updateFeeNotice()
+                }
+                const methods = json.paymentMethods || {}
+                document.querySelectorAll('.payment-option[data-payment]').forEach(button => {
+                    const method = button.dataset.payment
+                    if (method === 'qrisgopay') {
+                        button.disabled = true
+                        button.classList.remove('selected')
+                        button.setAttribute('aria-pressed', 'false')
+                        return
+                    }
+                    const enabled = Boolean(methods[method]?.enabled)
+                    button.disabled = !enabled
+                    if (!enabled) {
+                        const label = button.querySelector('.payment-copy small')
+                        if (label) label.textContent = 'BELUM DIKONFIGURASI'
+                    }
+                })
+                const selectedButton = document.querySelector(`.payment-option[data-payment="${selectedPaymentMethod}"]`)
+                if (!selectedButton || selectedButton.disabled) {
+                    const firstAvailable = [...document.querySelectorAll('.payment-option[data-payment]')].find(button => !button.disabled)
+                    if (firstAvailable) selectPaymentMethod(firstAvailable.dataset.payment, firstAvailable)
+                    else {
+                        document.getElementById('submitBtn').disabled = true
+                        showAlert('Belum ada metode pembayaran yang dikonfigurasi. Periksa Environment Variables di Vercel.')
+                    }
                 }
             } catch (e) {}
         }
@@ -2186,7 +2215,8 @@
             document.getElementById('accountTabGuest').classList.remove('hidden')
             document.getElementById('accountGate').classList.remove('hidden')
             document.getElementById('donateForm').classList.add('hidden')
-            document.getElementById('name').readOnly = false
+            document.getElementById('name').value = 'Anonim'
+            document.getElementById('name').readOnly = true
             anonymousMode = false
             showAlert('Kamu sudah keluar dari akun.')
         }
@@ -2261,6 +2291,7 @@
         }
 
         const selectPaymentMethod = (method, el) => {
+            if (method === 'qrisgopay' || el?.disabled) { showAlert(method === 'qrisgopay' ? 'QRIS GoPay sedang maintenance. Pilih QRIS DANA.' : 'Metode pembayaran ini belum dikonfigurasi.'); return }
             selectedPaymentMethod = method
             document.querySelectorAll('.payment-option[data-payment]').forEach(button => {
                 const active = button.dataset.payment === method
@@ -2283,6 +2314,7 @@
                 walletOptions.hidden = method !== 'shopeepay'
             }
             const btn = document.getElementById('submitBtn')
+            btn.disabled = false
             btn.innerHTML = isQr ? '<i data-lucide="qr-code"></i> BUAT QRIS SEKARANG' : '<i data-lucide="wallet"></i> LANJUT KE SHOPEEPAY'
             if (window.lucide) lucide.createIcons()
         }
@@ -2719,7 +2751,7 @@
                     const json = await res.json()
 
                     if (json.success && json.data) {
-                        const status = json.data.status
+                        const status = String(json.data.status || '').toLowerCase()
                         const isExpired = Date.now() > new Date(currentTrx.expiredAt).getTime()
 
                         if (status === 'sukses' || status === 'success') {
@@ -2734,10 +2766,10 @@
                             document.getElementById('successReferenceBox').classList.remove('hidden')
                             return
                         }
-                        if (status === 'expired' || isExpired) {
+                        if (['expired', 'gagal', 'failed'].includes(status) || isExpired) {
                             return showResult('clock', 'WAKTU HABIS', 'QRIS sudah kadaluarsa, silakan buat transaksi baru.')
                         }
-                        if (status === 'cancel' || status === 'cancelled') {
+                        if (['cancel', 'cancelled', 'canceled'].includes(status)) {
                             return showResult('x-circle', 'DIBATALKAN', 'Transaksi donasi telah dibatalkan.')
                         }
                     }
@@ -2756,12 +2788,14 @@
             btn.textContent = 'MEMBATALKAN...'
 
             try {
-                await fetch(`/api/cancel/${currentTrx.transactionId}`, {
+                const response = await fetch(`/api/cancel/${currentTrx.transactionId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ key: currentTrx.accessKey })
                 })
-                showResult('x-circle', 'DIBATALKAN', 'Transaksi berhasil dibatalkan.')
+                const result = await response.json().catch(() => null)
+                if (!response.ok || !result?.success) throw new Error(result?.message || 'Gateway tidak mengonfirmasi pembatalan.')
+                showResult('x-circle', 'DIBATALKAN', 'Gateway mengonfirmasi transaksi dibatalkan.')
             } catch (e) {
                 showAlert('Gagal membatalkan transaksi.')
                 btn.disabled = false
