@@ -1,12 +1,12 @@
 import express from 'express'
 import fetch from 'node-fetch'
-import dotenv from 'dotenv'
+import './config.js'
 import crypto from 'node:crypto'
-
-dotenv.config()
+import BetabotzPaygate from 'betabotz-paygate'
 
 const app = express()
-const BTZ_BASE_URL = new URL('https://web.btzpay.my.id').origin
+const BTZ_BASE_URL = process.env.BTZ_BASE_URL || 'https://web.btzpay.my.id'
+const SITE_URL = (process.env.SITE_URL || 'https://donate.khasan.site').replace(/\/$/, '')
 const API_KEY = process.env.BTZ_API_KEY
 const QRISGOPAY_API_KEY = process.env.BTZ_QRISGOPAY_API_KEY || process.env.QRISGOPAY_API_KEY || ''
 const QRISDANA_API_KEY = process.env.BTZ_QRISDANA_API_KEY || process.env.QRISDANA_API_KEY || ''
@@ -17,9 +17,9 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || ''
 const parsePercent = (value, fallback) => { const parsed = Number(value); return Number.isFinite(parsed) && parsed >= 0 && parsed <= 100 ? parsed : fallback }
 const ANONYMOUS_FEE_PERCENT = parsePercent(process.env.ANONYMOUS_FEE_PERCENT ?? process.env.FEE_PERCENT ?? '0.7', 0.7)
 const MEMBER_FEE_PERCENT = parsePercent(process.env.MEMBER_FEE_PERCENT ?? '0.3', 0.3)
-const DONATION_FEE_ENABLED = String(process.env.DONATION_FEE_ENABLED ?? 'true').toLowerCase() === 'true'
+const DONATION_FEE_ENABLED = String(process.env.DONATION_FEE_ENABLED ?? 'false').toLowerCase() === 'true'
 const EARLY_SUPPORTER_CUTOFF = process.env.EARLY_SUPPORTER_CUTOFF || ''
-const OTP_HASH_SECRET = process.env.OTP_HASH_SECRET || process.env.WASENDER_API_KEY || crypto.randomBytes(32).toString('hex')
+const OTP_HASH_SECRET = process.env.OTP_HASH_SECRET || process.env.WASENDER_API_KEY || 'CHANGE_THIS_OTP_HASH_SECRET_BEFORE_DEPLOYMENT'
 const JSONBIN_ID = process.env.JSONBIN_ID || ''
 const JSONBIN_KEY = process.env.JSONBIN_KEY || ''
 const WASENDER_API_KEY = process.env.WASENDER_API_KEY || ''
@@ -53,18 +53,18 @@ let memoryStore = {
 const loadDb = async () => {
     if (JSONBIN_ID && JSONBIN_KEY) {
         try {
-            const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, {
+            const res = await fetch(`https://api.jsonbin.io/v3/b/${encodeURIComponent(JSONBIN_ID)}/latest`, {
                 headers: { 'X-Master-Key': JSONBIN_KEY }
             })
-            const json = await res.json()
-            if (json.record) {
-                if (Array.isArray(json.record)) {
-                    memoryStore.history = json.record
-                } else if (json.record.history) {
-                    memoryStore = { ...memoryStore, ...json.record, notifications: json.record.notifications || [], comments: json.record.comments || [], users: json.record.users || [], otpChallenges: json.record.otpChallenges || [], chatMessages: json.record.chatMessages || [], notificationLogs: json.record.notificationLogs || [], auditLogs: json.record.auditLogs || [] }
-                }
+            const json = await res.json().catch(() => ({}))
+            if (!res.ok) throw new Error(`JSONBin gagal membaca data (HTTP ${res.status}). Periksa JSONBIN_ID dan JSONBIN_KEY di config.js.`)
+            if (!json.record) throw new Error('JSONBin tidak mengembalikan record. Periksa ID bin yang dikonfigurasi.')
+            if (Array.isArray(json.record)) {
+                memoryStore.history = json.record
+            } else if (json.record && typeof json.record === 'object') {
+                memoryStore = { ...memoryStore, ...json.record, goal: json.record.goal || memoryStore.goal, history: Array.isArray(json.record.history) ? json.record.history : memoryStore.history, notifications: json.record.notifications || [], comments: json.record.comments || [], users: json.record.users || [], otpChallenges: json.record.otpChallenges || [], chatMessages: json.record.chatMessages || [], notificationLogs: json.record.notificationLogs || [], auditLogs: json.record.auditLogs || [] }
             }
-        } catch (e) {}
+        } catch (e) { throw e }
     }
     return memoryStore
 }
@@ -73,7 +73,7 @@ const saveDb = async (data) => {
     memoryStore = data
     if (JSONBIN_ID && JSONBIN_KEY) {
         try {
-            await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
+            const res = await fetch(`https://api.jsonbin.io/v3/b/${encodeURIComponent(JSONBIN_ID)}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -81,7 +81,8 @@ const saveDb = async (data) => {
                 },
                 body: JSON.stringify(memoryStore)
             })
-        } catch (e) {}
+            if (!res.ok) throw new Error(`JSONBin gagal menyimpan data (HTTP ${res.status}). Periksa JSONBIN_ID dan JSONBIN_KEY di config.js.`)
+        } catch (e) { throw e }
     }
 }
 
@@ -319,6 +320,30 @@ app.post('/api/admin/chats/reply', async (req, res) => {
     res.json({ success: true, message: item })
 })
 
+app.post('/api/paygate/callback', async (req, res) => {
+    try {
+        const body = req.body || {}
+        const id = String(body.pay_id || body.transactionId || body.raw?.data?.transactionId || '')
+        if (!id) return res.status(400).json({ success: false, message: 'ID transaksi tidak ditemukan.' })
+        const db = await loadDb()
+        const trx = (db.history || []).find(item => item.transactionId === id)
+        if (!trx) return res.status(404).json({ success: false, message: 'Transaksi tidak ditemukan.' })
+        const apiKey = trx.paymentMethod === 'shopeepay' ? SHOPEEPAY_API_KEY : trx.paymentMethod === 'qrisgopay' ? QRISGOPAY_API_KEY : trx.paymentMethod === 'qrisdana' ? QRISDANA_API_KEY : API_KEY
+        if (!apiKey || !trx.accessKey) return res.status(503).json({ success: false, message: 'Verifikasi transaksi belum tersedia.' })
+        const paygate = new BetabotzPaygate({ apiKey, baseURL: BTZ_BASE_URL, timeout: 30000 })
+        const verified = await paygate.getTransaction(id, trx.accessKey)
+        const status = String(verified?.data?.status || '').toLowerCase()
+        if (verified?.success && ['sukses', 'success', 'paid', 'completed', 'gagal', 'failed', 'expired', 'cancel', 'cancelled'].includes(status)) {
+            trx.gatewayCallbackAt = new Date().toISOString()
+            trx.gatewayCallbackStatus = status
+            await saveDb(db)
+        }
+        return res.json({ success: true, verified: Boolean(verified?.success) })
+    } catch (error) {
+        return res.status(200).json({ success: false, message: 'Callback diterima; status akan diverifikasi melalui polling.' })
+    }
+})
+
 app.post('/api/donate', async (req, res) => {
     try {
         const { name, amount, notes, emoji, whatsapp, paymentMethod = 'qris' } = req.body
@@ -353,35 +378,22 @@ app.post('/api/donate', async (req, res) => {
         const feePercent = DONATION_FEE_ENABLED ? configuredFeePercent : 0
         const feeAmount = DONATION_FEE_ENABLED ? getFee(parsedAmount, configuredFeePercent) : 0
 
-        const createRes = await fetch(`${BTZ_BASE_URL}/api/qris/create`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                apikey: selectedApiKey,
-                amount: parsedAmount,
-                fee: feeAmount,
-                notes: trxNotes,
-                timeout: 1200000,
-                metadata: {
-                    orderId: `DONASI-${Date.now()}`,
-                    sender: senderName
-                },
-                customerInfo: {
-                    name: senderName,
-                    email: '',
-                    phone: cleanWa
-                },
-                ...(selectedMethod === 'shopeepay' ? {
-                    accountNumber: SHOPEEPAY_ACCOUNT_NUMBER,
-                    accountName: SHOPEEPAY_ACCOUNT_NAME
-                } : {})
-            })
+        const paygate = new BetabotzPaygate({ apiKey: selectedApiKey, baseURL: BTZ_BASE_URL, timeout: 30000 })
+        const methodMap = { qrisdana: 'qrisdana', qris: 'qrisdana', qrisgopay: 'qrisgopay', shopeepay: 'qrisshopeepay' }
+        const createJson = await paygate.createTransaction({
+            amount: parsedAmount,
+            fee: feeAmount,
+            paymentMethod: methodMap[selectedMethod] || 'qrisdana',
+            timeout: 1200000,
+            notes: trxNotes,
+            callback_url: `${SITE_URL}/api/paygate/callback`,
+            return_url: `${SITE_URL}/success`,
+            customerInfo: { name: senderName, email: '', phone: cleanWa },
+            metadata: { orderId: `DONASI-${Date.now()}`, sender: senderName }
         })
 
-        const createJson = await createRes.json()
-
-        if (!createJson.success || !createJson.data?.transactionId) {
-            return res.status(400).json({ success: false, message: createJson.message || `Gagal membuat transaksi ${selectedMethod === 'shopeepay' ? 'ShopeePay' : selectedMethod === 'qrisdana' ? 'QRISDANA' : 'QRIS'}.` })
+        if (!createJson?.success || !createJson.data?.transactionId) {
+            return res.status(400).json({ success: false, message: createJson?.message || 'Betabotz Paygate gagal membuat transaksi.' })
         }
 
         const trx = createJson.data
@@ -462,8 +474,10 @@ app.get('/api/status/:id', async (req, res) => {
         const db = await loadDb()
         const localTrx = (db.history || []).find(item => item.transactionId === id && item.accessKey === String(key || ''))
         if (!localTrx) return res.status(403).json({ success: false, message: 'Akses transaksi tidak valid.' })
-        const checkRes = await fetch(`${BTZ_BASE_URL}/api/qris/transaction/${encodeURIComponent(id)}?key=${encodeURIComponent(String(key || ''))}`)
-        const checkJson = await checkRes.json()
+        const statusApiKey = localTrx.paymentMethod === 'shopeepay' ? SHOPEEPAY_API_KEY : localTrx.paymentMethod === 'qrisgopay' ? QRISGOPAY_API_KEY : localTrx.paymentMethod === 'qrisdana' ? QRISDANA_API_KEY : API_KEY
+        if (!statusApiKey) return res.status(503).json({ success: false, message: 'API key metode pembayaran belum diisi di file .env.' })
+        const paygate = new BetabotzPaygate({ apiKey: statusApiKey, baseURL: BTZ_BASE_URL, timeout: 30000 })
+        const checkJson = await paygate.getTransaction(id, String(key || ''))
 
         if (checkJson.success && checkJson.data) {
             const gatewayTransactionId = String(checkJson.data.transactionId || checkJson.data.id || id)
@@ -523,12 +537,9 @@ app.post('/api/cancel/:id', async (req, res) => {
         if (!existingTrx) return res.status(404).json({ success: false, message: 'Transaksi tidak ditemukan.' })
         const cancelApiKey = existingTrx.paymentMethod === 'shopeepay' ? SHOPEEPAY_API_KEY : existingTrx.paymentMethod === 'qrisgopay' ? QRISGOPAY_API_KEY : existingTrx.paymentMethod === 'qrisdana' ? QRISDANA_API_KEY : API_KEY
         if (!cancelApiKey) return res.status(500).json({ success: false, message: 'API key untuk metode pembayaran ini belum dipasang.' })
-        const cancelRes = await fetch(`${BTZ_BASE_URL}/api/qris/cancel/${id}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ apikey: cancelApiKey, reason: 'cancelled_by_user' })
-        })
-        const cancelJson = await cancelRes.json()
+        const paygate = new BetabotzPaygate({ apiKey: cancelApiKey, baseURL: BTZ_BASE_URL, timeout: 30000 })
+        const cancelJson = await paygate.cancelTransaction(id, 'cancelled_by_user')
+        const cancelRes = { status: 200 }
 
         const idx = db.history.findIndex(item => item.transactionId === id)
         if (idx !== -1 && cancelJson.success) {
@@ -729,7 +740,7 @@ app.post('/api/admin/stats', async (req, res) => {
             history: db.history
         })
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Gagal memuat data admin.' })
+        res.status(500).json({ success: false, message: error.message || 'Gagal memuat data admin.' })
     }
 })
 
