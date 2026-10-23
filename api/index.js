@@ -210,7 +210,7 @@ app.post('/api/auth/request-otp', async (req, res) => {
         db.otpChallenges.push(challenge)
         db.otpRequestLog.push({ phone, requestIp, createdAtMs: now })
         await saveDb(db)
-        try { await sendWhatsApp(phone, `Kode OTP Kaxel Support kamu: ${otp}\nBerlaku 5 menit. Jangan bagikan kode ini kepada siapa pun.`) }
+        try { await sendWhatsApp(phone, `🔐 *KAXEL SUPPORT | VERIFIKASI AKUN*\n\nHai${name ? ` ${name}` : ''}! Berikut kode OTP untuk melanjutkan pendaftaran atau masuk ke akun Kaxel Support.\n\n╭─ *KODE VERIFIKASI*\n│ 🔑 *${otp}*\n╰──────────────\n\n⏳ Berlaku selama *5 menit*.\n🛡️ Jangan bagikan kode ini kepada siapa pun, termasuk pihak yang mengaku sebagai admin.\n\nJika kamu tidak meminta kode ini, abaikan pesan ini.\n\n_Kaxel Support • Pesan otomatis_`) }
         catch (e) { db.otpChallenges = db.otpChallenges.filter(x => x.id !== challenge.id); await saveDb(db); return res.status(502).json({ success: false, message: 'Gagal mengirim OTP WhatsApp. Periksa nomor, koneksi sesi Wasender, dan API key.' }) }
         res.json({ success: true, message: 'OTP dikirim ke WhatsApp kamu.', challengeId: challenge.id, expiresIn: 300 })
     } catch (e) { res.status(500).json({ success: false, message: 'Gagal meminta OTP.' }) }
@@ -318,7 +318,8 @@ app.post('/api/donate', async (req, res) => {
     try {
         const { name, amount, notes, emoji, whatsapp, paymentMethod = 'qris' } = req.body
         const selectedMethod = String(paymentMethod).toLowerCase()
-        if (!['qrisgopay', 'qrisdana', 'qris', 'shopeepay'].includes(selectedMethod)) return res.status(400).json({ success: false, message: 'Metode pembayaran tidak tersedia.' })
+        if (selectedMethod === 'qrisgopay') return res.status(503).json({ success: false, message: 'QRIS GoPay sedang dalam pemeliharaan. Silakan gunakan QRIS DANA.' })
+        if (!['qrisdana', 'qris', 'shopeepay'].includes(selectedMethod)) return res.status(400).json({ success: false, message: 'Metode pembayaran tidak tersedia.' })
         const selectedApiKey = selectedMethod === 'shopeepay' ? SHOPEEPAY_API_KEY : selectedMethod === 'qrisgopay' ? QRISGOPAY_API_KEY : selectedMethod === 'qrisdana' ? QRISDANA_API_KEY : API_KEY
         if (!selectedApiKey) {
             const message = selectedMethod === 'shopeepay'
@@ -339,7 +340,7 @@ app.post('/api/donate', async (req, res) => {
 
         const db = await loadDb()
         const registeredUser = getUserFromToken(req, db)
-        const senderName = registeredUser ? (registeredUser.name || 'Donatur') : String(name || 'Anonim').trim().replace(/[<>]/g, '').slice(0, 60) || 'Anonim'
+        const senderName = registeredUser ? (registeredUser.name || 'Member') : 'Anonim'
         const trxNotes = notes?.trim() || 'Semangat terus Kaxel!'
         const chosenEmoji = emoji || 'support'
         const cleanWa = registeredUser ? registeredUser.phone : ''
@@ -399,7 +400,7 @@ app.post('/api/donate', async (req, res) => {
             transactionId: trx.transactionId,
             accessKey: trx.accessKey,
             name: senderName,
-            publicName: registeredUser && registeredUser.showPublicIdentity === false ? 'Anonim' : senderName,
+            publicName: !registeredUser || registeredUser.showPublicIdentity === false ? 'Anonim' : senderName,
             whatsapp: cleanWa,
             userId: registeredUser?.id || null,
             registered: Boolean(registeredUser && (registeredUser.whatsappVerifiedAt || registeredUser.createdAt)),
@@ -488,14 +489,14 @@ app.get('/api/status/:id', async (req, res) => {
                 await saveDb(db)
                 const savedTrx = db.history[idx]
                 if (isVerifiedMember(db, savedTrx)) {
-                    const statusBody = `KAXEL SUPPORT - Status transaksi donasi diperbarui\nInvoice: ${savedTrx.invoiceNumber || `INV-${id}`}\nID transaksi: ${id}\nStatus: ${statusText}\nNominal donasi: Rp${Number(savedTrx.amount || 0).toLocaleString('id-ID')}\nFee layanan: Rp${Number(savedTrx.fee || 0).toLocaleString('id-ID')}\nTotal pembayaran: Rp${Number(savedTrx.totalAmount || savedTrx.amount || 0).toLocaleString('id-ID')}\nMetode: ${String(savedTrx.paymentMethod || '').toUpperCase()}`
+                    const statusBody = `🧾 *KAXEL SUPPORT | PEMBARUAN DONASI*\n\nHalo! Status transaksi donasimu telah diperbarui.\n\n╭─ *RINCIAN TRANSAKSI*\n│ Invoice: ${savedTrx.invoiceNumber || `INV-${id}`}\n│ ID transaksi: ${id}\n│ Status: *${statusText.toUpperCase()}*\n│ Donasi: ${formatCurrency(savedTrx.amount)}\n│ Biaya layanan: ${formatCurrency(savedTrx.fee || 0)}\n│ Total pembayaran: *${formatCurrency(savedTrx.totalAmount || savedTrx.amount)}*\n│ Metode: ${String(savedTrx.paymentMethod || '').toUpperCase()}\n╰──────────────\n\nTerima kasih telah mendukung Kaxel Support. Simpan nomor invoice ini sebagai referensi transaksi.\n\n_Kaxel Support • Notifikasi otomatis_`
                     if (isPaid(statusText) || ['cancelled', 'canceled', 'cancel', 'expired'].includes(statusText.toLowerCase())) await deliverMemberWhatsAppOnce(db, savedTrx, `status:${id}:${statusText.toLowerCase()}`, statusBody)
                 }
             }
             const settledTrx = db.history.find(item => item.transactionId === id && item.accessKey === String(key || ''))
             if (settledTrx && isPaid(settledTrx.status) && isVerifiedMember(db, settledTrx)) {
                 const paidStatus = String(settledTrx.status).toLowerCase()
-                const statusBody = `KAXEL SUPPORT - Status transaksi donasi diperbarui\nInvoice: ${settledTrx.invoiceNumber || `INV-${id}`}\nID transaksi: ${id}\nStatus: ${paidStatus}\nNominal donasi: Rp${Number(settledTrx.amount || 0).toLocaleString('id-ID')}\nFee layanan: Rp${Number(settledTrx.fee || 0).toLocaleString('id-ID')}\nTotal pembayaran: Rp${Number(settledTrx.totalAmount || settledTrx.amount || 0).toLocaleString('id-ID')}`
+                const statusBody = `✅ *KAXEL SUPPORT | DONASI BERHASIL*\n\nTerima kasih banyak atas dukunganmu! Pembayaran donasimu telah berhasil diverifikasi. 💛\n\n╭─ *RINCIAN TRANSAKSI*\n│ Invoice: ${settledTrx.invoiceNumber || `INV-${id}`}\n│ ID transaksi: ${id}\n│ Status: *BERHASIL*\n│ Donasi: ${formatCurrency(settledTrx.amount)}\n│ Biaya layanan: ${formatCurrency(settledTrx.fee || 0)}\n│ Total pembayaran: *${formatCurrency(settledTrx.totalAmount || settledTrx.amount)}*\n╰──────────────\n\nSimpan nomor invoice ini untuk referensi. Dukunganmu sangat berarti! 🙏\n\n_Kaxel Support • Notifikasi otomatis_`
                 await deliverMemberWhatsAppOnce(db, settledTrx, `status:${id}:${paidStatus}`, statusBody)
             }
         }
@@ -744,6 +745,20 @@ app.post('/api/admin/goal', async (req, res) => {
     } catch (error) {
         res.status(500).json({ success: false, message: 'Gagal mengubah target donasi.' })
     }
+})
+
+app.get('/api/health', async (req, res) => {
+    const startedAt = Date.now()
+    const checks = []
+    checks.push({ id: 'api', label: 'API server', status: 'ok', detail: 'Endpoint kesehatan merespons.' })
+    checks.push({ id: 'qrisdana', label: 'QRIS DANA', status: QRISDANA_API_KEY ? 'configured' : 'warning', detail: QRISDANA_API_KEY ? 'Kredensial tersedia di environment.' : 'API key QRIS DANA belum terdeteksi.' })
+    checks.push({ id: 'qrisgopay', label: 'QRIS GoPay', status: 'maintenance', detail: 'Metode ditandai maintenance sesuai konfigurasi produk.' })
+    checks.push({ id: 'whatsapp', label: 'WhatsApp OTP / notifikasi', status: WASENDER_API_KEY ? 'configured' : 'warning', detail: WASENDER_API_KEY ? 'Token gateway terkonfigurasi; pengiriman nyata tidak diuji.' : 'Token gateway belum terdeteksi.' })
+    checks.push({ id: 'storage', label: 'JSONBin storage', status: JSONBIN_ID && JSONBIN_KEY ? 'configured' : 'warning', detail: JSONBIN_ID && JSONBIN_KEY ? 'Konfigurasi penyimpanan tersedia; koneksi tidak diuji pada pemeriksaan ringan.' : 'Konfigurasi JSONBin belum lengkap; aplikasi dapat memakai fallback memori.' })
+    checks.push({ id: 'admin', label: 'Admin password', status: ADMIN_PASSWORD ? 'configured' : 'warning', detail: ADMIN_PASSWORD ? 'Password admin terkonfigurasi.' : 'ADMIN_PASSWORD belum disetel.' })
+    const warnings = checks.filter(item => ['warning', 'error'].includes(item.status)).length
+    res.setHeader('Cache-Control', 'no-store')
+    res.status(200).json({ success: true, service: 'Kaxel Donate', timestamp: new Date().toISOString(), timezone: 'Asia/Jakarta', uptimeSeconds: Math.floor(process.uptime()), responseMs: Date.now() - startedAt, overall: warnings ? 'degraded' : 'operational', checks })
 })
 
 export default app
